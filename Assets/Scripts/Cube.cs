@@ -36,7 +36,7 @@ public static class Cube
             triangles[faceIndex++] = triangleIndex + 3;
             triangles[faceIndex++] = triangleIndex;
             triangleIndex += 4;
-            AddTexture(myBlocks.blocks[blockID].faces[i], ref uv, ref uvIndex);
+            AddTexture(myBlocks.block[blockID].faces[i], ref uv, ref uvIndex);
         }
         
         //Mesh creation
