@@ -7,11 +7,11 @@ public class Blocks : MonoBehaviour
 {
     public MeshRenderer meshRenderer;
     public MeshFilter meshFilter;
-    public Block[] blocks;
+    public BlockType[] block; //stores block types
 
     private void Start()
     {
-        meshFilter.mesh = Cube.GenerateMesh(new Vector3(0, 0, 1), 0);
+        //meshFilter.mesh = Cube.GenerateMesh(new Vector3(0, 0, 1), 0);
         //for testing
         //creates 3 blocks and combines them together into a single mesh
         /*Mesh block1 = Cube.GenerateMesh(new Vector3(0, 0, 1), 0);
@@ -38,7 +38,7 @@ public class Blocks : MonoBehaviour
 /// Block types
 /// </summary>
 [System.Serializable]
-public class Block
+public class BlockType
 {
     public string name;
     public bool isSolid;
