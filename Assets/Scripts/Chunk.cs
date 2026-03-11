@@ -1,12 +1,8 @@
 using Assets.Scripts;
 using System.Collections.Generic;
-using System.Drawing;
-using Unity.Burst.CompilerServices;
 using UnityEngine;
-using UnityEngine.LightTransport;
-using static Unity.Collections.AllocatorManager;
 
-public class Chunk : MonoBehaviour
+public class Chunk
 {
     public MeshRenderer meshRenderer;
     public MeshFilter meshFilter;
@@ -23,11 +19,11 @@ public class Chunk : MonoBehaviour
     /// <summary>
     /// chunk size 
     /// </summary>
-    int Height = 8;
-    int Width = 16;
+    public const int Height = 200;
+    public const int Width = 16;
 
 
-    int[,,] blocks; //3d array of blocks in the world
+    public int[,,] blocks; //3d array of blocks in the world
 
     /// <summary>
     /// Creates a flat layer of blocks
@@ -49,6 +45,7 @@ public class Chunk : MonoBehaviour
             }
         }
     }
+
     /// <summary>
     /// Creates a flat layer of blocks
     /// </summary>
@@ -62,11 +59,11 @@ public class Chunk : MonoBehaviour
         var combineInstance = new List<CombineInstance>();
         for (int i = 0; i < Width; i++)
         {
-            for(int j = offset; j < thickness + offset; j++)
+            for (int j = offset; j < thickness + offset; j++)
             {
                 for (int k = 0; k < Width; k++)
                 {
-                    if(BlockID != -1)
+                    if (BlockID != -1)
                     {
                         Mesh mesh = Cube.GenerateMesh(new Vector3(i, j, k), BlockID);
                         CombineInstance temp = new CombineInstance();
@@ -79,6 +76,7 @@ public class Chunk : MonoBehaviour
         }
         return combineInstance;
     }
+
     /// <summary>
     /// creates chunk based on blocks in the block data array
     /// </summary>
@@ -93,17 +91,34 @@ public class Chunk : MonoBehaviour
             {
                 for (int k = 0; k < Width; k++)
                 {
-                    Mesh mesh = Cube.GenerateMesh(new Vector3(i, j, k), blocks[i, j, k]);
-                    CombineInstance temp = new CombineInstance();
-                    temp.mesh = mesh;
-                    temp.transform = meshFilter.transform.localToWorldMatrix;
-                    combineInstance.Add(temp);
+                    if (blocks[i, j, k] != -1)
+                    {
+
+                        Mesh mesh = Cube.GenerateMesh(new Vector3(i, j, k), blocks[i, j, k]);
+                        CombineInstance temp = new CombineInstance();
+                        temp.mesh = mesh;
+                        temp.transform = meshFilter.transform.localToWorldMatrix;
+                        combineInstance.Add(temp);
+                    }
                 }
             }
         }
         combinedMesh.CombineMeshes(combineInstance.ToArray());
         meshFilter.mesh = combinedMesh;
     }
+
+    /// <summary>
+    /// helper method to create the blocks array and fill it with -1 (air blocks)
+    /// </summary>
+    void InitializeBlocks()
+    {
+        for (int x = 0; x < Width; x++)
+            for (int y = 0; y < Height; y++)
+                for (int z = 0; z < Width; z++)
+                    blocks[x, y, z] = -1;
+    }
+
+
     /// <summary>
     /// creates chunk game object
     /// </summary>
@@ -114,7 +129,7 @@ public class Chunk : MonoBehaviour
 
         coord = _coord;
         chunkObject = new GameObject();
-        chunkObject.transform.position = new Vector3(coord.x * Width /2, 0f, coord.z * Width/2);
+        chunkObject.transform.position = new Vector3(coord.x * Width / 2, 0f, coord.z * Width / 2);
 
         meshRenderer = chunkObject.AddComponent<MeshRenderer>();
         meshFilter = chunkObject.AddComponent<MeshFilter>();
@@ -126,11 +141,14 @@ public class Chunk : MonoBehaviour
         chunkObject.name = coord.x + ", " + coord.z;
 
         blocks = new int[Width, Height, Width];
+
+        InitializeBlocks();
+
         //world gen
         CreateLayerOfBlocks(0, 1, 0);//layer of 0 blocks
         CreateLayerOfBlocks(1, 4, 1);//4 layer of 1 blocks
         CreateLayerOfBlocks(2, 3, 5);//3 layers of 2 blocks
-
+        blocks[10, 8, 10] = 1;
         CreateChunkBlocks();
     }
 }
