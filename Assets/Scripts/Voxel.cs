@@ -5,7 +5,7 @@ using UnityEngine;
 /// </summary>
 public static class Voxel
 {
-    public static readonly int TextureAtlasWidth = 4;    //the width (in blocks) of texture atlas
+    public static readonly int TextureAtlasWidth = 2;    //the width (in blocks) of texture atlas
     public static readonly float NormalizedBlockSize = 1.0f / TextureAtlasWidth; //normalized block size
 
     public static readonly Vector3[] Vertices =     //vertice coordinates of a block
