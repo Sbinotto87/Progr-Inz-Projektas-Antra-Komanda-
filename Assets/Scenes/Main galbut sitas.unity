@@ -225,27 +225,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
       propertyPath: 'block.Array.data[2].faces.Array.data[0]'
-      value: 7
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
       propertyPath: 'block.Array.data[2].faces.Array.data[1]'
-      value: 7
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
       propertyPath: 'block.Array.data[2].faces.Array.data[2]'
-      value: 7
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
       propertyPath: 'block.Array.data[2].faces.Array.data[3]'
-      value: 7
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
       propertyPath: 'block.Array.data[2].faces.Array.data[4]'
-      value: 7
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
       propertyPath: 'block.Array.data[2].faces.Array.data[5]'
-      value: 7
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
       propertyPath: 'block.Array.data[3].faces.Array.data[0]'
@@ -624,7 +624,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3aef2afbbfaf1bf4dbbce8b66e5bf32d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.World
+  Player: {fileID: 6941386855807311954, guid: 788a3b82a5a63eb4f9ea53a54fb60b95, type: 3}
   material: {fileID: 2100000, guid: d4533934b2ce22ac3b63b11296203585, type: 2}
+  DayTime: 0
+  CurrentDay: 0
 --- !u!4 &1220039295
 Transform:
   m_ObjectHideFlags: 0

@@ -11,12 +11,13 @@ public class Blocks : MonoBehaviour
 
     private void Start()
     {
+       /*
         //meshFilter.mesh = Cube.GenerateMesh(new Vector3(0, 0, 1), 0);
         //for testing
         //creates 3 blocks and combines them together into a single mesh
-        /*Mesh block1 = Cube.GenerateMesh(new Vector3(0, 0, 1), 0);
-        Mesh block2 = Cube.GenerateMesh(new Vector3(1, 0, 0), 0);
-        Mesh block3 = Cube.GenerateMesh(new Vector3(0, 1, 0), 0);
+        Mesh block1 = Cube.GenerateMesh(new Vector3(10, 7, 1), 0);
+        Mesh block2 = Cube.GenerateMesh(new Vector3(10, 8, 2), 0);
+        Mesh block3 = Cube.GenerateMesh(new Vector3(10, 7, 2), 0);
         Mesh combinedMesh = new Mesh();
         combinedMesh.CombineMeshes(new CombineInstance[] {
             new() {
@@ -30,7 +31,7 @@ public class Blocks : MonoBehaviour
             transform = meshFilter.transform.localToWorldMatrix }
         });
         meshFilter.mesh = combinedMesh;
-        meshFilter.mesh = Cube.GenerateMesh(new Vector3(0, 0, 0), 0);*/
+       */
     }
 }
 
