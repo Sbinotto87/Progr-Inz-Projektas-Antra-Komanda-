@@ -1,7 +1,8 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class NewMonoBehaviourScript : MonoBehaviour
+public class UIElements : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -17,7 +18,17 @@ public class NewMonoBehaviourScript : MonoBehaviour
     public float hunger = 100f;
     public float thirst = 100f;
 
-    public float depletionRate = 10f; 
+    public float depletionRate = 2f;
+
+    // Text for coordinates
+    public TMP_Text coordinateText;
+
+    private Transform playerTransform;
+
+    public void SetPlayer(Transform player)
+    {
+        playerTransform = player;
+    }
 
     // Update is called once per frame
     void Update()
@@ -36,5 +47,11 @@ public class NewMonoBehaviourScript : MonoBehaviour
         HungerBar.value = Mathf.Lerp(HungerBar.value, hunger / 100f, Time.deltaTime * 5f);
         ThirstBar.value = Mathf.Lerp(ThirstBar.value, thirst / 100f, Time.deltaTime * 5f);
         HealthBar.value = Mathf.Lerp(HealthBar.value, health / 100f, Time.deltaTime * 5f);
+
+        if (playerTransform != null)
+        {
+            Vector3 pos = playerTransform.position;
+            coordinateText.text = $"X: {pos.x:F0} | Y: {pos.y:F0} | Z: {pos.z:F0}";
+        }
     }
 }
