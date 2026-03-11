@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Assets.Scripts
 {
@@ -18,6 +19,12 @@ namespace Assets.Scripts
         /// </summary>
         [SerializeField]
         private Canvas UICanvas;
+        /// <summary>
+        /// UI canvas prefab
+        /// </summary>
+        [SerializeField]
+        private Canvas UICanvas;
+
         /// <summary>
         /// world size
         /// </summary>
@@ -52,6 +59,7 @@ namespace Assets.Scripts
             Instantiate(Player, new Vector3(20, 20, 20), Quaternion.identity); //for testing   Create player prefab at 20, 20, 20 coords
             Instantiate(UICanvas);
 
+            Instantiate(UICanvas);
         }
         private void Update()
         {
