@@ -69,6 +69,7 @@ public class Player : MonoBehaviour
         // Resolve ground AFTER movement
         ResolveGround();
         grounded = IsGrounded(transform.position); // final grounded state
+        Debug.Log($"Grounded: {transform.position.y - halfHeight}");
     }
 
 
@@ -192,7 +193,7 @@ public class Player : MonoBehaviour
     {
         return CheckBlocks(
             playerPos.x,
-            playerPos.y - halfHeight,
+            playerPos.y - halfHeight - 0.01f,
             playerPos.z
         );
     }
@@ -212,7 +213,7 @@ public class Player : MonoBehaviour
             grounded = true;
             verticalVelocity = 0;
 
-            float feetY = transform.position.y - halfHeight;
+            float feetY = transform.position.y - halfHeight - 0.01f;
             float floorY = Mathf.Floor(feetY) + 1f;
             float targetY = floorY + halfHeight;
 

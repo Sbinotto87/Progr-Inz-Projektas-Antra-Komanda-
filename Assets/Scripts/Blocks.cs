@@ -36,7 +36,7 @@ public class Blocks : MonoBehaviour
             isBreakable = true,
             tool = "Shovel",
             hitCount = 1,
-            faces = new byte[] { 0, 0, 0, 0, 1, 0 }
+            faces = new byte[] { 0, 0, 0, 0, 2, 0 }
         };
 
         //Wood
@@ -47,7 +47,7 @@ public class Blocks : MonoBehaviour
             isBreakable = true,
             tool = "Axe",
             hitCount = 2,
-            faces = new byte[] { 4, 4, 4, 4, 4, 4 }
+            faces = new byte[] { 3, 3, 3, 3, 3, 3 }
         };
 
         //Leaves
@@ -64,20 +64,20 @@ public class Blocks : MonoBehaviour
 
         private void Start()
     {
-        Mesh combinedMesh = new Mesh();
-        CombineInstance[] combine = new CombineInstance[block.Length];
+        //Mesh combinedMesh = new Mesh();
+        //CombineInstance[] combine = new CombineInstance[block.Length];
 
-        for (int i = 0; i < block.Length; i++)
-        {
-            Mesh m = Cube.GenerateMesh(new Vector3(i * 1.2f, 0, 0), i);
-            combine[i].mesh = m;
-            combine[i].transform = Matrix4x4.identity;
-        }
+        //for (int i = 0; i < block.Length; i++)
+        //{
+        //    Mesh m = Cube.GenerateMesh(new Vector3(i * 1.2f, 0, 0), i);
+        //    combine[i].mesh = m;
+        //    combine[i].transform = Matrix4x4.identity;
+        //}
 
-        combinedMesh.CombineMeshes(combine, true, false);
+        //combinedMesh.CombineMeshes(combine, true, false);
 
-        meshFilter.mesh = combinedMesh;
-        meshRenderer.material = blockMaterial;
+        //meshFilter.mesh = combinedMesh;
+        //meshRenderer.material = blockMaterial;
         /*
          //meshFilter.mesh = Cube.GenerateMesh(new Vector3(0, 0, 1), 0);
          //for testing

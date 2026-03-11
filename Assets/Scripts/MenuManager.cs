@@ -10,7 +10,7 @@ public class MenuManager : MonoBehaviour
 
         SaveWorld.Save();
 
-        SceneManager.LoadScene("GameScene");
+        SceneManager.LoadScene(1);
     }
 
     // Quit button

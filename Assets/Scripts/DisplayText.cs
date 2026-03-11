@@ -4,10 +4,9 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class PositionTracker : MonoBehaviour
+public class DisplayText : MonoBehaviour
 {
-    [SerializeField]
-    GameObject World;
+
 
 
     private World world;
@@ -15,6 +14,8 @@ public class PositionTracker : MonoBehaviour
     void Start()
     {
         playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+
+        GameObject World = GameObject.Find("World");
         world = World.GetComponent<World>();
     }
 
