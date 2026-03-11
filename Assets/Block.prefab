@@ -105,6 +105,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Block
   meshRenderer: {fileID: 963162131471398369}
   meshFilter: {fileID: 4434475266173198894}
+  blockMaterial: {fileID: 2100000, guid: b5b0e307c89ba64468d9c75ed30a924e, type: 2}
   block:
   - name: Block
     isSolid: 0
