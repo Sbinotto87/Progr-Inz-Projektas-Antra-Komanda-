@@ -8,13 +8,19 @@ namespace Assets.Scripts
     public class World: MonoBehaviour
     {
         /// <summary>
+        /// Player gameObject prefab
+        /// </summary>
+        [SerializeField]
+        private GameObject Player;
+
+        /// <summary>
         /// world size
         /// </summary>
-        static int WorldSize = 8;
+        public const int WorldSize = 8;
         /// <summary>
         /// chunk array
         /// </summary>
-        Chunk[,] chunks = new Chunk[WorldSize, WorldSize];
+        public Chunk[,] chunks = new Chunk[WorldSize, WorldSize];
         /// <summary>
         /// no clu, pavogiau koda
         /// </summary>
@@ -32,6 +38,9 @@ namespace Assets.Scripts
         private void Start()
         {
             GenerateWorld();
+
+            Instantiate(Player, new Vector3(20, 20, 20), Quaternion.identity); //for testing   Create player prefab at 20, 20, 20 coords
+
         }
 
         private void Update()
@@ -58,6 +67,7 @@ namespace Assets.Scripts
         private void CreateChunk(ChunkCoord coord)
         {
             chunks[coord.x, coord.z] = new Chunk(new ChunkCoord(coord.x, coord.z), this);
+
             activeChunks.Add(new ChunkCoord(coord.x, coord.z));
         }
     }
