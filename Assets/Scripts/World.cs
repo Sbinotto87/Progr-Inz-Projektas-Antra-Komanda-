@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Assets.Scripts
@@ -12,7 +13,11 @@ namespace Assets.Scripts
         /// </summary>
         [SerializeField]
         private GameObject Player;
-
+        /// <summary>
+        /// UiCanvas
+        /// </summary>
+        [SerializeField]
+        private Canvas UICanvas;
         /// <summary>
         /// world size
         /// </summary>
@@ -34,18 +39,55 @@ namespace Assets.Scripts
         /// </summary>
         public int DayTime; //1440 seconds (24 minutes, 1 irl second = 1 ingame minute
         public int CurrentDay; //event every 7 days?
+        public int Tick;
 
         private void Start()
         {
+            DayTime = 0;
+            CurrentDay = 0;
+            Tick = 0;
+
             GenerateWorld();
 
             Instantiate(Player, new Vector3(20, 20, 20), Quaternion.identity); //for testing   Create player prefab at 20, 20, 20 coords
+            Instantiate(UICanvas);
 
         }
-
         private void Update()
         {
 
+        }
+        /// <summary>
+        /// tickrate, 20 ticks per second, used for ingame time
+        /// </summary>
+        private void FixedUpdate()
+        {
+            TickDayTime();
+        }
+        /// <summary>
+        /// updates the ingame time (in seconds) every 20 tics
+        /// </summary>
+        private void TickDayTime()
+        {
+            switch (Tick)
+            {
+                case 19:
+                    Tick = 0;
+                    DayTime++;
+                    if (DayTime == 1440 - 1) UpdateDayCounter();
+                    break;
+                default:
+                    Tick++;
+                    break;
+            }
+        }
+        /// <summary>
+        /// increments day counter and resets day time, called at midnight
+        /// </summary>
+        private void UpdateDayCounter()
+        {
+            DayTime = 0;
+            CurrentDay++;
         }
         /// <summary>
         /// generates chunk coordinates for world and the chunks themselves
