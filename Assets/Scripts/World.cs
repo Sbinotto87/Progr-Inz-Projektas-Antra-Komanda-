@@ -42,6 +42,13 @@ namespace Assets.Scripts
         public int CurrentDay; //event every 7 days?
         public int Tick;
 
+        private void Awake()
+        {
+            var player = Instantiate(Player, new Vector3(20, 20, 20), Quaternion.identity); //for testing   Create player prefab at 20, 20, 20 coords
+            player.name = Player.name;
+            var canvas = Instantiate(UICanvas);
+            canvas.name = UICanvas.name;
+        }
         private void Start()
         {
             DayTime = 0;
@@ -50,8 +57,7 @@ namespace Assets.Scripts
 
             GenerateWorld();
 
-            Instantiate(Player, new Vector3(20, 20, 20), Quaternion.identity); //for testing   Create player prefab at 20, 20, 20 coords
-            Instantiate(UICanvas);
+
 
         }
         private void Update()

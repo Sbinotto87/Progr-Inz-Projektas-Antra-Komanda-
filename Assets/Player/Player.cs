@@ -48,7 +48,7 @@ public class Player : MonoBehaviour
         playerInput = GetComponent<PlayerInput>();
         world = GameObject.Find("World").GetComponent<World>();
 
-        playerInput.actions["Jump"].performed += ctx => Jump();
+        playerInput.actions["Jump"].started += ctx => Jump();
 
     }
 
@@ -69,7 +69,7 @@ public class Player : MonoBehaviour
         // Resolve ground AFTER movement
         ResolveGround();
         grounded = IsGrounded(transform.position); // final grounded state
-        Debug.Log($"Grounded: {transform.position.y - halfHeight}");
+        
     }
 
 

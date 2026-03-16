@@ -23,12 +23,6 @@ public class UIElements : MonoBehaviour
     // Text for coordinates
     public TMP_Text coordinateText;
 
-    private Transform playerTransform;
-
-    public void SetPlayer(Transform player)
-    {
-        playerTransform = player;
-    }
 
     // Update is called once per frame
     void Update()
@@ -48,10 +42,6 @@ public class UIElements : MonoBehaviour
         ThirstBar.value = Mathf.Lerp(ThirstBar.value, thirst / 100f, Time.deltaTime * 5f);
         HealthBar.value = Mathf.Lerp(HealthBar.value, health / 100f, Time.deltaTime * 5f);
 
-        if (playerTransform != null)
-        {
-            Vector3 pos = playerTransform.position;
-            coordinateText.text = $"X: {pos.x:F0} | Y: {pos.y:F0} | Z: {pos.z:F0}";
-        }
+
     }
 }
