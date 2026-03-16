@@ -48,7 +48,7 @@ GameObject:
   - component: {fileID: 3023038424158478491}
   - component: {fileID: 3674569417673890848}
   m_Layer: 5
-  m_Name: CoordinatesText
+  m_Name: Coordinates
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -550,7 +550,7 @@ GameObject:
   - component: {fileID: 4235796815712253028}
   - component: {fileID: 1272937652529274711}
   - component: {fileID: 8405551611410333233}
-  - component: {fileID: 8899942398961474789}
+  - component: {fileID: 4043509519377355048}
   m_Layer: 5
   m_Name: UI elements
   m_TagString: Untagged
@@ -658,10 +658,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 492bef5833e2b3c48aef822eef2238c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  World: {fileID: 0}
   coordinateText: {fileID: 4455326758817217089}
   TimeText: {fileID: 7002761040888241901}
---- !u!114 &8899942398961474789
+--- !u!114 &4043509519377355048
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -670,16 +669,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 3825256826906398864}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9fad8855f1c5d9f46947336ca6f88cf3, type: 3}
+  m_Script: {fileID: 11500000, guid: 2785d654dfe8403449ec99aa1170a48e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::StatBarUI
+  m_EditorClassIdentifier: Assembly-CSharp::UIElements
   HealthBar: {fileID: 6194865548382193191}
   HungerBar: {fileID: 7643516683873203685}
   ThirstBar: {fileID: 2069934050702313558}
   health: 100
   hunger: 100
   thirst: 100
-  depletionRate: 10
+  depletionRate: 2
+  coordinateText: {fileID: 0}
 --- !u!1 &3897435612368810339
 GameObject:
   m_ObjectHideFlags: 0
@@ -1117,7 +1117,7 @@ GameObject:
   - component: {fileID: 1689574122788257550}
   - component: {fileID: 7002761040888241901}
   m_Layer: 5
-  m_Name: GameTimeOverlay
+  m_Name: GameTimeText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1170,7 +1170,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: asdf
+  m_text: 52
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1254,7 +1254,7 @@ GameObject:
   - component: {fileID: 2492131265795496335}
   - component: {fileID: 4455326758817217089}
   m_Layer: 5
-  m_Name: TextOverlay
+  m_Name: XYZcords
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1277,7 +1277,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 230, y: 0}
-  m_SizeDelta: {x: 400, y: 50}
+  m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &2492131265795496335
 CanvasRenderer:
@@ -1307,7 +1307,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: asdf
+  m_text: 'x:0 : Y:0 Z:0'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1351,7 +1351,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 1
+  m_TextWrappingMode: 0
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
