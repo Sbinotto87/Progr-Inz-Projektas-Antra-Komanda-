@@ -58,13 +58,13 @@ public class Player : MonoBehaviour
         // get mouse input and rotate camera
         CameraControl();
 
-        // set velocity.x and velocity.z
+        // move player x and z based on input and collisions
         Movement();
         // set velocity.y
         ApplyGravity();
 
-        // apply velocity
-        transform.Translate(velocity * Time.deltaTime, Space.World);
+        // apply velocity.y to player position
+        transform.Translate(velocity.y * Time.deltaTime * Vector3.up, Space.World);
 
         // Resolve ground AFTER movement
         ResolveGround();
@@ -84,42 +84,59 @@ public class Player : MonoBehaviour
 
         float speed = sprinting ? sprintSpeed : walkSpeed;
 
-        Vector3 move = (transform.right * movement.x + transform.forward * movement.y).normalized * speed;
-
-
+        Vector3 move = (transform.right * movement.x + transform.forward * movement.y).normalized * speed * Time.deltaTime;
 
         Vector3 pos = transform.position;
-        pos += move * Time.deltaTime;
-        // check X direction
-        if (move.x > 0) // moving right
+
+        // ---------- X AXIS ----------
+        float newX = pos.x + move.x;
+
+        if (move.x > 0)
         {
-            if (CheckBlocks(pos.x + halfWidth, pos.y - halfHeight + 0.01f, pos.z) ||
-                CheckBlocks(pos.x + halfWidth, pos.y + halfHeight, pos.z))
-                move.x = 0;
+            if (!(CheckBlocks(newX + halfWidth, pos.y - halfHeight + 0.01f, pos.z + halfWidth) ||
+                  CheckBlocks(newX + halfWidth, pos.y - halfHeight + 0.01f, pos.z - halfWidth) ||
+                  CheckBlocks(newX + halfWidth, pos.y + halfHeight, pos.z + halfWidth) ||
+                  CheckBlocks(newX + halfWidth, pos.y + halfHeight, pos.z - halfWidth)))
+            {
+                pos.x = newX;
+            }
         }
-        else if (move.x < 0) // moving left
+        else if (move.x < 0)
         {
-            if (CheckBlocks(pos.x - halfWidth, pos.y - halfHeight + 0.01f, pos.z) ||
-                CheckBlocks(pos.x - halfWidth, pos.y + halfHeight, pos.z))
-                move.x = 0;
+            if (!(CheckBlocks(newX - halfWidth, pos.y - halfHeight + 0.01f, pos.z + halfWidth) ||
+                  CheckBlocks(newX - halfWidth, pos.y - halfHeight + 0.01f, pos.z - halfWidth) ||
+                  CheckBlocks(newX - halfWidth, pos.y + halfHeight, pos.z + halfWidth) ||
+                  CheckBlocks(newX - halfWidth, pos.y + halfHeight, pos.z - halfWidth)))
+            {
+                pos.x = newX;
+            }
         }
 
-        // check Z direction
-        if (move.z > 0) // forward
+        // ---------- Z AXIS ----------
+        float newZ = pos.z + move.z;
+
+        if (move.z > 0)
         {
-            if (CheckBlocks(pos.x, pos.y - halfHeight + 0.01f, pos.z + halfWidth) ||
-                CheckBlocks(pos.x, pos.y + halfHeight, pos.z + halfWidth))
-                move.z = 0;
+            if (!(CheckBlocks(pos.x - halfWidth, pos.y - halfHeight + 0.01f, newZ + halfWidth) ||
+                  CheckBlocks(pos.x + halfWidth, pos.y - halfHeight + 0.01f, newZ + halfWidth) ||
+                  CheckBlocks(pos.x - halfWidth, pos.y + halfHeight, newZ + halfWidth) ||
+                  CheckBlocks(pos.x + halfWidth, pos.y + halfHeight, newZ + halfWidth)))
+            {
+                pos.z = newZ;
+            }
         }
-        else if (move.z < 0) // backward
+        else if (move.z < 0)
         {
-            if (CheckBlocks(pos.x, pos.y - halfHeight + 0.01f, pos.z - halfWidth) ||
-                CheckBlocks(pos.x, pos.y + halfHeight, pos.z - halfWidth))
-                move.z = 0;
+            if (!(CheckBlocks(pos.x - halfWidth, pos.y - halfHeight + 0.01f, newZ - halfWidth) ||
+                  CheckBlocks(pos.x + halfWidth, pos.y - halfHeight + 0.01f, newZ - halfWidth) ||
+                  CheckBlocks(pos.x - halfWidth, pos.y + halfHeight, newZ - halfWidth) ||
+                  CheckBlocks(pos.x + halfWidth, pos.y + halfHeight, newZ - halfWidth)))
+            {
+                pos.z = newZ;
+            }
         }
 
-        velocity.x = move.x;
-        velocity.z = move.z;
+        transform.position = pos;
     }
 
 
@@ -191,11 +208,10 @@ public class Player : MonoBehaviour
     /// <returns></returns>
     public bool IsGrounded(Vector3 playerPos)
     {
-        return CheckBlocks(
-            playerPos.x,
-            playerPos.y - halfHeight - 0.01f,
-            playerPos.z
-        );
+        return CheckBlocks(playerPos.x + halfWidth, playerPos.y - halfHeight - 0.01f, playerPos.z + halfWidth) ||
+                CheckBlocks(playerPos.x + halfWidth, playerPos.y - halfHeight - 0.01f, playerPos.z - halfWidth) ||
+                CheckBlocks(playerPos.x - halfWidth, playerPos.y - halfHeight - 0.01f, playerPos.z + halfWidth) ||
+                CheckBlocks(playerPos.x - halfWidth, playerPos.y - halfHeight - 0.01f, playerPos.z - halfWidth);
     }
 
     /// <summary>
