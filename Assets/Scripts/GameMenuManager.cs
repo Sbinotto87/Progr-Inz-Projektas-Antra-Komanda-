@@ -8,7 +8,8 @@ public class GameMenuManager : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
-
+    [SerializeField]
+    GameObject pauseMenuUI;
 
     PlayerInput SettingsInput;
 
@@ -26,8 +27,8 @@ public class GameMenuManager : MonoBehaviour
 
         SettingsInput.actions["Pause"].started += ctx => Pause();
 
-        volume = FindFirstObjectByType<Volume>();
-        Debug.Log(volume.profile.TryGet(out dof)); // CIA KAZKAS SUPISTA NX
+        volume = GameObject.Find("Volume (effects after render)").GetComponent<Volume>();
+        Debug.Log(volume.profile.TryGet(out dof)); 
         volume.profile.TryGet(out colorAdjustments);
 
         //colorAdjustments.postExposure.value = -0.5f;
@@ -52,7 +53,7 @@ public class GameMenuManager : MonoBehaviour
 
 
 
-    void Pause()
+    public void Pause()
     {
 
         playerController = GameObject.Find("Player").GetComponent<Player>();
@@ -66,6 +67,8 @@ public class GameMenuManager : MonoBehaviour
             UIelements.SetActive(false);
             dof.active = true;
             colorAdjustments.active = true;
+            pauseMenuUI.SetActive(true);
+
 
             Time.timeScale = 0;
             Debug.Log("Game paused.");
@@ -79,6 +82,7 @@ public class GameMenuManager : MonoBehaviour
             dof.active = false;
             colorAdjustments.active = false;
 
+            pauseMenuUI.SetActive(false);
             Time.timeScale = 1;
             Debug.Log("Game unpaused.");
         }
