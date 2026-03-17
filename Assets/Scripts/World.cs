@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -95,6 +97,7 @@ namespace Assets.Scripts
         /// </summary>
         private void GenerateWorld()
         {
+            
             for (int x = 0; x < WorldSize; x++)
             {
                 for (int z = 0; z < WorldSize; z++)
