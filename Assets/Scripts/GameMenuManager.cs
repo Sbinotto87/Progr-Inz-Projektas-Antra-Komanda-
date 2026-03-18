@@ -6,11 +6,22 @@ using UnityEngine.Rendering.Universal;
 [RequireComponent(typeof(PlayerInput))]
 public class GameMenuManager : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    /// <summary>
+    /// Sita klase editina shaderius taip pat stabdo laika ant mirties ir pauzes
+    /// </summary>
 
     [SerializeField]
     GameObject pauseMenuUI;
 
+    [SerializeField]
+    GameObject deathMenuUI;
+
+    [SerializeField]
+    GameObject volumeObject;
+
+    [SerializeField]
+    GameObject UIelements;
+    
     PlayerInput SettingsInput;
 
     Player playerController;
@@ -19,27 +30,42 @@ public class GameMenuManager : MonoBehaviour
     DepthOfField dof;
     ColorAdjustments colorAdjustments;
 
-    GameObject UIelements;
 
+    Player player;
+
+
+    InputAction pauseAction;
     void Start()
     {
-        SettingsInput = GetComponent<PlayerInput>();
-
-        SettingsInput.actions["Pause"].started += ctx => Pause();
-
-        volume = GameObject.Find("Volume (effects after render)").GetComponent<Volume>();
+        volume = volumeObject.GetComponent<Volume>();
         Debug.Log(volume.profile.TryGet(out dof)); 
         volume.profile.TryGet(out colorAdjustments);
 
-        //colorAdjustments.postExposure.value = -0.5f;
-        //colorAdjustments.contrast.value = 0f;
-        //colorAdjustments.saturation.value = -60f;
+        player = GameObject.FindWithTag("Player").GetComponent<Player>();
 
-        //dof.focusDistance.value = 0.1f;
-        //dof.aperture.value = 32f;
-        //dof.focalLength.value = 300f;
+        colorAdjustments.postExposure.value = -0.5f;
+        colorAdjustments.contrast.value = 30f;
+        colorAdjustments.saturation.value = -30f;
 
-        UIelements = GameObject.FindWithTag("UI");
+        dof.mode.value = DepthOfFieldMode.Gaussian;
+        dof.gaussianStart.value = 2f;
+        dof.gaussianEnd.value = 30f;
+        dof.gaussianMaxRadius.value = 1.5f;
+
+    }
+    public void OnPause()
+    {
+        Pause();
+    }
+    //private void OnDisable()
+    //{
+    //    pauseAction.started -= OnPause;
+    //}
+    private void OnEnable()
+    {
+        SettingsInput = GetComponent<PlayerInput>();
+
+        pauseAction = SettingsInput.actions["Pause"];
     }
 
     /// <summary>
@@ -48,19 +74,32 @@ public class GameMenuManager : MonoBehaviour
     private void Awake()
     {
         Time.timeScale = 1;
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
+    public void Update()
+    {
+        if (player.health <= 0)
+        {
+            Death();
+        }
 
+    }
 
 
     public void Pause()
     {
 
-        playerController = GameObject.Find("Player").GetComponent<Player>();
-        
 
+        playerController = GameObject.FindWithTag("Player").GetComponent<Player>();
         if (Time.timeScale == 1) // If the game is currently running, pause it
         {
+
+            Cursor.lockState = CursorLockMode.Confined;
+            Cursor.visible = true;
+
             playerController.GetComponent<PlayerInput>().enabled = false; // Disable player input to prevent movement while paused
             playerController.enabled = false; // Disable player controls
 
@@ -75,7 +114,7 @@ public class GameMenuManager : MonoBehaviour
         }
         else // If the game is currently paused, unpause it
         {
-            playerController.GetComponent<PlayerInput>().enabled = true; // Disable player input to prevent movement while paused
+            playerController.GetComponent<PlayerInput>().enabled = true; // enable player input to prevent movement while paused
             playerController.enabled = true; // enable player controls
 
             UIelements.SetActive(true);
@@ -85,6 +124,33 @@ public class GameMenuManager : MonoBehaviour
             pauseMenuUI.SetActive(false);
             Time.timeScale = 1;
             Debug.Log("Game unpaused.");
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
         }
+    }
+
+
+
+
+
+    public void Death()
+    {
+
+        Cursor.lockState = CursorLockMode.Confined;
+        Cursor.visible = true;
+
+        playerController = GameObject.FindWithTag("Player").GetComponent<Player>();
+        playerController.GetComponent<PlayerInput>().enabled = false; // Disable player input to prevent movement while paused
+        playerController.enabled = false; // Disable player controls
+        Time.timeScale = 0;
+
+        UIelements.SetActive(false);
+        dof.active = true;
+        colorAdjustments.colorFilter.value = new Color(0.5f, 0f, 0f, 1f);
+        colorAdjustments.active = true;
+        deathMenuUI.SetActive(true);
+            
+
+        Debug.Log("Player died.");
     }
 }

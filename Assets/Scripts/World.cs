@@ -15,11 +15,6 @@ namespace Assets.Scripts
         [SerializeField]
         private GameObject Player;
         /// <summary>
-        /// UiCanvas
-        /// </summary>
-        [SerializeField]
-        private Canvas UICanvas;
-        /// <summary>
         /// world size
         /// </summary>
         public const int WorldSize = 8;
@@ -46,8 +41,6 @@ namespace Assets.Scripts
         {
             var player = Instantiate(Player, new Vector3(20, 20, 20), Quaternion.identity); //for testing   Create player prefab at 20, 20, 20 coords
             player.name = Player.name;
-            var canvas = Instantiate(UICanvas);
-            canvas.name = UICanvas.name;
         }
         private void Start()
         {

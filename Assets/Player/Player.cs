@@ -32,6 +32,11 @@ public class Player : MonoBehaviour
     public float jumpStrength = 5f;
     public float mouseSensitivity = 0.45f;
 
+    public float health = 100f;
+    public float hunger = 100f;
+    public float thirst = 100f;
+
+
     private bool grounded = true;
 
 
