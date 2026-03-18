@@ -6,7 +6,6 @@ public class MenuManager : MonoBehaviour
     // Start button
     public void StartGame()
     {
-        WorldGenerator.GenerateWorld();
 
         SaveWorld.Save();
 
