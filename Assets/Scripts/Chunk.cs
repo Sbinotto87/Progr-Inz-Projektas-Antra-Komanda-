@@ -169,12 +169,11 @@ public class Chunk
         InitializeBlocks();
 
         //world gen 
-        CreateLayerOfBlocks(0, 255, 0);//layer of 0 blocks
-        //CreateLayerOfBlocks(0, 1, 0);//layer of 0 blocks
-        //CreateLayerOfBlocks(0, 1, 0);//layer of 0 blocks
-        //CreateLayerOfBlocks(2, 4, 1);//4 layer of 1 blocks
-        //CreateLayerOfBlocks(1, 3, 5);//3 layers of 2 blocks
-        //blocks[10, 8, 10] = 1;
+        //CreateLayerOfBlocks(0, 255, 0);//layer of 0 blocks
+        CreateLayerOfBlocks(0, 1, 0);//layer of 0 blocks
+        CreateLayerOfBlocks(2, 4, 1);//4 layer of 1 blocks
+        CreateLayerOfBlocks(1, 3, 5);//3 layers of 2 blocks
+        blocks[10, 8, 10] = 1;
         CreateChunkBlocks();
     }
 }
