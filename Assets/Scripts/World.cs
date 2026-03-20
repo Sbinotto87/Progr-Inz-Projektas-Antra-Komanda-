@@ -18,11 +18,6 @@ namespace Assets.Scripts
         [SerializeField]
         private GameObject Player;
         /// <summary>
-        /// UiCanvas
-        /// </summary>
-        [SerializeField]
-        private Canvas UICanvas;
-        /// <summary>
         /// world size
         /// </summary>
         public const int WorldSize = 8;

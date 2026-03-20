@@ -32,6 +32,11 @@ public class Player : MonoBehaviour
     public float jumpStrength = 5f;
     public float mouseSensitivity = 0.45f;
 
+    public float health = 100f;
+    public float hunger = 100f;
+    public float thirst = 100f;
+
+
     private bool grounded = true;
 
 
@@ -48,7 +53,7 @@ public class Player : MonoBehaviour
         playerInput = GetComponent<PlayerInput>();
         world = GameObject.Find("World").GetComponent<World>();
 
-        playerInput.actions["Jump"].performed += ctx => Jump();
+        playerInput.actions["Jump"].started += ctx => Jump();
 
     }
 
