@@ -74,7 +74,7 @@ public class Player : MonoBehaviour
         // Resolve ground AFTER movement
         ResolveGround();
         grounded = IsGrounded(transform.position); // final grounded state
-        //Debug.Log($"Grounded: {transform.position.y - halfHeight}");
+        
     }
 
 

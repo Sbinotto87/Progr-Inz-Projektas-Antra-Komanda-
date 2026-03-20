@@ -52,6 +52,12 @@ namespace Assets.Scripts
         ChunkCoord playerChunkCoord;
         public int viewDistance = 4;
         Vector3 spawnPosition = new Vector3 (0, 100, 0);
+        private void Awake()
+        {
+            var player = Instantiate(Player, spawnPosition, Quaternion.identity); //spawns player
+
+            player.name = Player.name;
+        }
         private void Start()
         {
             UnityEngine.Random.InitState(Seed);
@@ -60,9 +66,6 @@ namespace Assets.Scripts
             Tick = 0;
 
             GenerateWorld();
-
-            Instantiate(Player, spawnPosition, Quaternion.identity); //for testing   Create player prefab at 20, 20, 20 coords
-            Instantiate(UICanvas);
 
         }
         private void Update()
