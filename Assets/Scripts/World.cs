@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,11 +22,15 @@ namespace Assets.Scripts
         /// </summary>
         public const int WorldSize = 8;
         /// <summary>
+        /// world size in blocks, used for perlin noise bounds
+        /// </summary>
+        public const int WorldSizeInBlocks = WorldSize * Chunk.Width;
+        /// <summary>
         /// chunk array
         /// </summary>
         public Chunk[,] chunks = new Chunk[WorldSize, WorldSize];
         /// <summary>
-        /// no clu, pavogiau koda
+        /// List of chunks in the players vision
         /// </summary>
         List<ChunkCoord> activeChunks = new List<ChunkCoord>();
         /// <summary>
@@ -37,24 +44,35 @@ namespace Assets.Scripts
         public int CurrentDay; //event every 7 days?
         public int Tick;
 
-        private void Awake()
-        {
-            var player = Instantiate(Player, new Vector3(20, 20, 20), Quaternion.identity); //for testing   Create player prefab at 20, 20, 20 coords
-            player.name = Player.name;
-        }
+        /// <summary>
+        /// signed 32bit int for seed
+        /// </summary>
+        public int Seed;
+        public BiomeData biome;
+        ChunkCoord playerChunkCoord;
+        public int viewDistance = 4;
+        Vector3 spawnPosition = new Vector3 (0, 100, 0);
         private void Start()
         {
+            UnityEngine.Random.InitState(Seed);
             DayTime = 0;
             CurrentDay = 0;
             Tick = 0;
 
             GenerateWorld();
 
-
+            Instantiate(Player, spawnPosition, Quaternion.identity); //for testing   Create player prefab at 20, 20, 20 coords
+            Instantiate(UICanvas);
 
         }
         private void Update()
         {
+            playerChunkCoord = GetChunkCoordFromVector3(Player.transform.position);
+
+            if (playerChunkCoord.Equals(playerChunkCoord))
+            {
+                //CheckViewDistance();
+            }
 
         }
         /// <summary>
@@ -99,8 +117,10 @@ namespace Assets.Scripts
                 for (int z = 0; z < WorldSize; z++)
                 {
                     CreateChunk(new ChunkCoord(x, z));
+                    chunks[x, z].isActive = true;
                 }
             }
+            Player.transform.position = spawnPosition;
         }
         /// <summary>
         /// creates chunk game object
@@ -111,6 +131,121 @@ namespace Assets.Scripts
             chunks[coord.x, coord.z] = new Chunk(new ChunkCoord(coord.x, coord.z), this);
 
             activeChunks.Add(new ChunkCoord(coord.x, coord.z));
+        }
+        public int GetVoxel(Vector3 pos)
+        {
+
+            int yPos = Mathf.FloorToInt(pos.y);
+
+            /* IMMUTABLE PASS */
+
+            // If outside world, return air.
+            if (!IsVoxelInWorld(pos))
+                return -1;
+            // If bottom block of chunk, return block 1.
+            if (yPos == 0)
+                return 0;
+
+            /* BASIC TERRAIN PASS */
+            int terrainHeight = Mathf.FloorToInt(biome.terrainHeight * PerlinNoise.Get2DPerlinNoise(new Vector2(pos.x, pos.z), 0, biome.terrainScale)) + biome.solidGroundHeight;
+            byte voxelValue = 0;
+
+            if (yPos == terrainHeight) // grass
+                voxelValue = 1;
+            else if (yPos < terrainHeight && yPos > terrainHeight - 4) //dirt (add drit bruh why do we not have dirt
+                voxelValue = 1;
+            else if (yPos > terrainHeight)
+                return -1; //air
+            else
+                voxelValue = 0; //stone
+
+            /* SECOND PASS */
+
+            //second pass is for random nodes of stuff in terrain like dirt in terrain in mc
+            /*
+            if (voxelValue == 2)
+            {
+                foreach (Lode lode in biome.lodes)
+                {
+                    if (yPos > lode.minHeight && yPos < lode.maxHeight)
+                    {
+                        if (PerlinNoise.Get3DPerlinNoise(pos, lode.noiseOffset, lode.scale, lode.threshold))
+                            voxelValue = lode.blockID;
+                    }
+                }
+            }
+            */
+            return voxelValue;
+        }
+        ChunkCoord GetChunkCoordFromVector3(Vector3 pos)
+        {
+            int x = Mathf.FloorToInt(pos.x / Chunk.Width);
+            int z = Mathf.FloorToInt(pos.z / Chunk.Width);
+
+            return new ChunkCoord(x, z);
+        }
+        void CheckViewDistance()
+        {
+            ChunkCoord coord = GetChunkCoordFromVector3(Player.transform.position);
+            List<ChunkCoord> PreviouslyActiveChunks = new List<ChunkCoord>(activeChunks);
+
+            //loop through chunks in view distance
+            for (int x = coord.x - viewDistance; x < coord.x + viewDistance; x++)
+            {
+                for (int z = coord.z - viewDistance; z < coord.z + viewDistance; z++)
+                {
+                    //if not active
+                    if(ChunkIsInWorld(new ChunkCoord(x, z)))
+                    {
+                        //create if doesnt exist
+                        if (chunks[x,z] == null)
+                        {
+                            CreateChunk(new ChunkCoord(x, z));
+                        }
+                        //activate
+                        else if (!chunks[x, z].isActive)
+                        {
+                            chunks[x, z].isActive = true;
+                            activeChunks.Add(new ChunkCoord(x, z));
+                        }
+                    }
+                    //remove chunk from previously active list
+                    for (int i = 0; i < PreviouslyActiveChunks.Count; i++)
+                    {
+
+                        if (PreviouslyActiveChunks[i].Equals(new ChunkCoord(x, z)))
+                            PreviouslyActiveChunks.RemoveAt(i);
+
+                    }
+                }
+            }
+            //deactivate chunks that were previously active
+            foreach (ChunkCoord c in PreviouslyActiveChunks)
+                chunks[c.x, c.z].isActive = false;
+        }
+        /// <summary>
+        /// used for checking view distance
+        /// </summary>
+        /// <param name="coord">chunk coordinate</param>
+        /// <returns> true if chunk is within limits of world size</returns>
+        bool ChunkIsInWorld(ChunkCoord coord)
+        {
+            if (coord.x > 0 && coord.x < WorldSize - 1 && coord.z > 0 && coord.z < WorldSize - 1)
+                return true;
+            else
+                return false;
+        }
+        /// <summary>
+        /// used for limiting block creation (based on perlin noise)
+        /// </summary>
+        /// <param name="pos">block location</param>
+        /// <returns>true if within world limits</returns>
+        bool IsVoxelInWorld(Vector3 pos)
+        {
+            if (pos.x >= 0 && pos.x < WorldSizeInBlocks && pos.y >= 0 && pos.y < Chunk.Height && pos.z >= 0 && pos.z < WorldSizeInBlocks)
+                return true;
+            else
+                return false;
         }
     }
     /// <summary>
@@ -126,4 +261,5 @@ namespace Assets.Scripts
             z = _z;
         }
     }
+
 }
