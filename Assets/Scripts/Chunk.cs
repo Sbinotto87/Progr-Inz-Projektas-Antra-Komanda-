@@ -11,6 +11,7 @@ public class Chunk
     World world;
     public ChunkCoord coord;
 
+
     /// <summary>
     /// chunk coordinate in world
     /// </summary>
@@ -25,6 +26,31 @@ public class Chunk
 
 
     public int[,,] blocks; //3d array of blocks in the world (-1 denotes air block)
+
+    /// <summary>
+    /// chunk status for gameplay and render distance
+    /// </summary>
+    public bool isActive
+    {
+
+        get { return chunkObject.activeSelf; }
+        set { chunkObject.SetActive(value); }
+
+    }
+    public void PopulateBlockArray()
+    {
+
+        for (int i = 0; i < Width; i++)
+        {
+            for (int j = 0; j < Height; j++)
+            {
+                for (int k = 0; k < Width; k++)
+                {
+                    blocks[i, j, k] = world.GetVoxel(new Vector3(i, j, k) + position);
+                }
+            }
+        }
+    }
 
     /// <summary>
     /// Creates a flat layer of blocks
@@ -56,6 +82,7 @@ public class Chunk
     /// <returns>CombineInstance containing meshes of the layer of blocks</returns>
     public List<CombineInstance> RenderLayerOfBlocks(int BlockID, int thickness, int offset)
     {
+        //NOT USED ANYMORE
         Mesh combinedMesh = new Mesh();
         combinedMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32; // fixes array size so that we dont overflow via max size chunk
         var combineInstance = new List<CombineInstance>();
@@ -70,7 +97,7 @@ public class Chunk
                         Mesh mesh = Cube.GenerateMesh(new Vector3(i, j, k), BlockID);
                         CombineInstance temp = new CombineInstance();
                         temp.mesh = mesh;
-                        temp.transform = meshFilter.transform.localToWorldMatrix;
+                        temp.transform = Matrix4x4.identity;
                         combineInstance.Add(temp);
                     }
                 }
@@ -78,7 +105,6 @@ public class Chunk
         }
         return combineInstance;
     }
-
     /// <summary>
     /// creates chunk based on blocks in the block data array
     /// </summary>
@@ -100,7 +126,7 @@ public class Chunk
                         Mesh mesh = Cube.GenerateMesh(new Vector3(i, j, k), blocks[i, j, k]);
                         CombineInstance temp = new CombineInstance();
                         temp.mesh = mesh;
-                        temp.transform = meshFilter.transform.localToWorldMatrix;
+                        temp.transform = Matrix4x4.identity;
                         combineInstance.Add(temp);
                     }
                 }
@@ -141,7 +167,12 @@ public class Chunk
         }
         return false;
     }
+    public Vector3 position
+    {
 
+        get { return chunkObject.transform.position; }
+
+    }
 
     /// <summary>
     /// creates chunk game object
@@ -153,7 +184,7 @@ public class Chunk
 
         coord = _coord;
         chunkObject = new GameObject();
-        chunkObject.transform.position = new Vector3(coord.x * Width / 2, 0f, coord.z * Width / 2);
+        chunkObject.transform.position = new Vector3(coord.x * Width, 0f, coord.z * Width);
 
         meshRenderer = chunkObject.AddComponent<MeshRenderer>();
         meshFilter = chunkObject.AddComponent<MeshFilter>();
@@ -168,12 +199,14 @@ public class Chunk
 
         InitializeBlocks();
 
-        //world gen 
+
+        //world gen  testing
         //CreateLayerOfBlocks(0, 255, 0);//layer of 0 blocks
-        CreateLayerOfBlocks(0, 1, 0);//layer of 0 blocks
-        CreateLayerOfBlocks(2, 4, 1);//4 layer of 1 blocks
-        CreateLayerOfBlocks(1, 3, 5);//3 layers of 2 blocks
-        blocks[10, 8, 10] = 1;
+        //CreateLayerOfBlocks(0, 1, 0);//layer of 0 blocks
+        //CreateLayerOfBlocks(2, 4, 1);//4 layer of 1 blocks
+        //CreateLayerOfBlocks(1, 3, 5);//3 layers of 2 blocks
+        //blocks[10, 8, 10] = 1;
+        PopulateBlockArray();
         CreateChunkBlocks();
     }
 }

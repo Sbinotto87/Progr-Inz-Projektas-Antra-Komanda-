@@ -630,6 +630,9 @@ MonoBehaviour:
   DayTime: 0
   CurrentDay: 0
   Tick: 0
+  Seed: 0
+  biome: {fileID: 11400000, guid: 55cc94da4c897b24686469a9e975ef05, type: 2}
+  viewDistance: 4
 --- !u!4 &1220039295
 Transform:
   m_ObjectHideFlags: 0
