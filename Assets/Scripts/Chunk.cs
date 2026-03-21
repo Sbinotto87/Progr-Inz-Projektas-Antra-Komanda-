@@ -2,6 +2,8 @@ using Assets.Scripts;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
+using static UnityEditor.Searcher.SearcherWindow.Alignment;
 
 public class Chunk
 {
@@ -24,8 +26,14 @@ public class Chunk
     public const int Height = 256;
     public const int Width = 16;
 
+    int triangleIndex = 0;
+    List<Vector3> vertices = new List<Vector3>();
+    List<int> triangles = new List<int>();
+    List<Vector2> uvs = new List<Vector2>();
 
     public int[,,] blocks; //3d array of blocks in the world (-1 denotes air block)
+    Blocks MyBlocks = null;
+    
 
     /// <summary>
     /// chunk status for gameplay and render distance
@@ -37,6 +45,9 @@ public class Chunk
         set { chunkObject.SetActive(value); }
 
     }
+    /// <summary>
+    /// Creates blocks in the array based off the perlin noise generated in the other class
+    /// </summary>
     public void PopulateBlockArray()
     {
 
@@ -51,7 +62,7 @@ public class Chunk
             }
         }
     }
-
+    //OBSOLETE
     /// <summary>
     /// Creates a flat layer of blocks
     /// </summary>
@@ -72,7 +83,7 @@ public class Chunk
             }
         }
     }
-
+    //OBSOLETE
     /// <summary>
     /// Creates a flat layer of blocks
     /// </summary>
@@ -108,7 +119,7 @@ public class Chunk
     /// <summary>
     /// creates chunk based on blocks in the block data array
     /// </summary>
-    public void CreateChunkBlocks()
+    public void CreateChunkBlocksOld()
     {
         Mesh combinedMesh = new Mesh();
         combinedMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32; // fixes array size so that we dont overflow via max size chunk
@@ -134,6 +145,106 @@ public class Chunk
         }
         combinedMesh.CombineMeshes(combineInstance.ToArray());
         meshFilter.mesh = combinedMesh;
+    }
+    public void CreateChunkMesh()
+    {
+        Mesh mesh = new Mesh();
+        mesh.vertices = vertices.ToArray();
+        mesh.triangles = triangles.ToArray();
+        mesh.uv = uvs.ToArray();
+
+        mesh.RecalculateNormals();
+
+        meshFilter.mesh = mesh;
+    }
+    void CreateMeshData()
+    {
+        for (int i = 0; i < Width; i++)
+        {
+            for (int j = 0; j < Height; j++)
+            {
+                for (int k = 0; k < Width; k++)
+                {
+                    if (blocks[i, j, k] != -1)
+                    {
+                        if (MyBlocks.block[blocks[i, j, k]].isSolid)
+                            AddVoxelDataToChunk(new Vector3(i, j, k));
+                    }
+
+                }
+            }
+        }
+
+    }
+    void AddVoxelDataToChunk(Vector3 pos)
+    {
+
+        for (int i = 0; i < 6; i++)
+        {
+
+            if (!CheckIfBlockIsSolid(pos + Voxel.faceChecks[i]))
+            {
+
+                int blockID = blocks[(int)pos.x, (int)pos.y, (int)pos.z];
+
+                vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 0]]);
+                vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 1]]);
+                vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 2]]);
+                vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 3]]);
+
+                AddTexture(MyBlocks.block[blockID].faces[i]);
+
+
+                triangles.Add(triangleIndex);
+                triangles.Add(triangleIndex + 1);
+                triangles.Add(triangleIndex + 2);
+                triangles.Add(triangleIndex + 2);
+                triangles.Add(triangleIndex + 3);
+                triangles.Add(triangleIndex);
+                triangleIndex += 4;
+
+            }
+        }
+
+    }
+    bool CheckIfBlockIsSolid(Vector3 pos)
+    {
+        int x = Mathf.FloorToInt(pos.x);
+        int y = Mathf.FloorToInt(pos.y);
+        int z = Mathf.FloorToInt(pos.z);
+
+        if (!IsVoxelInChunk(x, y, z))
+        {
+            if(world.GetVoxel(pos + position) != -1)
+                return MyBlocks.block[world.GetVoxel(pos + position)].isSolid;
+        }
+        if (x < 0 || x > Width - 1 || y < 0 || y > Height - 1 || z < 0 || z > Width - 1 || blocks[x, y, z] == -1)
+            return false;
+        return MyBlocks.block[blocks[x, y, z]].isSolid;
+
+    }
+    bool IsVoxelInChunk(int x, int y, int z)
+    {
+
+        if (x < 0 || x > Width - 1 || y < 0 || y > Height - 1 || z < 0 || z > Width - 1)
+            return false;
+        else
+            return true;
+
+    }
+    void AddTexture(int textureID)
+    {
+        float y = textureID / Voxel.TextureAtlasWidth;
+        float x = textureID - y * Voxel.TextureAtlasWidth;
+        x *= Voxel.NormalizedBlockSize;
+        y *= Voxel.NormalizedBlockSize;
+        y = 1f - y - Voxel.NormalizedBlockSize;
+
+
+        uvs.Add(new Vector2(x, y));
+        uvs.Add(new Vector2(x, y + Voxel.NormalizedBlockSize));
+        uvs.Add(new Vector2(x + Voxel.NormalizedBlockSize, y + Voxel.NormalizedBlockSize));
+        uvs.Add(new Vector2(x + Voxel.NormalizedBlockSize, y));
     }
 
     /// <summary>
@@ -169,9 +280,7 @@ public class Chunk
     }
     public Vector3 position
     {
-
         get { return chunkObject.transform.position; }
-
     }
 
     /// <summary>
@@ -181,6 +290,7 @@ public class Chunk
     /// <param name="_world">idk unity needs this</param>
     public Chunk(ChunkCoord _coord, World _world)
     {
+        MyBlocks = GameObject.Find("Block").GetComponent<Blocks>();
 
         coord = _coord;
         chunkObject = new GameObject();
@@ -207,6 +317,9 @@ public class Chunk
         //CreateLayerOfBlocks(1, 3, 5);//3 layers of 2 blocks
         //blocks[10, 8, 10] = 1;
         PopulateBlockArray();
-        CreateChunkBlocks();
+
+        CreateMeshData();
+
+        CreateChunkMesh();
     }
 }

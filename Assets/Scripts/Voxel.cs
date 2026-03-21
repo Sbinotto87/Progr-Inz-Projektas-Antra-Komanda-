@@ -31,4 +31,20 @@ public static class Voxel
         {1, 5, 6, 2},     //top
         {3, 7, 4, 0}      //bottom
     };
+
+    public static readonly Vector3[] faceChecks = new Vector3[6] {
+        new (1.0f, 0.0f, 0.0f),  // front
+        new (-1.0f, 0.0f, 0.0f), // back
+        new (0.0f, 0.0f, -1.0f), // right
+        new (0.0f, 0.0f, 1.0f),  // left
+        new (0.0f, 1.0f, 0.0f),  // Top
+        new (0.0f, -1.0f, 0.0f)  // Bottom
+    };
+
+    public static readonly Vector2[] voxelUvs = new Vector2[4] {
+        new (0.0f, 0.0f), // Bottom-Left
+        new (0.0f, 1.0f), // Top-Left
+        new (1.0f, 1.0f), // Top-Right
+        new (1.0f, 0.0f)  // Bottom-Right
+    };
 }
