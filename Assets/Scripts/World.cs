@@ -20,7 +20,11 @@ namespace Assets.Scripts
         /// <summary>
         /// world size
         /// </summary>
-        public const int WorldSize = 8;
+        public const int WorldSize = 100;
+        /// <summary>
+        /// view distance from player
+        /// </summary>
+        public int viewDistance;
         /// <summary>
         /// world size in blocks, used for perlin noise bounds
         /// </summary>
@@ -44,37 +48,61 @@ namespace Assets.Scripts
         public int CurrentDay; //event every 7 days?
         public int Tick;
 
+        Blocks MyBlocks = null;
+
         /// <summary>
         /// signed 32bit int for seed
         /// </summary>
         public int Seed;
+        /// <summary>
+        /// current biome to generate 
+        /// </summary>
         public BiomeData biome;
-        ChunkCoord playerChunkCoord;
-        public int viewDistance = 4;
+        /// <summary>
+        /// the spawn position(gets overwritten)
+        /// </summary>
         Vector3 spawnPosition = new Vector3 (0, 100, 0);
+        /// <summary>
+        /// the chunk that the player is in
+        /// </summary>
+        ChunkCoord playerChunkCoord;
+        /// <summary>
+        /// the chunk that the player was previously in
+        /// </summary>
+        ChunkCoord playerLastChunkCoord;
+        /// <summary>
+        /// player position cause for some reason i cant pull it from gameObject player
+        /// </summary>
+        private Transform playerTransform;
         private void Awake()
         {
+            spawnPosition = spawnPosition = new Vector3((WorldSize * Chunk.Width) / 2f, Chunk.Height + 2f, (WorldSize * Chunk.Width) / 2f);
             var player = Instantiate(Player, spawnPosition, Quaternion.identity); //spawns player
 
             player.name = Player.name;
         }
         private void Start()
         {
+            MyBlocks = GameObject.Find("Block").GetComponent<Blocks>();
+            Seed = UnityEngine.Random.Range(0, int.MaxValue);
             UnityEngine.Random.InitState(Seed);
             DayTime = 0;
             CurrentDay = 0;
             Tick = 0;
+            viewDistance = 16;
 
             GenerateWorld();
-
+            playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+            playerLastChunkCoord = GetChunkCoordFromVector3(playerTransform.position);
         }
         private void Update()
         {
-            playerChunkCoord = GetChunkCoordFromVector3(Player.transform.position);
+            playerChunkCoord = GetChunkCoordFromVector3(playerTransform.position);
 
-            if (playerChunkCoord.Equals(playerChunkCoord))
+            if (!playerChunkCoord.Equals(playerLastChunkCoord)) //if player moved from chunk, update 
             {
-                //CheckViewDistance();
+                CheckViewDistance();
+                playerLastChunkCoord = playerChunkCoord;
             }
 
         }
@@ -115,12 +143,11 @@ namespace Assets.Scripts
         /// </summary>
         private void GenerateWorld()
         {
-            for (int x = 0; x < WorldSize; x++)
+            for (int x = (WorldSize / 2) - viewDistance; x < (WorldSize / 2) + viewDistance; x++)
             {
-                for (int z = 0; z < WorldSize; z++)
+                for (int z = (WorldSize / 2) - viewDistance; z < (WorldSize / 2) + viewDistance; z++)
                 {
                     CreateChunk(new ChunkCoord(x, z));
-                    chunks[x, z].isActive = true;
                 }
             }
             Player.transform.position = spawnPosition;
@@ -131,10 +158,15 @@ namespace Assets.Scripts
         /// <param name="coord">coordiate to create chunk at</param>
         private void CreateChunk(ChunkCoord coord)
         {
-            chunks[coord.x, coord.z] = new Chunk(new ChunkCoord(coord.x, coord.z), this);
+            chunks[coord.x, coord.z] = new Chunk(new ChunkCoord(coord.x, coord.z), this, MyBlocks);
 
             activeChunks.Add(new ChunkCoord(coord.x, coord.z));
         }
+        /// <summary>
+        /// gets voxel at position based on perlin
+        /// </summary>
+        /// <param name="pos"></param>
+        /// <returns>the voxel that should be at the pos based on perlin noisek</returns>
         public int GetVoxel(Vector3 pos)
         {
 
@@ -180,6 +212,11 @@ namespace Assets.Scripts
             */
             return voxelValue;
         }
+        /// <summary>
+        /// gets chunk coord from world coord
+        /// </summary>
+        /// <param name="pos">position in world</param>
+        /// <returns>chunk coord that the world coord is in</returns>
         ChunkCoord GetChunkCoordFromVector3(Vector3 pos)
         {
             int x = Mathf.FloorToInt(pos.x / Chunk.Width);
@@ -187,9 +224,12 @@ namespace Assets.Scripts
 
             return new ChunkCoord(x, z);
         }
+        /// <summary>
+        /// recalculates whuch chunks should be active
+        /// </summary>
         void CheckViewDistance()
         {
-            ChunkCoord coord = GetChunkCoordFromVector3(Player.transform.position);
+            ChunkCoord coord = GetChunkCoordFromVector3(playerTransform.position);
             List<ChunkCoord> PreviouslyActiveChunks = new List<ChunkCoord>(activeChunks);
 
             //loop through chunks in view distance
@@ -225,6 +265,7 @@ namespace Assets.Scripts
             //deactivate chunks that were previously active
             foreach (ChunkCoord c in PreviouslyActiveChunks)
                 chunks[c.x, c.z].isActive = false;
+
         }
         /// <summary>
         /// used for checking view distance
@@ -258,10 +299,16 @@ namespace Assets.Scripts
     {
         public int x;
         public int z;
-        public ChunkCoord(int _x, int _z)
+        public ChunkCoord(int x, int z)
         {
-            x = _x;
-            z = _z;
+            this.x = x;
+            this.z = z;
+        }
+        public bool Equals(ChunkCoord other)
+        {
+            if (this.x == other.x && this.z == other.z)
+                return true;
+            return false;
         }
     }
 
