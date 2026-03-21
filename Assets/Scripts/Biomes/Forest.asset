@@ -15,4 +15,4 @@ MonoBehaviour:
   BiomeName: Forest
   solidGroundHeight: 50
   terrainHeight: 50
-  terrainScale: 0.25
+  terrainScale: 0.1

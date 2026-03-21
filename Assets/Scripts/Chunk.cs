@@ -26,24 +26,26 @@ public class Chunk
     public const int Height = 256;
     public const int Width = 16;
 
+    /// <summary>
+    /// mesh information
+    /// </summary>
     int triangleIndex = 0;
     List<Vector3> vertices = new List<Vector3>();
     List<int> triangles = new List<int>();
     List<Vector2> uvs = new List<Vector2>();
 
     public int[,,] blocks; //3d array of blocks in the world (-1 denotes air block)
+    /// <summary>
+    /// block id
+    /// </summary>
     Blocks MyBlocks = null;
-    
-
     /// <summary>
     /// chunk status for gameplay and render distance
     /// </summary>
     public bool isActive
     {
-
         get { return chunkObject.activeSelf; }
         set { chunkObject.SetActive(value); }
-
     }
     /// <summary>
     /// Creates blocks in the array based off the perlin noise generated in the other class
@@ -62,6 +64,171 @@ public class Chunk
             }
         }
     }
+    /// <summary>
+    /// creates a mesh based on the data in the lists
+    /// </summary>
+    public void CreateChunkMesh()
+    {
+        Mesh mesh = new Mesh();
+        mesh.vertices = vertices.ToArray();
+        mesh.triangles = triangles.ToArray();
+        mesh.uv = uvs.ToArray();
+
+        mesh.RecalculateNormals();
+
+        meshFilter.mesh = mesh;
+    }
+    /// <summary>
+    /// adds mesh data to the lists in this class based on the data in the block array
+    /// </summary>
+    void CreateMeshData()
+    {
+        for (int i = 0; i < Width; i++)
+        {
+            for (int j = 0; j < Height; j++)
+            {
+                for (int k = 0; k < Width; k++)
+                {
+                    if (blocks[i, j, k] != -1)
+                    {
+                        if (MyBlocks.block[blocks[i, j, k]].isSolid)
+                            AddVoxelDataToChunk(new Vector3(i, j, k));
+                    }
+                }
+            }
+        }
+    }
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="pos"></param>
+    void AddVoxelDataToChunk(Vector3 pos)
+    {
+        for (int i = 0; i < 6; i++)
+        {
+            if (!CheckIfBlockIsSolid(pos + Voxel.faceChecks[i]))
+            {
+                int blockID = blocks[(int)pos.x, (int)pos.y, (int)pos.z];
+
+                vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 0]]);
+                vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 1]]);
+                vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 2]]);
+                vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 3]]);
+
+                AddTexture(MyBlocks.block[blockID].faces[i]);
+
+                triangles.Add(triangleIndex);
+                triangles.Add(triangleIndex + 1);
+                triangles.Add(triangleIndex + 2);
+                triangles.Add(triangleIndex + 2);
+                triangles.Add(triangleIndex + 3);
+                triangles.Add(triangleIndex);
+                triangleIndex += 4;
+
+            }
+        }
+    }
+    /// <summary>
+    /// cheks if the block is solid(also does checks for blocks outside the chunk)
+    /// </summary>
+    /// <param name="pos">position in chunk</param>
+    /// <returns>true if block is solid, false otherwise</returns>
+    bool CheckIfBlockIsSolid(Vector3 pos)
+    {
+        int x = Mathf.FloorToInt(pos.x);
+        int y = Mathf.FloorToInt(pos.y);
+        int z = Mathf.FloorToInt(pos.z);
+
+        if (!IsVoxelInChunk(x, y, z))
+        {
+            if(world.GetVoxel(pos + position) != -1)
+                return MyBlocks.block[world.GetVoxel(pos + position)].isSolid;
+        }
+        if (y < 0) return true;
+        if (x < 0 || x > Width - 1 || y < 0 || y > Height - 1 || z < 0 || z > Width - 1 || blocks[x, y, z] == -1)
+            return false;
+        return MyBlocks.block[blocks[x, y, z]].isSolid;
+
+    }
+    /// <summary>
+    /// chesk if voxel within the limits of the chunk
+    /// </summary>
+    /// <param name="x">block x coord</param>
+    /// <param name="y">block y coord</param>
+    /// <param name="z">block z coord</param>
+    /// <returns>true if block is in chunk, false otherwise</returns>
+    bool IsVoxelInChunk(int x, int y, int z)
+    {
+        if (x < 0 || x > Width - 1 || y < 0 || y > Height - 1 || z < 0 || z > Width - 1)
+            return false;
+        else
+            return true;
+    }
+    /// <summary>
+    /// Aplies texture info to face
+    /// </summary>
+    /// <param name="textureID">texture id to add from the atlas</param>
+    void AddTexture(int textureID)
+    {
+        float y = textureID / Voxel.TextureAtlasWidth;
+        float x = textureID - y * Voxel.TextureAtlasWidth;
+        x *= Voxel.NormalizedBlockSize;
+        y *= Voxel.NormalizedBlockSize;
+        y = 1f - y - Voxel.NormalizedBlockSize;
+
+        uvs.Add(new Vector2(x, y));
+        uvs.Add(new Vector2(x, y + Voxel.NormalizedBlockSize));
+        uvs.Add(new Vector2(x + Voxel.NormalizedBlockSize, y + Voxel.NormalizedBlockSize));
+        uvs.Add(new Vector2(x + Voxel.NormalizedBlockSize, y));
+    }
+
+    public Vector3 position
+    {
+        get { return chunkObject.transform.position; }
+    }
+
+    /// <summary>
+    /// creates chunk game object
+    /// </summary>
+    /// <param name="_coord">coordinates</param>
+    /// <param name="_world">idk unity needs this</param>
+    public Chunk(ChunkCoord Coord, World World, Blocks MyBlocks)
+    {
+        this.MyBlocks = MyBlocks;
+        this.coord = Coord;
+        this.world = World;
+
+        chunkObject = new GameObject();
+        chunkObject.transform.position = new Vector3(coord.x * Width, 0f, coord.z * Width);
+
+        meshRenderer = chunkObject.AddComponent<MeshRenderer>();
+        meshFilter = chunkObject.AddComponent<MeshFilter>();
+
+        chunkObject.transform.SetParent(world.transform);
+        meshRenderer.material = world.material;
+
+        chunkObject.name = coord.x + ", " + coord.z;
+
+        blocks = new int[Width, Height, Width];
+
+        //InitializeBlocks();
+
+
+        //world gen  testing
+        //CreateLayerOfBlocks(0, 255, 0);//layer of 0 blocks
+        //CreateLayerOfBlocks(0, 1, 0);//layer of 0 blocks
+        //CreateLayerOfBlocks(2, 4, 1);//4 layer of 1 blocks
+        //CreateLayerOfBlocks(1, 3, 5);//3 layers of 2 blocks
+        //blocks[10, 8, 10] = 1;
+        PopulateBlockArray();
+
+        CreateMeshData();
+
+        CreateChunkMesh();
+    }
+
+    //Legacy code from this point onwards
+    //-------------------------------------------------------------------------------------------------
     //OBSOLETE
     /// <summary>
     /// Creates a flat layer of blocks
@@ -146,117 +313,7 @@ public class Chunk
         combinedMesh.CombineMeshes(combineInstance.ToArray());
         meshFilter.mesh = combinedMesh;
     }
-    public void CreateChunkMesh()
-    {
-        Mesh mesh = new Mesh();
-        mesh.vertices = vertices.ToArray();
-        mesh.triangles = triangles.ToArray();
-        mesh.uv = uvs.ToArray();
-
-        mesh.RecalculateNormals();
-
-        meshFilter.mesh = mesh;
-    }
-    void CreateMeshData()
-    {
-        for (int i = 0; i < Width; i++)
-        {
-            for (int j = 0; j < Height; j++)
-            {
-                for (int k = 0; k < Width; k++)
-                {
-                    if (blocks[i, j, k] != -1)
-                    {
-                        if (MyBlocks.block[blocks[i, j, k]].isSolid)
-                            AddVoxelDataToChunk(new Vector3(i, j, k));
-                    }
-
-                }
-            }
-        }
-
-    }
-    void AddVoxelDataToChunk(Vector3 pos)
-    {
-
-        for (int i = 0; i < 6; i++)
-        {
-
-            if (!CheckIfBlockIsSolid(pos + Voxel.faceChecks[i]))
-            {
-
-                int blockID = blocks[(int)pos.x, (int)pos.y, (int)pos.z];
-
-                vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 0]]);
-                vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 1]]);
-                vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 2]]);
-                vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 3]]);
-
-                AddTexture(MyBlocks.block[blockID].faces[i]);
-
-
-                triangles.Add(triangleIndex);
-                triangles.Add(triangleIndex + 1);
-                triangles.Add(triangleIndex + 2);
-                triangles.Add(triangleIndex + 2);
-                triangles.Add(triangleIndex + 3);
-                triangles.Add(triangleIndex);
-                triangleIndex += 4;
-
-            }
-        }
-
-    }
-    bool CheckIfBlockIsSolid(Vector3 pos)
-    {
-        int x = Mathf.FloorToInt(pos.x);
-        int y = Mathf.FloorToInt(pos.y);
-        int z = Mathf.FloorToInt(pos.z);
-
-        if (!IsVoxelInChunk(x, y, z))
-        {
-            if(world.GetVoxel(pos + position) != -1)
-                return MyBlocks.block[world.GetVoxel(pos + position)].isSolid;
-        }
-        if (x < 0 || x > Width - 1 || y < 0 || y > Height - 1 || z < 0 || z > Width - 1 || blocks[x, y, z] == -1)
-            return false;
-        return MyBlocks.block[blocks[x, y, z]].isSolid;
-
-    }
-    bool IsVoxelInChunk(int x, int y, int z)
-    {
-
-        if (x < 0 || x > Width - 1 || y < 0 || y > Height - 1 || z < 0 || z > Width - 1)
-            return false;
-        else
-            return true;
-
-    }
-    void AddTexture(int textureID)
-    {
-        float y = textureID / Voxel.TextureAtlasWidth;
-        float x = textureID - y * Voxel.TextureAtlasWidth;
-        x *= Voxel.NormalizedBlockSize;
-        y *= Voxel.NormalizedBlockSize;
-        y = 1f - y - Voxel.NormalizedBlockSize;
-
-
-        uvs.Add(new Vector2(x, y));
-        uvs.Add(new Vector2(x, y + Voxel.NormalizedBlockSize));
-        uvs.Add(new Vector2(x + Voxel.NormalizedBlockSize, y + Voxel.NormalizedBlockSize));
-        uvs.Add(new Vector2(x + Voxel.NormalizedBlockSize, y));
-    }
-
-    /// <summary>
-    /// helper method to create the blocks array and fill it with -1 (air blocks)
-    /// </summary>
-    void InitializeBlocks()
-    {
-        for (int x = 0; x < Width; x++)
-            for (int y = 0; y < Height; y++)
-                for (int z = 0; z < Width; z++)
-                    blocks[x, y, z] = -1;
-    }
+    //OBSOLETE
     /// <summary>
     /// checks if the block at the specified coordinates is surrounded on all sides by blocks
     /// </summary>
@@ -266,60 +323,26 @@ public class Chunk
     /// <returns>true if surrounded, false if at least 1 side is exposed to air</returns>
     bool CheckIFBLockIsSurrounded(int x, int y, int z)
     {
-        if(x !=0 && y !=0 && z !=0 &&//corner
-           x != Width -1 && y!= Height -1 && z != Width - 1 //eliminates all edge blocks from check so so that no indexOutOfBounds
+        if (x != 0 && y != 0 && z != 0 &&//corner
+           x != Width - 1 && y != Height - 1 && z != Width - 1 //eliminates all edge blocks from check so so that no indexOutOfBounds
             )
         {
             //Debug.Log(String.Format("x: {0} y: {1} z: {2}", x.ToString(), y.ToString(), z.ToString()));
             if (blocks[x + 1, y, z] != -1 && blocks[x - 1, y, z] != -1 && //x dirrection
                 blocks[x, y + 1, z] != -1 && blocks[x, y - 1, z] != -1 && //y dirrection
-                blocks[x, y, z + 1] != -1 && blocks[x, y, z - 1] != -1  ) //z dirrection
+                blocks[x, y, z + 1] != -1 && blocks[x, y, z - 1] != -1) //z dirrection
                 return true;
         }
         return false;
     }
-    public Vector3 position
-    {
-        get { return chunkObject.transform.position; }
-    }
-
     /// <summary>
-    /// creates chunk game object
+    /// helper method to create the blocks array and fill it with -1 (air blocks)
     /// </summary>
-    /// <param name="_coord">coordinates</param>
-    /// <param name="_world">idk unity needs this</param>
-    public Chunk(ChunkCoord _coord, World _world)
+    void InitializeBlocks()
     {
-        MyBlocks = GameObject.Find("Block").GetComponent<Blocks>();
-
-        coord = _coord;
-        chunkObject = new GameObject();
-        chunkObject.transform.position = new Vector3(coord.x * Width, 0f, coord.z * Width);
-
-        meshRenderer = chunkObject.AddComponent<MeshRenderer>();
-        meshFilter = chunkObject.AddComponent<MeshFilter>();
-        world = _world;
-
-        chunkObject.transform.SetParent(world.transform);
-        meshRenderer.material = world.material;
-
-        chunkObject.name = coord.x + ", " + coord.z;
-
-        blocks = new int[Width, Height, Width];
-
-        InitializeBlocks();
-
-
-        //world gen  testing
-        //CreateLayerOfBlocks(0, 255, 0);//layer of 0 blocks
-        //CreateLayerOfBlocks(0, 1, 0);//layer of 0 blocks
-        //CreateLayerOfBlocks(2, 4, 1);//4 layer of 1 blocks
-        //CreateLayerOfBlocks(1, 3, 5);//3 layers of 2 blocks
-        //blocks[10, 8, 10] = 1;
-        PopulateBlockArray();
-
-        CreateMeshData();
-
-        CreateChunkMesh();
+        for (int x = 0; x < Width; x++)
+            for (int y = 0; y < Height; y++)
+                for (int z = 0; z < Width; z++)
+                    blocks[x, y, z] = -1;
     }
 }
