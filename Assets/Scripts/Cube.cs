@@ -3,6 +3,7 @@ using UnityEngine;
 /// <summary>
 /// Cube class with methods for generating blocks
 /// </summary>
+// OBSOLETE
 public static class Cube
 {
     /// <summary>
