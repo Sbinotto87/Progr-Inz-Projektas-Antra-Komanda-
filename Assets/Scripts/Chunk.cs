@@ -23,8 +23,8 @@ public class Chunk
     /// <summary>
     /// chunk size 
     /// </summary>
-    public const int Height = 256;
-    public const int Width = 16;
+    public static readonly int Height = 256;
+    public static readonly int Width = 16;
 
     /// <summary>
     /// mesh information
@@ -81,7 +81,7 @@ public class Chunk
     /// <summary>
     /// adds mesh data to the lists in this class based on the data in the block array
     /// </summary>
-    void CreateMeshData()
+    public void CreateMeshData()
     {
         for (int i = 0; i < Width; i++)
         {
@@ -222,9 +222,9 @@ public class Chunk
         //blocks[10, 8, 10] = 1;
         PopulateBlockArray();
 
-        CreateMeshData();
+        //CreateMeshData();
 
-        CreateChunkMesh();
+        //CreateChunkMesh();
     }
 
     //Legacy code from this point onwards

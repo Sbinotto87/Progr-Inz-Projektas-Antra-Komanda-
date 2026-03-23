@@ -54,7 +54,7 @@ public class Blocks : MonoBehaviour
         block[3] = new BlockType
         {
             name = "Leaves",
-            isSolid = false,
+            isSolid = true,
             isBreakable = true,
             tool = "Axe",
             hitCount = 1,
@@ -62,8 +62,8 @@ public class Blocks : MonoBehaviour
         };
     }
 
-        private void Start()
-    {
+        //private void Start()
+    //{
         //Mesh combinedMesh = new Mesh();
         //CombineInstance[] combine = new CombineInstance[block.Length];
 
@@ -99,13 +99,12 @@ public class Blocks : MonoBehaviour
          });
          meshFilter.mesh = combinedMesh;
         */
-    }
+    //}
 }
 
 /// <summary>
 /// Block types
 /// </summary>
-[System.Serializable]
 public class BlockType
 {
     public string name;
