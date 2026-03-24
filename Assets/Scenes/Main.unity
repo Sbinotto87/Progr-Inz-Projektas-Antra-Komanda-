@@ -169,7 +169,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
       propertyPath: block.Array.size
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
       propertyPath: block.Array.data[0].name
@@ -185,7 +185,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
       propertyPath: block.Array.data[3].name
-      value: Stone
+      value: Leaves
+      objectReference: {fileID: 0}
+    - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
+      propertyPath: block.Array.data[3].tool
+      value: Axe
+      objectReference: {fileID: 0}
+    - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
+      propertyPath: block.Array.data[3].isSolid
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
+      propertyPath: block.Array.data[3].hitCount
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
+      propertyPath: block.Array.data[3].isBreakable
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
       propertyPath: block.Array.data[1].faces.Array.size
@@ -249,27 +265,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
       propertyPath: 'block.Array.data[3].faces.Array.data[0]'
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
       propertyPath: 'block.Array.data[3].faces.Array.data[1]'
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
       propertyPath: 'block.Array.data[3].faces.Array.data[2]'
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
       propertyPath: 'block.Array.data[3].faces.Array.data[3]'
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
       propertyPath: 'block.Array.data[3].faces.Array.data[4]'
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
       propertyPath: 'block.Array.data[3].faces.Array.data[5]'
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 9214121455304609419, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
       propertyPath: m_Name

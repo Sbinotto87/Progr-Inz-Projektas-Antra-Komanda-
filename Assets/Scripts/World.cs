@@ -20,7 +20,7 @@ namespace Assets.Scripts
         /// <summary>
         /// world size
         /// </summary>
-        public const int WorldSize = 100;
+        public static readonly int WorldSize = 100;
         /// <summary>
         /// view distance from player
         /// </summary>
@@ -28,7 +28,7 @@ namespace Assets.Scripts
         /// <summary>
         /// world size in blocks, used for perlin noise bounds
         /// </summary>
-        public const int WorldSizeInBlocks = WorldSize * Chunk.Width;
+        public readonly int WorldSizeInBlocks = WorldSize * Chunk.Width;
         /// <summary>
         /// chunk array
         /// </summary>
@@ -89,7 +89,7 @@ namespace Assets.Scripts
             DayTime = 0;
             CurrentDay = 0;
             Tick = 0;
-            viewDistance = 16;
+            viewDistance = 8;
 
             GenerateWorld();
             playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
@@ -143,11 +143,26 @@ namespace Assets.Scripts
         /// </summary>
         private void GenerateWorld()
         {
+            //Add block numbers to each chunk's block array
             for (int x = (WorldSize / 2) - viewDistance; x < (WorldSize / 2) + viewDistance; x++)
             {
                 for (int z = (WorldSize / 2) - viewDistance; z < (WorldSize / 2) + viewDistance; z++)
                 {
                     CreateChunk(new ChunkCoord(x, z));
+                }
+            }
+            
+            //Generate structures
+            Structures.GenerateGrass(this);
+            Structures.GenerateTrees(this);
+            
+            //Generate chunks (together with terrain and structures)
+            for (int x = (WorldSize / 2) - viewDistance; x < (WorldSize / 2) + viewDistance; x++)
+            {
+                for (int z = (WorldSize / 2) - viewDistance; z < (WorldSize / 2) + viewDistance; z++)
+                {
+                    chunks[x, z].CreateMeshData();
+                    chunks[x, z].CreateChunkMesh();
                 }
             }
             Player.transform.position = spawnPosition;

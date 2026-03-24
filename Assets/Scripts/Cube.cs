@@ -26,10 +26,21 @@ public static class Cube
         int uvIndex = 0;
         for (int i = 0; i < 6; i++)
         {
-            vertices[vertexIndex++] = Voxel.Vertices[Voxel.Faces[i, 0]] + position;
-            vertices[vertexIndex++] = Voxel.Vertices[Voxel.Faces[i, 1]] + position;
-            vertices[vertexIndex++] = Voxel.Vertices[Voxel.Faces[i, 2]] + position;
-            vertices[vertexIndex++] = Voxel.Vertices[Voxel.Faces[i, 3]] + position;
+            if (blockID == 4)
+            {
+                vertices[vertexIndex++] = Voxel.Vertices[Voxel.GrassFaces[i, 0]] + position;
+                vertices[vertexIndex++] = Voxel.Vertices[Voxel.GrassFaces[i, 1]] + position;
+                vertices[vertexIndex++] = Voxel.Vertices[Voxel.GrassFaces[i, 2]] + position;
+                vertices[vertexIndex++] = Voxel.Vertices[Voxel.GrassFaces[i, 3]] + position;
+            }
+            else
+            {
+               vertices[vertexIndex++] = Voxel.Vertices[Voxel.Faces[i, 0]] + position;
+               vertices[vertexIndex++] = Voxel.Vertices[Voxel.Faces[i, 1]] + position;
+               vertices[vertexIndex++] = Voxel.Vertices[Voxel.Faces[i, 2]] + position;
+               vertices[vertexIndex++] = Voxel.Vertices[Voxel.Faces[i, 3]] + position; 
+            }
+
             triangles[faceIndex++] = triangleIndex;
             triangles[faceIndex++] = triangleIndex + 1;
             triangles[faceIndex++] = triangleIndex + 2;
