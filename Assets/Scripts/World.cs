@@ -153,6 +153,7 @@ namespace Assets.Scripts
             }
             
             //Generate structures
+            Structures.GenerateGrass(this);
             Structures.GenerateTrees(this);
             
             //Generate chunks (together with terrain and structures)

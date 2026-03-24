@@ -202,7 +202,11 @@ public class Player : MonoBehaviour
         int localX = blockX - chunkX * Chunk.Width;
         int localZ = blockZ - chunkZ * Chunk.Width;
 
-        return chunk.blocks[localX, blockY, localZ] != -1;
+        if (chunk.blocks[localX, blockY, localZ] != -1)
+            return chunk.MyBlocks.block[chunk.blocks[localX, blockY, localZ]].isSolid;
+        
+        return false;
+
 
     }
 

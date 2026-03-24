@@ -7,6 +7,7 @@ using Random = UnityEngine.Random;
 public class Structures
 {
     static readonly double TreeDensity = 0.5;
+    static readonly double GrassDensity = 1.5;
     
     /// <summary>
     /// Generates one tree within a specified chunk
@@ -38,6 +39,39 @@ public class Structures
                     if (chunk.blocks[i + (int)position.x, j + (int)position.y, k + (int)position.z] == 2) continue; 
                     chunk.blocks[i + (int)position.x, j + (int)position.y, k + (int)position.z] = 3;
                 }
+        }
+    }
+
+    public static void GenerateGrass(World world)
+    {
+        int randX, randZ, x, y, z, chunkX, chunkZ;
+        int numGrass = (int)(world.WorldSizeInBlocks * GrassDensity);
+        for (int i = 0; i <= numGrass; i++)
+        {
+            y = -100;
+            randX = Random.Range((World.WorldSize / 2 - world.viewDistance) * Chunk.Width, (World.WorldSize / 2 + world.viewDistance) * Chunk.Width);
+            randZ = Random.Range((World.WorldSize / 2 - world.viewDistance) * Chunk.Width, (World.WorldSize / 2 + world.viewDistance) * Chunk.Width);
+            x = randX / Chunk.Width;
+            z = randZ / Chunk.Width;
+            chunkX = randX % Chunk.Width;
+            chunkZ = randZ % Chunk.Width;
+            for (int j = Chunk.Height - 1; j >= 0; j--)
+                if (world.chunks[x, z].blocks[chunkX, j, chunkZ] == 1)
+                {
+                    y = j + 1;
+                    break;
+                }
+                else if (world.chunks[x, z].blocks[chunkX, j, chunkZ] > -1)
+                {
+                    y = -100;
+                    break;
+                }
+            if (y == -100)
+            {
+                i--;
+                continue;
+            }
+            world.chunks[x, z].blocks[chunkX, y, chunkZ] = 4;
         }
     }
     

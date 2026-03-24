@@ -5,7 +5,7 @@ using UnityEngine;
 /// </summary>
 public static class Voxel
 {
-    public static readonly int TextureAtlasWidth = 2;    //the width (in blocks) of texture atlas
+    public static readonly int TextureAtlasWidth = 4;    //the width (in blocks) of texture atlas
     public static readonly float NormalizedBlockSize = 1.0f / TextureAtlasWidth; //normalized block size
 
     public static readonly Vector3[] Vertices =     //vertice coordinates of a block
@@ -41,10 +41,13 @@ public static class Voxel
         new (0.0f, -1.0f, 0.0f)  // Bottom
     };
 
-    public static readonly Vector2[] voxelUvs = new Vector2[4] {
-        new (0.0f, 0.0f), // Bottom-Left
-        new (0.0f, 1.0f), // Top-Left
-        new (1.0f, 1.0f), // Top-Right
-        new (1.0f, 0.0f)  // Bottom-Right
+    public static readonly int[,] GrassFaces =
+    {
+        {0, 1, 6, 7},     //front
+        {7, 6, 1, 0},     //back
+        {4, 5, 2, 3},     //front
+        {3, 2, 5, 4},     //back
+        {7, 7, 7, 7},     
+        {7, 7, 7, 7}      
     };
 }
