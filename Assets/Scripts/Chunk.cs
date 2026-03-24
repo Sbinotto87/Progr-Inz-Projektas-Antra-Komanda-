@@ -38,7 +38,7 @@ public class Chunk
     /// <summary>
     /// block id
     /// </summary>
-    Blocks MyBlocks = null;
+    public Blocks MyBlocks = null;
     /// <summary>
     /// chunk status for gameplay and render distance
     /// </summary>
@@ -77,6 +77,12 @@ public class Chunk
         mesh.RecalculateNormals();
 
         meshFilter.mesh = mesh;
+        MeshCollider col = chunkObject.GetComponent<MeshCollider>();
+
+        if (col == null)
+            col = chunkObject.AddComponent<MeshCollider>();
+
+        col.sharedMesh = mesh;
     }
     /// <summary>
     /// adds mesh data to the lists in this class based on the data in the block array
@@ -344,5 +350,49 @@ public class Chunk
             for (int y = 0; y < Height; y++)
                 for (int z = 0; z < Width; z++)
                     blocks[x, y, z] = -1;
+    }
+
+    public void UpdateChunk()
+    {
+        // Reset mesh data
+        vertices.Clear();
+        triangles.Clear();
+        uvs.Clear();
+        triangleIndex = 0;
+
+        // Rebuild
+        CreateMeshData();
+        CreateChunkMesh();
+    }
+
+    public void UpdateNeighborChunks(int x, int z)
+    {
+        // LEFT
+        if (x == 0 && coord.x > 0)
+        {
+            var n = world.chunks[coord.x - 1, coord.z];
+            if (n != null) n.UpdateChunk();
+        }
+
+        // RIGHT
+        if (x == Width - 1 && coord.x < World.WorldSize - 1)
+        {
+            var n = world.chunks[coord.x + 1, coord.z];
+            if (n != null) n.UpdateChunk();
+        }
+
+        // BACK
+        if (z == 0 && coord.z > 0)
+        {
+            var n = world.chunks[coord.x, coord.z - 1];
+            if (n != null) n.UpdateChunk();
+        }
+
+        // FRONT
+        if (z == Width - 1 && coord.z < World.WorldSize - 1)
+        {
+            var n = world.chunks[coord.x, coord.z + 1];
+            if (n != null) n.UpdateChunk();
+        }
     }
 }

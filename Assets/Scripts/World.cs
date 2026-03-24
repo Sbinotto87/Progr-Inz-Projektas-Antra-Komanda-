@@ -162,55 +162,106 @@ namespace Assets.Scripts
 
             activeChunks.Add(new ChunkCoord(coord.x, coord.z));
         }
-        /// <summary>
-        /// gets voxel at position based on perlin
-        /// </summary>
-        /// <param name="pos"></param>
-        /// <returns>the voxel that should be at the pos based on perlin noisek</returns>
+        ///// <summary>
+        ///// gets voxel at position based on perlin
+        ///// </summary>
+        ///// <param name="pos"></param>
+        ///// <returns>the voxel that should be at the pos based on perlin noisek</returns>
+        //public int GetVoxel(Vector3 pos)
+        //{
+
+        //    int yPos = Mathf.FloorToInt(pos.y);
+
+        //    /* IMMUTABLE PASS */
+
+        //    // If outside world, return air.
+        //    if (!IsVoxelInWorld(pos))
+        //        return -1;
+        //    // If bottom block of chunk, return block 1.
+        //    if (yPos == 0)
+        //        return 0;
+
+        //    /* BASIC TERRAIN PASS */
+        //    int terrainHeight = Mathf.FloorToInt(biome.terrainHeight * PerlinNoise.Get2DPerlinNoise(new Vector2(pos.x, pos.z), 0, biome.terrainScale)) + biome.solidGroundHeight;
+        //    byte voxelValue = 0;
+
+        //    if (yPos == terrainHeight) // grass
+        //        voxelValue = 1;
+        //    else if (yPos < terrainHeight && yPos > terrainHeight - 4) //dirt (add drit bruh why do we not have dirt
+        //        voxelValue = 1;
+        //    else if (yPos > terrainHeight)
+        //        return -1; //air
+        //    else
+        //        voxelValue = 0; //stone
+
+        //    /* SECOND PASS */
+
+        //    //second pass is for random nodes of stuff in terrain like dirt in terrain in mc
+        //    /*
+        //    if (voxelValue == 2)
+        //    {
+        //        foreach (Lode lode in biome.lodes)
+        //        {
+        //            if (yPos > lode.minHeight && yPos < lode.maxHeight)
+        //            {
+        //                if (PerlinNoise.Get3DPerlinNoise(pos, lode.noiseOffset, lode.scale, lode.threshold))
+        //                    voxelValue = lode.blockID;
+        //            }
+        //        }
+        //    }
+        //    */
+        //    return voxelValue;
+        //}
         public int GetVoxel(Vector3 pos)
         {
-
-            int yPos = Mathf.FloorToInt(pos.y);
-
-            /* IMMUTABLE PASS */
-
-            // If outside world, return air.
             if (!IsVoxelInWorld(pos))
                 return -1;
-            // If bottom block of chunk, return block 1.
-            if (yPos == 0)
-                return 0;
 
-            /* BASIC TERRAIN PASS */
-            int terrainHeight = Mathf.FloorToInt(biome.terrainHeight * PerlinNoise.Get2DPerlinNoise(new Vector2(pos.x, pos.z), 0, biome.terrainScale)) + biome.solidGroundHeight;
-            byte voxelValue = 0;
+            int x = Mathf.FloorToInt(pos.x);
+            int y = Mathf.FloorToInt(pos.y);
+            int z = Mathf.FloorToInt(pos.z);
 
-            if (yPos == terrainHeight) // grass
-                voxelValue = 1;
-            else if (yPos < terrainHeight && yPos > terrainHeight - 4) //dirt (add drit bruh why do we not have dirt
-                voxelValue = 1;
-            else if (yPos > terrainHeight)
-                return -1; //air
-            else
-                voxelValue = 0; //stone
+            int chunkX = x / Chunk.Width;
+            int chunkZ = z / Chunk.Width;
 
-            /* SECOND PASS */
-
-            //second pass is for random nodes of stuff in terrain like dirt in terrain in mc
-            /*
-            if (voxelValue == 2)
+            if (chunkX >= 0 && chunkZ >= 0 &&
+                chunkX < WorldSize && chunkZ < WorldSize)
             {
-                foreach (Lode lode in biome.lodes)
+                Chunk chunk = chunks[chunkX, chunkZ];
+
+                if (chunk != null)
                 {
-                    if (yPos > lode.minHeight && yPos < lode.maxHeight)
-                    {
-                        if (PerlinNoise.Get3DPerlinNoise(pos, lode.noiseOffset, lode.scale, lode.threshold))
-                            voxelValue = lode.blockID;
-                    }
+                    int localX = x - chunkX * Chunk.Width;
+                    int localZ = z - chunkZ * Chunk.Width;
+
+                    if (y >= 0 && y < Chunk.Height)
+                        return chunk.blocks[localX, y, localZ];
                 }
             }
-            */
-            return voxelValue;
+
+            // fallback: terrain generation (ONLY for ungenerated areas)
+            return GenerateTerrainVoxel(x, y, z);
+        }
+        private int GenerateTerrainVoxel(int x, int y, int z)
+        {
+            if (y == 0)
+                return 0;
+
+            int terrainHeight =
+                Mathf.FloorToInt(biome.terrainHeight *
+                PerlinNoise.Get2DPerlinNoise(new Vector2(x, z), 0, biome.terrainScale))
+                + biome.solidGroundHeight;
+
+            if (y > terrainHeight)
+                return -1;
+
+            if (y == terrainHeight)
+                return 1;
+
+            if (y < terrainHeight && y > terrainHeight - 4)
+                return 1;
+
+            return 0;
         }
         /// <summary>
         /// gets chunk coord from world coord
