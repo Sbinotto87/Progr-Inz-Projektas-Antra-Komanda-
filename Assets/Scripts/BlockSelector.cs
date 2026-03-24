@@ -3,7 +3,7 @@ using TMPro;
 using Assets.Scripts;
 
 public class BlockSelector : MonoBehaviour
-{
+{ 
     [Header("References")]
     public World world;
     public TMP_Text selectedBlockText;
@@ -11,6 +11,11 @@ public class BlockSelector : MonoBehaviour
 
     [Header("Settings")]
     public float range = 100f;
+
+    public Chunk currentChunk;
+    public Vector3Int currentBlockPosition;
+    public Vector3Int currentLocalPosition;
+    public bool hasBlockSelected;
 
     void Update()
     {
@@ -49,10 +54,17 @@ public class BlockSelector : MonoBehaviour
 
             if (blockID == -1)
             {
+                hasBlockSelected = false;
+                currentChunk = null;
                 selectedBlockText.text = "Facing:\nSelected Block:";
                 highlightBox.SetActive(false);
                 return;
             }
+
+            currentChunk = chunk;
+            currentBlockPosition = worldPos;
+            currentLocalPosition = new Vector3Int(localX, localY, localZ);
+            hasBlockSelected = true;
 
             BlockType type = chunk.MyBlocks.block[blockID];
 
@@ -67,6 +79,8 @@ public class BlockSelector : MonoBehaviour
         }
         else
         {
+            hasBlockSelected = false;
+            currentChunk = null;
             selectedBlockText.text = "Facing:\nSelected Block:";
             highlightBox.SetActive(false);
         }
