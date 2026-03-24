@@ -38,7 +38,7 @@ public class Chunk
     /// <summary>
     /// block id
     /// </summary>
-    Blocks MyBlocks = null;
+    public Blocks MyBlocks = null;
     /// <summary>
     /// chunk status for gameplay and render distance
     /// </summary>
@@ -77,6 +77,12 @@ public class Chunk
         mesh.RecalculateNormals();
 
         meshFilter.mesh = mesh;
+        MeshCollider col = chunkObject.GetComponent<MeshCollider>();
+
+        if (col == null)
+            col = chunkObject.AddComponent<MeshCollider>();
+
+        col.sharedMesh = mesh;
     }
     /// <summary>
     /// adds mesh data to the lists in this class based on the data in the block array

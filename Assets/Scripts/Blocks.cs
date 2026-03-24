@@ -12,6 +12,20 @@ public class Blocks : MonoBehaviour
 
     public BlockType[] block;
 
+    [Header("Current block")]
+    public int blockIndex;
+
+    public BlockType CurrentBlockType
+    {
+        get
+        {
+            if (blockIndex >= 0 && blockIndex < block.Length)
+                return block[blockIndex];
+
+            return null;
+        }
+    }
+
     private void Awake()
     {
         // Initialize block array with 4 blocks
