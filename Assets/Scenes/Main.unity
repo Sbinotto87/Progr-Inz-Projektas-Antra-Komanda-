@@ -168,6 +168,26 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
+      propertyPath: leafItem
+      value: 
+      objectReference: {fileID: 11400000, guid: 395da397bcc0e7e44a6302b4c6682787, type: 2}
+    - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
+      propertyPath: woodItem
+      value: 
+      objectReference: {fileID: 11400000, guid: bfa47a61fd450d342981bdc7b0ebfa96, type: 2}
+    - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
+      propertyPath: grassItem
+      value: 
+      objectReference: {fileID: 11400000, guid: 5f696a33474e32c4985bd0f32b2ce197, type: 2}
+    - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
+      propertyPath: stoneItem
+      value: 
+      objectReference: {fileID: 11400000, guid: 650bafcc1fe4760489cb16202ae2d860, type: 2}
+    - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
+      propertyPath: grassBlockItem
+      value: 
+      objectReference: {fileID: 11400000, guid: 828d6b3ec2c22984491a9acbbcd5474e, type: 2}
+    - target: {fileID: 7876613463478552227, guid: 3bcf693311ebecf4fbfc9d1b860251a9, type: 3}
       propertyPath: block.Array.size
       value: 4
       objectReference: {fileID: 0}
@@ -645,6 +665,7 @@ GameObject:
   - component: {fileID: 330585547}
   - component: {fileID: 330585548}
   - component: {fileID: 330585549}
+  - component: {fileID: 330585550}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -789,6 +810,7 @@ MonoBehaviour:
   currentBlockPosition: {x: 0, y: 0, z: 0}
   currentLocalPosition: {x: 0, y: 0, z: 0}
   hasBlockSelected: 0
+  hitNormal: {x: 0, y: 0, z: 0}
 --- !u!114 &330585549
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -801,6 +823,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69b35a58b5e437f4f97562937617a9f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BlockBreaking
+  selector: {fileID: 330585548}
+--- !u!114 &330585550
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330585543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7755583d5e217bb49b44f0f20ac055a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BlockPlacer
   selector: {fileID: 330585548}
 --- !u!1 &410087039
 GameObject:
@@ -2930,6 +2965,10 @@ PrefabInstance:
     - target: {fileID: 2016575086930927895, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2189117492197485753, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -0.00004123417
       objectReference: {fileID: 0}
     - target: {fileID: 4987976902964535875, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
       propertyPath: m_AnchorMax.x

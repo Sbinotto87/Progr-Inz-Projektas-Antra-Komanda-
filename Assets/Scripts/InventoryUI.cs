@@ -52,6 +52,7 @@ public class InventoryUI : MonoBehaviour
     private void FindPlayer()
     {
         GameObject player = GameObject.FindGameObjectWithTag("Player");
+
         if (player != null)
         {
             playerInventory = player.GetComponent<Inventory>();
@@ -59,7 +60,7 @@ public class InventoryUI : MonoBehaviour
 
             if (playerInventory != null)
             {
-                playerInventory.uiDisplay = this;
+                playerInventory.OnInventoryChanged += RefreshUI;
             }
         }
     }
@@ -109,7 +110,9 @@ public class InventoryUI : MonoBehaviour
             GameObject newSlot = Instantiate(slotPrefab, listParent);
 
             // Finds text inside button prefab
-            newSlot.GetComponentInChildren<TextMeshProUGUI>().text = $"{item.itemName} ({item.weight} kg)";
+            //newSlot.GetComponentInChildren<TextMeshProUGUI>().text = $"{item.itemName} ({item.weight} kg)";
+            var text = newSlot.GetComponentInChildren<TextMeshProUGUI>();
+            text.text = $"{item.itemName} ({item.weight} kg)";
 
             // Link data to drag script
             DraggableItem dragScript = newSlot.GetComponent<DraggableItem>();

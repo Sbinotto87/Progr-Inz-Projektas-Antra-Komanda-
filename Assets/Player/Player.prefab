@@ -159,9 +159,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c3b835987745bd4cb805f391a224812, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inventory
-  maxWeight: 50
+  maxWeight: 100
   currentWeight: 0
-  uiDisplay: {fileID: 0}
   items: []
-  interval: 5
-  timeGiftItem: {fileID: 11400000, guid: 650bafcc1fe4760489cb16202ae2d860, type: 2}
