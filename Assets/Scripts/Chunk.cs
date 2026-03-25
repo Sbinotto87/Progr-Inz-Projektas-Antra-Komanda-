@@ -23,8 +23,8 @@ public class Chunk
     /// <summary>
     /// chunk size 
     /// </summary>
-    public const int Height = 256;
-    public const int Width = 16;
+    public static readonly int Height = 256;
+    public static readonly int Width = 16;
 
     /// <summary>
     /// mesh information
@@ -38,7 +38,7 @@ public class Chunk
     /// <summary>
     /// block id
     /// </summary>
-    Blocks MyBlocks = null;
+    public Blocks MyBlocks = null;
     /// <summary>
     /// chunk status for gameplay and render distance
     /// </summary>
@@ -77,11 +77,17 @@ public class Chunk
         mesh.RecalculateNormals();
 
         meshFilter.mesh = mesh;
+        MeshCollider col = chunkObject.GetComponent<MeshCollider>();
+
+        if (col == null)
+            col = chunkObject.AddComponent<MeshCollider>();
+
+        col.sharedMesh = mesh;
     }
     /// <summary>
     /// adds mesh data to the lists in this class based on the data in the block array
     /// </summary>
-    void CreateMeshData()
+    public void CreateMeshData()
     {
         for (int i = 0; i < Width; i++)
         {
@@ -91,29 +97,38 @@ public class Chunk
                 {
                     if (blocks[i, j, k] != -1)
                     {
-                        if (MyBlocks.block[blocks[i, j, k]].isSolid)
-                            AddVoxelDataToChunk(new Vector3(i, j, k));
+                        AddVoxelDataToChunk(new Vector3(i, j, k));
                     }
                 }
             }
         }
     }
     /// <summary>
-    /// 
+    /// Adds voxel data in vertex, triangle and uv lists
     /// </summary>
-    /// <param name="pos"></param>
+    /// <param name="pos">Position of the block</param>
     void AddVoxelDataToChunk(Vector3 pos)
     {
+       /* int blockID = blocks[(int)pos.x, (int)pos.y, (int)pos.z];
         for (int i = 0; i < 6; i++)
         {
             if (!CheckIfBlockIsSolid(pos + Voxel.faceChecks[i]))
             {
-                int blockID = blocks[(int)pos.x, (int)pos.y, (int)pos.z];
-
-                vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 0]]);
-                vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 1]]);
-                vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 2]]);
-                vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 3]]);
+                if (blockID == 4 && i == 4) break;
+                if (blockID == 4)
+                {
+                    vertices.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 0]]);
+                    vertices.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 1]]);
+                    vertices.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 2]]);
+                    vertices.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 3]]);
+                }
+                else
+                {
+                    vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 0]]);
+                    vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 1]]);
+                    vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 2]]);
+                    vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 3]]);
+                }
 
                 AddTexture(MyBlocks.block[blockID].faces[i]);
 
@@ -124,9 +139,40 @@ public class Chunk
                 triangles.Add(triangleIndex + 3);
                 triangles.Add(triangleIndex);
                 triangleIndex += 4;
-
             }
-        }
+        }*/
+       int blockID = blocks[(int)pos.x, (int)pos.y, (int)pos.z];
+       for (int i = 0; i < 6; i++)
+       {
+           if (!CheckIfBlockIsSolid(pos + Voxel.faceChecks[i]) || MyBlocks.block[blockID].isTransparent)
+           {
+               if (blockID == 4)
+               {
+                   vertices.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 0]]);
+                   vertices.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 1]]);
+                   vertices.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 2]]);
+                   vertices.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 3]]);
+               }
+               else
+               {
+                   vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 0]]);
+                   vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 1]]);
+                   vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 2]]);
+                   vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 3]]);
+               }
+
+               AddTexture(MyBlocks.block[blockID].faces[i]);
+
+               triangles.Add(triangleIndex);
+               triangles.Add(triangleIndex + 1);
+               triangles.Add(triangleIndex + 2);
+               triangles.Add(triangleIndex + 2);
+               triangles.Add(triangleIndex + 3);
+               triangles.Add(triangleIndex);
+               triangleIndex += 4;
+
+           }
+       }
     }
     /// <summary>
     /// cheks if the block is solid(also does checks for blocks outside the chunk)
@@ -145,7 +191,7 @@ public class Chunk
                 return MyBlocks.block[world.GetVoxel(pos + position)].isSolid;
         }
         if (y < 0) return true;
-        if (x < 0 || x > Width - 1 || y < 0 || y > Height - 1 || z < 0 || z > Width - 1 || blocks[x, y, z] == -1)
+        if (x < 0 || x > Width - 1 || y < 0 || y > Height - 1 || z < 0 || z > Width - 1 || blocks[x, y, z] == -1 || MyBlocks.block[blocks[x, y, z]].isTransparent)
             return false;
         return MyBlocks.block[blocks[x, y, z]].isSolid;
 
@@ -222,9 +268,9 @@ public class Chunk
         //blocks[10, 8, 10] = 1;
         PopulateBlockArray();
 
-        CreateMeshData();
+        //CreateMeshData();
 
-        CreateChunkMesh();
+        //CreateChunkMesh();
     }
 
     //Legacy code from this point onwards
@@ -344,5 +390,49 @@ public class Chunk
             for (int y = 0; y < Height; y++)
                 for (int z = 0; z < Width; z++)
                     blocks[x, y, z] = -1;
+    }
+
+    public void UpdateChunk()
+    {
+        // Reset mesh data
+        vertices.Clear();
+        triangles.Clear();
+        uvs.Clear();
+        triangleIndex = 0;
+
+        // Rebuild
+        CreateMeshData();
+        CreateChunkMesh();
+    }
+
+    public void UpdateNeighborChunks(int x, int z)
+    {
+        // LEFT
+        if (x == 0 && coord.x > 0)
+        {
+            var n = world.chunks[coord.x - 1, coord.z];
+            if (n != null) n.UpdateChunk();
+        }
+
+        // RIGHT
+        if (x == Width - 1 && coord.x < World.WorldSize - 1)
+        {
+            var n = world.chunks[coord.x + 1, coord.z];
+            if (n != null) n.UpdateChunk();
+        }
+
+        // BACK
+        if (z == 0 && coord.z > 0)
+        {
+            var n = world.chunks[coord.x, coord.z - 1];
+            if (n != null) n.UpdateChunk();
+        }
+
+        // FRONT
+        if (z == Width - 1 && coord.z < World.WorldSize - 1)
+        {
+            var n = world.chunks[coord.x, coord.z + 1];
+            if (n != null) n.UpdateChunk();
+        }
     }
 }
