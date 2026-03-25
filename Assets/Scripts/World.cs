@@ -89,7 +89,7 @@ namespace Assets.Scripts
             DayTime = 0;
             CurrentDay = 0;
             Tick = 0;
-            viewDistance = 8;
+            viewDistance = 4;
 
             GenerateWorld();
             playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
