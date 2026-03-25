@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 5613600458738566344}
   - component: {fileID: 8986029750442768731}
   - component: {fileID: 4836387161571524856}
-  - component: {fileID: 7005440015792967976}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -147,20 +146,3 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
---- !u!114 &7005440015792967976
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6941386855807311954}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2c3b835987745bd4cb805f391a224812, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Inventory
-  maxWeight: 50
-  currentWeight: 0
-  items: []
-  interval: 5
-  timeGiftItem: {fileID: 11400000, guid: 650bafcc1fe4760489cb16202ae2d860, type: 2}
