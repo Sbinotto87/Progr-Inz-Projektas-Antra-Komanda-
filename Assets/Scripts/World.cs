@@ -175,6 +175,9 @@ namespace Assets.Scripts
         {
             chunks[coord.x, coord.z] = new Chunk(new ChunkCoord(coord.x, coord.z), this, MyBlocks);
 
+            chunks[coord.x, coord.z].CreateMeshData();
+            chunks[coord.x, coord.z].CreateChunkMesh();
+
             activeChunks.Add(new ChunkCoord(coord.x, coord.z));
         }
         ///// <summary>
