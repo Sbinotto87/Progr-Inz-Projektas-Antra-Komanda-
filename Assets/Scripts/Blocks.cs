@@ -12,27 +12,42 @@ public class Blocks : MonoBehaviour
 
     public BlockType[] block;
 
+    [Header("Current block")]
+    public int blockIndex;
+
+    public BlockType CurrentBlockType
+    {
+        get
+        {
+            if (blockIndex >= 0 && blockIndex < block.Length)
+                return block[blockIndex];
+
+            return null;
+        }
+    }
+
     private void Awake()
     {
-        // Initialize block array with 4 blocks
-        block = new BlockType[4];
+        block = new BlockType[5];
 
         //Stone
         block[0] = new BlockType
         {
-            name = "Stone",
+            name = "Stone block",
             isSolid = true,
+            isTransparent = false,
             isBreakable = true,
             tool = "Pickaxe",
             hitCount = 1,
             faces = new byte[] { 1, 1, 1, 1, 1, 1 }
         };
 
-        //Grass
+        //Grass (block)
         block[1] = new BlockType
         {
-            name = "Grass",
+            name = "Grass block",
             isSolid = true,
+            isTransparent = false,
             isBreakable = true,
             tool = "Shovel",
             hitCount = 1,
@@ -42,8 +57,9 @@ public class Blocks : MonoBehaviour
         //Wood
         block[2] = new BlockType
         {
-            name = "Wood",
+            name = "Wood block",
             isSolid = true,
+            isTransparent = false,
             isBreakable = true,
             tool = "Axe",
             hitCount = 2,
@@ -53,17 +69,30 @@ public class Blocks : MonoBehaviour
         //Leaves
         block[3] = new BlockType
         {
-            name = "Leaves",
-            isSolid = false,
+            name = "Leaf block",
+            isSolid = true,
+            isTransparent = false,
             isBreakable = true,
             tool = "Axe",
             hitCount = 1,
             faces = new byte[] { 2, 2, 2, 2, 2, 2 }
         };
+        
+        //Grass
+        block[4] = new BlockType
+        {
+            name = "Grass",
+            isSolid = false,
+            isTransparent = true,
+            isBreakable = true,
+            tool = "Axe",
+            hitCount = 1,
+            faces = new byte[] { 4, 4, 4, 4, 5, 5 }
+        };
     }
 
-        private void Start()
-    {
+        //private void Start()
+    //{
         //Mesh combinedMesh = new Mesh();
         //CombineInstance[] combine = new CombineInstance[block.Length];
 
@@ -99,17 +128,17 @@ public class Blocks : MonoBehaviour
          });
          meshFilter.mesh = combinedMesh;
         */
-    }
+    //}
 }
 
 /// <summary>
 /// Block types
 /// </summary>
-[System.Serializable]
 public class BlockType
 {
     public string name;
     public bool isSolid;
+    public bool isTransparent;
     public bool isBreakable;
     public string tool;
     public int hitCount;
