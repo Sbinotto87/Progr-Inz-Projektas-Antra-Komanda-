@@ -17,6 +17,9 @@ public class BlockSelector : MonoBehaviour
     public Vector3Int currentLocalPosition;
     public bool hasBlockSelected;
 
+    [HideInInspector]
+    public Vector3 hitNormal;
+
     void Update()
     {
         Camera cam = Camera.main;
@@ -28,6 +31,7 @@ public class BlockSelector : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hit, range))
         {
+            hitNormal = hit.normal;
             Vector3 voxelPoint = hit.point - hit.normal * 0.01f;
             Vector3Int worldPos = Vector3Int.FloorToInt(voxelPoint);
 

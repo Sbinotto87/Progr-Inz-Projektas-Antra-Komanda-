@@ -12,6 +12,12 @@ public class Blocks : MonoBehaviour
 
     public BlockType[] block;
 
+    public Item stoneItem;
+    public Item grassBlockItem;
+    public Item woodItem;
+    public Item leafItem;
+    public Item grassItem;
+
     [Header("Current block")]
     public int blockIndex;
 
@@ -39,7 +45,8 @@ public class Blocks : MonoBehaviour
             isBreakable = true,
             tool = "Pickaxe",
             hitCount = 1,
-            faces = new byte[] { 1, 1, 1, 1, 1, 1 }
+            faces = new byte[] { 1, 1, 1, 1, 1, 1 },
+            dropItem = stoneItem
         };
 
         //Grass (block)
@@ -51,7 +58,8 @@ public class Blocks : MonoBehaviour
             isBreakable = true,
             tool = "Shovel",
             hitCount = 1,
-            faces = new byte[] { 0, 0, 0, 0, 2, 0 }
+            faces = new byte[] { 0, 0, 0, 0, 2, 0 },
+            dropItem = grassBlockItem
         };
 
         //Wood
@@ -63,7 +71,8 @@ public class Blocks : MonoBehaviour
             isBreakable = true,
             tool = "Axe",
             hitCount = 2,
-            faces = new byte[] { 3, 3, 3, 3, 3, 3 }
+            faces = new byte[] { 3, 3, 3, 3, 3, 3 },
+            dropItem = woodItem
         };
 
         //Leaves
@@ -75,7 +84,8 @@ public class Blocks : MonoBehaviour
             isBreakable = true,
             tool = "Axe",
             hitCount = 1,
-            faces = new byte[] { 2, 2, 2, 2, 2, 2 }
+            faces = new byte[] { 2, 2, 2, 2, 2, 2 },
+            dropItem = leafItem
         };
         
         //Grass
@@ -87,7 +97,8 @@ public class Blocks : MonoBehaviour
             isBreakable = true,
             tool = "Axe",
             hitCount = 1,
-            faces = new byte[] { 4, 4, 4, 4, 5, 5 }
+            faces = new byte[] { 4, 4, 4, 4, 5, 5 },
+            dropItem = grassItem
         };
     }
 
@@ -145,4 +156,5 @@ public class BlockType
     
     //always set 6 faces
     public byte[] faces;    //front, back, right, left, top, bottom
+    public Item dropItem;
 }
