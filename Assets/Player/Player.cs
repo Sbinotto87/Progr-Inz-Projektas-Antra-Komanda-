@@ -1,6 +1,8 @@
 using Assets.Scripts;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SocialPlatforms;
+using static Unity.Collections.AllocatorManager;
 
 public class Player : MonoBehaviour
 {
@@ -12,6 +14,16 @@ public class Player : MonoBehaviour
     /// Gets the playerInput class for handling player input
     /// </summary>
     PlayerInput playerInput;
+
+
+
+    //ALERT RANMDOM FLOAT TO FIX MOVEMENT IF WANT GAME GOOD REMOVE THIS
+    private float randomFloat = 0.1f;
+
+
+
+
+
 
 
     Vector3 velocity;
@@ -46,14 +58,17 @@ public class Player : MonoBehaviour
 
     void Start()
     {
+
         Camera = GameObject.Find("Main Camera");
         Camera.transform.parent = transform;
-        Camera.transform.localPosition = new Vector3(0, 0.5f, 0);
+        Camera.transform.localPosition = new Vector3(0, halfHeight/2, 0);
 
         playerInput = GetComponent<PlayerInput>();
         world = GameObject.Find("World").GetComponent<World>();
+        //  playerInput.actions["Jump"].started += ctx => Jump();
 
-        playerInput.actions["Jump"].started += ctx => Jump();
+
+        SpawnPosition();
 
     }
 
@@ -71,10 +86,33 @@ public class Player : MonoBehaviour
         // apply velocity.y to player position
         transform.Translate(velocity.y * Time.deltaTime * Vector3.up, Space.World);
 
+        if (playerInput.actions["Jump"].IsPressed() && grounded && verticalVelocity <= 0)
+        {
+            Jump();
+        }
+
         // Resolve ground AFTER movement
         ResolveGround();
         grounded = IsGrounded(transform.position); // final grounded state
-        
+
+    }
+
+    void SpawnPosition()
+    {
+        Vector3 pos = transform.position;
+        pos.x += 0.5f;
+        pos.z += 0.5f;
+
+        for (int i = Chunk.Height; i > 0; i--)
+        {
+            if (CheckBlocks(pos.x, i, pos.z))
+            {
+
+                pos.y = i + halfHeight + 1.01f;
+                transform.position = pos;
+                break;
+            }
+        }
     }
 
 
@@ -169,7 +207,19 @@ public class Player : MonoBehaviour
         if (!grounded)
             verticalVelocity += gravity * Time.deltaTime;
 
+
+        Vector3 pos = transform.position;
+
+        float newY = pos.y + verticalVelocity * Time.deltaTime;
+
+        // Check for collisions with blocks above the player when moving upwards
         velocity.y = verticalVelocity;
+        if (verticalVelocity > 0 &&
+              (CheckBlocks(pos.x + halfWidth, newY+halfHeight+randomFloat, pos.z + halfWidth) ||
+               CheckBlocks(pos.x + halfWidth, newY+halfHeight+randomFloat, pos.z - halfWidth) ||
+               CheckBlocks(pos.x - halfWidth, newY+halfHeight+randomFloat, pos.z + halfWidth) ||
+               CheckBlocks(pos.x - halfWidth, newY+halfHeight+randomFloat, pos.z - halfWidth)))
+            velocity.y = 0;
     }
 
 
@@ -204,7 +254,7 @@ public class Player : MonoBehaviour
 
         if (chunk.blocks[localX, blockY, localZ] != -1)
             return chunk.MyBlocks.block[chunk.blocks[localX, blockY, localZ]].isSolid;
-        
+
         return false;
 
 

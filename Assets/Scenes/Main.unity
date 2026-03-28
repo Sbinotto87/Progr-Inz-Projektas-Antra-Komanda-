@@ -712,7 +712,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
+  near clip plane: 0.15
   far clip plane: 1000
   field of view: 60
   orthographic: 0
@@ -2968,7 +2968,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2189117492197485753, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.00004123417
+      value: 0.00089401327
       objectReference: {fileID: 0}
     - target: {fileID: 4987976902964535875, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
       propertyPath: m_AnchorMax.x
