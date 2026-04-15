@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 7952122205054447523}
   - component: {fileID: 3225184405348067994}
   - component: {fileID: 5613600458738566344}
-  - component: {fileID: 8986029750442768731}
   - component: {fileID: 4836387161571524856}
   - component: {fileID: 8788282261242736067}
+  - component: {fileID: -1370188723294015091}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -93,30 +93,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &8986029750442768731
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6941386855807311954}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 498280c4724e1714198212a586fded5f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Player
-  playerHeight: 1.8
-  playerWidth: 0.8
-  halfHeight: 0.9
-  halfWidth: 0.4
-  walkSpeed: 4
-  sprintSpeed: 7
-  gravity: -14
-  jumpStrength: 6
-  mouseSensitivity: 0.25
-  health: 100
-  hunger: 100
-  thirst: 100
 --- !u!114 &4836387161571524856
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -162,3 +138,33 @@ MonoBehaviour:
   maxWeight: 100
   currentWeight: 0
   items: []
+--- !u!114 &-1370188723294015091
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6941386855807311954}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 498280c4724e1714198212a586fded5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Player
+  world: {fileID: 0}
+  playerCamera: {fileID: 0}
+  playerHeight: 1.8
+  playerWidth: 0.8
+  walkSpeed: 4
+  sprintSpeed: 7
+  sneakSpeed: 1.6
+  gravity: -23
+  jumpStrength: 7.25
+  mouseSensitivity: 0.45
+  minFov: 70
+  maxFov: 80
+  fovLerpSpeed: 8
+  speedForMaxFov: 7
+  sneakEdgeTolerance: 0.22
+  health: 100
+  hunger: 100
+  thirst: 100
