@@ -148,23 +148,29 @@ namespace Assets.Scripts
             {
                 for (int z = (WorldSize / 2) - viewDistance; z < (WorldSize / 2) + viewDistance; z++)
                 {
-                    CreateChunk(new ChunkCoord(x, z));
+                    //CreateChunk(new ChunkCoord(x, z));
+                    chunks[x, z] = new Chunk(new ChunkCoord(x, z), this, MyBlocks);
+                    
                 }
             }
             
-            //Generate structures
-            Structures.GenerateGrass(this);
-            Structures.GenerateTrees(this);
+            Structures.GenerateMall(this, spawnPosition);
+            Structures.GenerateBuildings(this, spawnPosition, (viewDistance - 2) * Chunk.Width, (viewDistance - 2) * Chunk.Width);
             
-            //Generate chunks (together with terrain and structures)
             for (int x = (WorldSize / 2) - viewDistance; x < (WorldSize / 2) + viewDistance; x++)
             {
                 for (int z = (WorldSize / 2) - viewDistance; z < (WorldSize / 2) + viewDistance; z++)
                 {
+                    Structures.GenerateGrass(chunks[x, z]);
+                    Structures.GenerateTrees(chunks[x, z]);
+                    
                     chunks[x, z].CreateMeshData();
                     chunks[x, z].CreateChunkMesh();
+        
+                    activeChunks.Add(new ChunkCoord(x, z));
                 }
             }
+            
             Player.transform.position = spawnPosition;
         }
         /// <summary>
@@ -174,6 +180,10 @@ namespace Assets.Scripts
         private void CreateChunk(ChunkCoord coord)
         {
             chunks[coord.x, coord.z] = new Chunk(new ChunkCoord(coord.x, coord.z), this, MyBlocks);
+            
+            //Generate structures
+            Structures.GenerateGrass(chunks[coord.x, coord.z]);
+            Structures.GenerateTrees(chunks[coord.x, coord.z]);
 
             chunks[coord.x, coord.z].CreateMeshData();
             chunks[coord.x, coord.z].CreateChunkMesh();
@@ -276,7 +286,7 @@ namespace Assets.Scripts
             if (y == terrainHeight)
                 return 1;
 
-            if (y < terrainHeight && y > terrainHeight - 4)
+            if (y < terrainHeight && y > terrainHeight - 20)
                 return 1;
 
             return 0;
