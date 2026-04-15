@@ -21,8 +21,19 @@ public class MenuManager : MonoBehaviour
 
     public void OpenSettings()
     {
-        Debug.Log("Settings button clicked. ");
-        // iki kol dar neturim settings pasirinkimu
+        SettingsPanelUI panel = SettingsPanelUI.Instance;
+        if (panel == null)
+        {
+            panel = FindFirstObjectByType<SettingsPanelUI>(FindObjectsInactive.Include);
+        }
+
+        if (panel != null)
+        {
+            panel.Open();
+            return;
+        }
+
+        Debug.LogError("SettingsPanelUI was not found. Ensure a SettingsPanelUI component exists in scene.");
     }
 
 }

@@ -401,4 +401,9 @@ public class Player : MonoBehaviour
             grounded = false; // Player is now in the air
         }
     }
+
+    public void SetMouseSensitivity(float sensitivity)
+    {
+        mouseSensitivity = Mathf.Clamp(sensitivity, 0.05f, 5f);
+    }
 }
