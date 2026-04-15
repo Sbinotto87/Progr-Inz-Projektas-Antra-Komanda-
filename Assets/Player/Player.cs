@@ -7,30 +7,35 @@ public class Player : MonoBehaviour
     /// <summary>
     /// Gets the world data class
     /// </summary>
-    World world;
+    [SerializeField] private World world;
     /// <summary>
     /// Gets the playerInput class for handling player input
     /// </summary>
-    PlayerInput playerInput;
+    private PlayerInput playerInput;
+    [SerializeField] private Camera playerCamera;
 
-
-    Vector3 velocity;
-    private float verticalVelocity = 0.0f;
-
+    private const float SkinWidth = 0.01f;
+    private const float HeadCheckEpsilon = 0.02f;
+    private float verticalVelocity;
 
     //player size variables for collision detection
-    public float playerHeight = 1.8f;
-    public float playerWidth = 0.8f;
-
-    public float halfHeight = 0.9f;
-    public float halfWidth = 0.4f;
+    [SerializeField] private float playerHeight = 1.8f;
+    [SerializeField] private float playerWidth = 0.8f;
+    private float HalfHeight => playerHeight * 0.5f;
+    private float HalfWidth => playerWidth * 0.5f;
 
 
     public float walkSpeed = 4.0f;
     public float sprintSpeed = 7.0f;
-    public float gravity = -9.8f;
-    public float jumpStrength = 5f;
+    public float sneakSpeed = 1.6f;
+    public float gravity = -23f;
+    public float jumpStrength = 7.25f;
     public float mouseSensitivity = 0.45f;
+    [SerializeField] private float minFov = 70f;
+    [SerializeField] private float maxFov = 80f;
+    [SerializeField] private float fovLerpSpeed = 8f;
+    [SerializeField] private float speedForMaxFov = 7f;
+    [SerializeField] private float sneakEdgeTolerance = 0.22f;
 
     public float health = 100f;
     public float hunger = 100f;
@@ -39,42 +44,112 @@ public class Player : MonoBehaviour
 
     private bool grounded = true;
 
+    private InputAction moveAction;
+    private InputAction sprintAction;
+    private InputAction lookAction;
+    private InputAction jumpAction;
+    private InputAction sneakAction;
 
-    //mouse look variable for clamping and stuff
     private float xRotation = 0f;
-    GameObject Camera;
 
     void Start()
     {
-        Camera = GameObject.Find("Main Camera");
-        Camera.transform.parent = transform;
-        Camera.transform.localPosition = new Vector3(0, 0.5f, 0);
-
         playerInput = GetComponent<PlayerInput>();
-        world = GameObject.Find("World").GetComponent<World>();
+        if (playerInput == null)
+        {
+            Debug.LogError("PlayerInput component is missing on Player.");
+            enabled = false;
+            return;
+        }
 
-        playerInput.actions["Jump"].started += ctx => Jump();
+        moveAction = playerInput.actions["Move"];
+        sprintAction = playerInput.actions["Sprint"];
+        lookAction = playerInput.actions["Look"];
+        jumpAction = playerInput.actions["Jump"];
+        sneakAction = playerInput.actions.FindAction("Sneak", throwIfNotFound: false);
+        if (sneakAction == null)
+        {
+            sneakAction = playerInput.actions.FindAction("Crouch", throwIfNotFound: false);
+        }
 
+        minFov = PlayerPrefs.GetFloat("MinFov", minFov);
+        maxFov = PlayerPrefs.GetFloat("MaxFov", maxFov);
+        minFov = Mathf.Clamp(minFov, 30f, 170f);
+        maxFov = Mathf.Clamp(maxFov, minFov, 170f);
+
+        if (playerCamera == null)
+        {
+            Camera mainCamera = Camera.main;
+            if (mainCamera != null)
+            {
+                playerCamera = mainCamera;
+            }
+        }
+
+        if (playerCamera != null)
+        {
+            playerCamera.transform.SetParent(transform);
+            playerCamera.transform.localPosition = new Vector3(0f, HalfHeight * 0.5f, 0f);
+            playerCamera.fieldOfView = minFov;
+        }
+        else
+        {
+            Debug.LogWarning("Player camera is not assigned and no MainCamera was found.");
+        }
+
+        if (world == null)
+        {
+            GameObject worldObject = GameObject.Find("World");
+            if (worldObject != null)
+            {
+                world = worldObject.GetComponent<World>();
+            }
+        }
+
+        if (world == null)
+        {
+            Debug.LogError("World reference is missing on Player.");
+            enabled = false;
+            return;
+        }
+
+        SpawnPosition();
     }
 
 
     void Update()
     {
-        // get mouse input and rotate camera
+        Vector3 positionBeforeMove = transform.position;
+        bool sprintingInput = sprintAction.IsPressed();
         CameraControl();
-
-        // move player x and z based on input and collisions
         Movement();
-        // set velocity.y
+        UpdateDynamicFov(positionBeforeMove, transform.position, sprintingInput);
         ApplyGravity();
+        transform.Translate(verticalVelocity * Time.deltaTime * Vector3.up, Space.World);
 
-        // apply velocity.y to player position
-        transform.Translate(velocity.y * Time.deltaTime * Vector3.up, Space.World);
+        if (jumpAction.IsPressed() && grounded && verticalVelocity <= 0f)
+        {
+            Jump();
+        }
 
-        // Resolve ground AFTER movement
         ResolveGround();
-        grounded = IsGrounded(transform.position); // final grounded state
-        
+    }
+
+    void SpawnPosition()
+    {
+        Vector3 pos = transform.position;
+        pos.x += 0.5f;
+        pos.z += 0.5f;
+
+        for (int i = Chunk.Height; i > 0; i--)
+        {
+            if (CheckBlocks(pos.x, i, pos.z))
+            {
+                    pos.y = i + HalfHeight + 1.01f;
+                    transform.position = pos;
+                    break;
+            }
+        }
     }
 
 
@@ -84,10 +159,11 @@ public class Player : MonoBehaviour
     /// </summary>
     void Movement()
     {
-        Vector2 movement = playerInput.actions["Move"].ReadValue<Vector2>();
-        bool sprinting = playerInput.actions["Sprint"].IsPressed();
+        Vector2 movement = moveAction.ReadValue<Vector2>();
+        bool sneaking = IsSneaking();
+        bool sprinting = sprintAction.IsPressed();
 
-        float speed = sprinting ? sprintSpeed : walkSpeed;
+        float speed = sneaking ? sneakSpeed : (sprinting ? sprintSpeed : walkSpeed);
 
         Vector3 move = (transform.right * movement.x + transform.forward * movement.y).normalized * speed * Time.deltaTime;
 
@@ -98,20 +174,22 @@ public class Player : MonoBehaviour
 
         if (move.x > 0)
         {
-            if (!(CheckBlocks(newX + halfWidth, pos.y - halfHeight + 0.01f, pos.z + halfWidth) ||
-                  CheckBlocks(newX + halfWidth, pos.y - halfHeight + 0.01f, pos.z - halfWidth) ||
-                  CheckBlocks(newX + halfWidth, pos.y + halfHeight, pos.z + halfWidth) ||
-                  CheckBlocks(newX + halfWidth, pos.y + halfHeight, pos.z - halfWidth)))
+            if (!(CheckBlocks(newX + HalfWidth, pos.y - HalfHeight + SkinWidth, pos.z + HalfWidth) ||
+                  CheckBlocks(newX + HalfWidth, pos.y - HalfHeight + SkinWidth, pos.z - HalfWidth) ||
+                  CheckBlocks(newX + HalfWidth, pos.y + HalfHeight, pos.z + HalfWidth) ||
+                  CheckBlocks(newX + HalfWidth, pos.y + HalfHeight, pos.z - HalfWidth)) &&
+                (!sneaking || HasSneakSupport(new Vector3(newX, pos.y, pos.z))))
             {
                 pos.x = newX;
             }
         }
         else if (move.x < 0)
         {
-            if (!(CheckBlocks(newX - halfWidth, pos.y - halfHeight + 0.01f, pos.z + halfWidth) ||
-                  CheckBlocks(newX - halfWidth, pos.y - halfHeight + 0.01f, pos.z - halfWidth) ||
-                  CheckBlocks(newX - halfWidth, pos.y + halfHeight, pos.z + halfWidth) ||
-                  CheckBlocks(newX - halfWidth, pos.y + halfHeight, pos.z - halfWidth)))
+            if (!(CheckBlocks(newX - HalfWidth, pos.y - HalfHeight + SkinWidth, pos.z + HalfWidth) ||
+                  CheckBlocks(newX - HalfWidth, pos.y - HalfHeight + SkinWidth, pos.z - HalfWidth) ||
+                  CheckBlocks(newX - HalfWidth, pos.y + HalfHeight, pos.z + HalfWidth) ||
+                  CheckBlocks(newX - HalfWidth, pos.y + HalfHeight, pos.z - HalfWidth)) &&
+                (!sneaking || HasSneakSupport(new Vector3(newX, pos.y, pos.z))))
             {
                 pos.x = newX;
             }
@@ -122,20 +200,22 @@ public class Player : MonoBehaviour
 
         if (move.z > 0)
         {
-            if (!(CheckBlocks(pos.x - halfWidth, pos.y - halfHeight + 0.01f, newZ + halfWidth) ||
-                  CheckBlocks(pos.x + halfWidth, pos.y - halfHeight + 0.01f, newZ + halfWidth) ||
-                  CheckBlocks(pos.x - halfWidth, pos.y + halfHeight, newZ + halfWidth) ||
-                  CheckBlocks(pos.x + halfWidth, pos.y + halfHeight, newZ + halfWidth)))
+            if (!(CheckBlocks(pos.x - HalfWidth, pos.y - HalfHeight + SkinWidth, newZ + HalfWidth) ||
+                  CheckBlocks(pos.x + HalfWidth, pos.y - HalfHeight + SkinWidth, newZ + HalfWidth) ||
+                  CheckBlocks(pos.x - HalfWidth, pos.y + HalfHeight, newZ + HalfWidth) ||
+                  CheckBlocks(pos.x + HalfWidth, pos.y + HalfHeight, newZ + HalfWidth)) &&
+                (!sneaking || HasSneakSupport(new Vector3(pos.x, pos.y, newZ))))
             {
                 pos.z = newZ;
             }
         }
         else if (move.z < 0)
         {
-            if (!(CheckBlocks(pos.x - halfWidth, pos.y - halfHeight + 0.01f, newZ - halfWidth) ||
-                  CheckBlocks(pos.x + halfWidth, pos.y - halfHeight + 0.01f, newZ - halfWidth) ||
-                  CheckBlocks(pos.x - halfWidth, pos.y + halfHeight, newZ - halfWidth) ||
-                  CheckBlocks(pos.x + halfWidth, pos.y + halfHeight, newZ - halfWidth)))
+            if (!(CheckBlocks(pos.x - HalfWidth, pos.y - HalfHeight + SkinWidth, newZ - HalfWidth) ||
+                  CheckBlocks(pos.x + HalfWidth, pos.y - HalfHeight + SkinWidth, newZ - HalfWidth) ||
+                  CheckBlocks(pos.x - HalfWidth, pos.y + HalfHeight, newZ - HalfWidth) ||
+                  CheckBlocks(pos.x + HalfWidth, pos.y + HalfHeight, newZ - HalfWidth)) &&
+                (!sneaking || HasSneakSupport(new Vector3(pos.x, pos.y, newZ))))
             {
                 pos.z = newZ;
             }
@@ -144,32 +224,87 @@ public class Player : MonoBehaviour
         transform.position = pos;
     }
 
+    private void UpdateDynamicFov(Vector3 positionBeforeMove, Vector3 positionAfterMove, bool sprintingInput)
+    {
+        if (playerCamera == null)
+            return;
+
+        float deltaTime = Mathf.Max(Time.deltaTime, 0.0001f);
+        Vector2 horizontalDelta = new Vector2(positionAfterMove.x - positionBeforeMove.x, positionAfterMove.z - positionBeforeMove.z);
+        float horizontalSpeed = horizontalDelta.magnitude / deltaTime;
+        bool isMovingHorizontally = horizontalSpeed > 0.05f;
+        bool shouldUseSprintFov = sprintingInput && isMovingHorizontally && !IsSneaking();
+        float speedT = shouldUseSprintFov
+            ? Mathf.Clamp01(horizontalSpeed / Mathf.Max(0.01f, speedForMaxFov))
+            : 0f;
+        float targetFov = Mathf.Lerp(minFov, maxFov, speedT);
+        playerCamera.fieldOfView = Mathf.Lerp(playerCamera.fieldOfView, targetFov, fovLerpSpeed * Time.deltaTime);
+    }
+
+    private bool HasSneakSupport(Vector3 testPosition)
+    {
+        float supportWidth = Mathf.Max(0.01f, HalfWidth - sneakEdgeTolerance);
+        float feetY = testPosition.y - HalfHeight - SkinWidth;
+
+        return CheckBlocks(testPosition.x + supportWidth, feetY, testPosition.z + supportWidth) ||
+               CheckBlocks(testPosition.x + supportWidth, feetY, testPosition.z - supportWidth) ||
+               CheckBlocks(testPosition.x - supportWidth, feetY, testPosition.z + supportWidth) ||
+               CheckBlocks(testPosition.x - supportWidth, feetY, testPosition.z - supportWidth);
+    }
+
+    private bool IsSneaking()
+    {
+        return sneakAction != null && sneakAction.IsPressed();
+    }
+
+    public void SetFovRange(float min, float max)
+    {
+        minFov = Mathf.Clamp(min, 30f, 170f);
+        maxFov = Mathf.Clamp(max, minFov, 170f);
+        PlayerPrefs.SetFloat("MinFov", minFov);
+        PlayerPrefs.SetFloat("MaxFov", maxFov);
+        PlayerPrefs.Save();
+    }
+
 
     /// <summary>
     /// gets the mouse data and changes camera rotation
     /// </summary>
     private void CameraControl()
     {
-        Vector2 mouse = playerInput.actions["Look"].ReadValue<Vector2>();
+        if (playerCamera == null)
+            return;
+
+        Vector2 mouse = lookAction.ReadValue<Vector2>();
         float mouseX = mouse.x * mouseSensitivity;
         float mouseY = mouse.y * mouseSensitivity;
 
         transform.Rotate(Vector3.up * mouseX);
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -89f, 89f);
-        Camera.transform.localRotation = Quaternion.Euler(xRotation, 0, 0);
+        playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
     }
 
     /// <summary>
     /// does what the name suggests ♥
     /// </summary>
-    /// <remarks>if player not on ground, apply gravity to velocity.y</remarks>
+    /// <remarks>If player is not grounded, apply gravity to vertical velocity.</remarks>
     void ApplyGravity()
     {
         if (!grounded)
             verticalVelocity += gravity * Time.deltaTime;
 
-        velocity.y = verticalVelocity;
+        Vector3 pos = transform.position;
+        float newY = pos.y + verticalVelocity * Time.deltaTime;
+
+        if (verticalVelocity > 0 &&
+              (CheckBlocks(pos.x + HalfWidth, newY + HalfHeight + HeadCheckEpsilon, pos.z + HalfWidth) ||
+               CheckBlocks(pos.x + HalfWidth, newY + HalfHeight + HeadCheckEpsilon, pos.z - HalfWidth) ||
+               CheckBlocks(pos.x - HalfWidth, newY + HalfHeight + HeadCheckEpsilon, pos.z + HalfWidth) ||
+               CheckBlocks(pos.x - HalfWidth, newY + HalfHeight + HeadCheckEpsilon, pos.z - HalfWidth)))
+        {
+            verticalVelocity = 0f;
+        }
     }
 
 
@@ -204,7 +339,7 @@ public class Player : MonoBehaviour
 
         if (chunk.blocks[localX, blockY, localZ] != -1)
             return chunk.MyBlocks.block[chunk.blocks[localX, blockY, localZ]].isSolid;
-        
+
         return false;
 
 
@@ -217,10 +352,10 @@ public class Player : MonoBehaviour
     /// <returns></returns>
     public bool IsGrounded(Vector3 playerPos)
     {
-        return CheckBlocks(playerPos.x + halfWidth, playerPos.y - halfHeight - 0.01f, playerPos.z + halfWidth) ||
-                CheckBlocks(playerPos.x + halfWidth, playerPos.y - halfHeight - 0.01f, playerPos.z - halfWidth) ||
-                CheckBlocks(playerPos.x - halfWidth, playerPos.y - halfHeight - 0.01f, playerPos.z + halfWidth) ||
-                CheckBlocks(playerPos.x - halfWidth, playerPos.y - halfHeight - 0.01f, playerPos.z - halfWidth);
+        return CheckBlocks(playerPos.x + HalfWidth, playerPos.y - HalfHeight - SkinWidth, playerPos.z + HalfWidth) ||
+                CheckBlocks(playerPos.x + HalfWidth, playerPos.y - HalfHeight - SkinWidth, playerPos.z - HalfWidth) ||
+                CheckBlocks(playerPos.x - HalfWidth, playerPos.y - HalfHeight - SkinWidth, playerPos.z + HalfWidth) ||
+                CheckBlocks(playerPos.x - HalfWidth, playerPos.y - HalfHeight - SkinWidth, playerPos.z - HalfWidth);
     }
 
     /// <summary>
@@ -236,11 +371,11 @@ public class Player : MonoBehaviour
         if (IsGrounded(transform.position) && verticalVelocity < 0)
         {
             grounded = true;
-            verticalVelocity = 0;
+            verticalVelocity = 0f;
 
-            float feetY = transform.position.y - halfHeight - 0.01f;
+            float feetY = transform.position.y - HalfHeight - SkinWidth;
             float floorY = Mathf.Floor(feetY) + 1f;
-            float targetY = floorY + halfHeight;
+            float targetY = floorY + HalfHeight;
 
             if (transform.position.y < targetY)
             {

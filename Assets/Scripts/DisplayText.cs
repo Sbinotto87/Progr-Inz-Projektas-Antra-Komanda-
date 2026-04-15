@@ -35,7 +35,7 @@ public class DisplayText : MonoBehaviour
         if (playerTransform != null)
         {
             Vector3 pos = playerTransform.position;
-            coordinateText.text = $"X: {pos.x:F1} | Y: {pos.y:F1} | Z: {pos.z:F1}";
+            coordinateText.text = $"X: {pos.x:F1} | Y: {pos.y+0.1:F1} | Z: {pos.z:F1}";
         }
         TimeText.text = $"{world.DayTime}";
     }
