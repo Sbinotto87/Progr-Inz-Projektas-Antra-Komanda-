@@ -229,10 +229,7 @@ MonoBehaviour:
   HealthBar: {fileID: 8827874000016324992}
   HungerBar: {fileID: 5031552469191109283}
   ThirstBar: {fileID: 3625440739199011309}
-  health: 100
-  hunger: 100
-  thirst: 100
-  depletionRate: 10
+  depletionRate: 4
 --- !u!1 &670348964004164592
 GameObject:
   m_ObjectHideFlags: 0

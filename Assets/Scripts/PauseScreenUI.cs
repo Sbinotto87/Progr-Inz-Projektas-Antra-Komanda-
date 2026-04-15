@@ -20,10 +20,14 @@ public class PauseScreenUI : MonoBehaviour
     // settings 
     public void Settings()
     {
-        Debug.Log("settings button clicked. ");
-        //Application.Quit();
-
-        // iki kol dar neturim settings pasirinkimu
+        if (SettingsPanelUI.Instance != null)
+        {
+            SettingsPanelUI.Instance.Open();
+        }
+        else
+        {
+            Debug.LogWarning("SettingsPanelUI instance not found in scene.");
+        }
     }
 
     //main menu
