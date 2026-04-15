@@ -1,13 +1,316 @@
 using System;
+using System.IO;
 using Assets.Scripts;
-using Unity.Mathematics;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class Structures
 {
-    static readonly double TreeDensity = 0.5;
-    static readonly double GrassDensity = 1.5;
+    private static readonly double TreeDensity = 0.01;
+    private static readonly double GrassDensity = 0.05;
+    private static readonly double BuildingsDensity = 0.01;
+    private static readonly int mallX = 50, mallY = 8, mallZ = 25, mallOffset = 0;  //Do not change values without consulting
+
+    /// <summary>
+    /// Generates a mall in the given position
+    /// </summary>
+    /// <param name="world">World object</param>
+    /// <param name="position">Position of the mall</param>
+    public static void GenerateMall(World world, Vector3 position)
+    {
+        int[,,] mall = GenerateCuboid(mallX, mallY, mallZ, mallOffset, 8);
+        int[,,] entrance = GenerateStructureFromFile("Assets/Scripts/Structures/MallEntrance.txt");
+        mall = MergeArrays(mall, entrance, new Vector3(mallX / 2 + mallOffset, 0, 0));
+        int[,,] eiffel = GenerateStructureFromFile("Assets/Scripts/Structures/Eiffel.txt");
+        
+        position.y = GetYcoord(world, position, mallX + mallOffset, mallZ + mallOffset);
+        if ((int)position.y != -1)
+        {
+            PlaceStructure(mall, world, position);
+            position.y = GetYcoord(world, position + new Vector3(13 - mallOffset, 0, -20 + mallOffset), eiffel.GetLength(0), eiffel.GetLength(2), (int)position.y + 10);
+            if ((int)position.y != -1)
+                PlaceStructure(eiffel, world, position + new Vector3(13 - mallOffset, 0, -20 + mallOffset));
+        }
+    }
+
+    public static void GenerateBuildings(World world, Vector3 position, int xOffset, int zOffset)
+    {
+        int numBuildings = (int)(World.WorldSize * Chunk.Width * BuildingsDensity);
+
+        for (int i = 0; i < numBuildings; i++)
+        {
+            int buildingLength = Random.Range(8, 20);
+            int buildingHeight = Random.Range(6, 15);
+            int buildingWidth = Random.Range(8, 20);
+            int[,,] building = GenerateCuboid(buildingLength, buildingHeight, buildingWidth, 1, 6);
+
+            int[,,] entrance;
+            int num = Random.Range(0, 4);
+            if (num < 2)
+                entrance = GenerateStructureFromFile("Assets/Scripts/Structures/BuildingEntrance1.txt");
+            else
+                entrance = GenerateStructureFromFile("Assets/Scripts/Structures/BuildingEntrance2.txt");
+            
+            int entranceX = Random.Range(3, buildingLength - 3);
+            int entranceZ = Random.Range(3, buildingWidth - 3);
+
+            if (num == 0)
+                entranceZ = 0;
+            else if (num == 1)
+                entranceZ = buildingWidth;
+            else if (num == 2)
+                entranceX = 0;
+            else
+                entranceX = buildingLength;
+            
+            building = MergeArrays(building, entrance, new Vector3(entranceX, 0, entranceZ));
+            
+            int y = -1, x = 0, z = 0;
+            while (y == -1)
+            {
+                x = Random.Range((int)position.x - xOffset, (int)position.x + xOffset);
+                z = Random.Range((int)position.z - zOffset, (int)position.z + zOffset);
+                
+                y = GetYcoord(world, new Vector3(x, 0, z), buildingLength + 10, buildingWidth + 10);
+            }
+            
+            PlaceStructure(building, world, new Vector3(x, y, z));
+        }
+    }
+    
+    public static void GenerateGrass(Chunk chunk)
+    {
+        int x, y, z;
+        int numGrass = (int)(Math.Pow(Chunk.Width, 2) * GrassDensity);
+        for (int i = 0; i < numGrass; i++)
+        {
+            y = -100;
+            x = Random.Range(0, Chunk.Width);
+            z = Random.Range(0, Chunk.Width);
+            for (int j = Chunk.Height - 1; j >= 0; j--)
+                if (chunk.blocks[x, j, z] == 1)
+                {
+                    y = j + 1;
+                    break;
+                }
+                else if (chunk.blocks[x, j, z] > -1)
+                {
+                    y = -100;
+                    break;
+                }
+
+            if (y == -100) continue;
+            chunk.blocks[x, y, z] = 4;
+        }
+    }
+    
+    /// <summary>
+    /// Generates trees in a chunk randomly
+    /// </summary>
+    /// <param name="chunk">Chunk object</param>
+    public static void GenerateTrees(Chunk chunk)
+    {
+        int numTrees = (int)(Math.Pow(Chunk.Width, 2) * TreeDensity);
+        int x, y, z;
+        for (int i = 0; i < numTrees; i++)
+        {
+            y = -100;
+            x = Random.Range(3, Chunk.Width - 4);
+            z = Random.Range(3, Chunk.Width - 4);
+            for (int j = Chunk.Height - 1; j >= 0; j--)
+                if (chunk.blocks[x, j, z] == 1)
+                {
+                    y = j + 1;
+                    break;
+                }
+                else if (chunk.blocks[x, j, z] > -1 || chunk.blocks[x - 1, j, z] > -1 ||
+                         chunk.blocks[x, j, z - 1] > -1 || chunk.blocks[x + 1, j, z] > -1 || chunk.blocks[x, j, z + 1] > -1)
+                {
+                    y = -100;
+                    break;
+                }
+
+            if (y == -100) continue;
+            GenerateTree(new Vector3(x, y, z), chunk);
+        }
+    }
+
+    /// <summary>
+    /// Merges arr2 into arr1 at the desired position
+    /// </summary>
+    /// <param name="arr1">Array 1</param>
+    /// <param name="arr2">Array 2</param>
+    /// <param name="position">XYZ position</param>
+    /// <returns>Merged array</returns>
+    private static int[,,] MergeArrays(int[,,] arr1, int[,,] arr2, Vector3 position)
+    {
+        int indx, indy, indz;
+        indx = 0;
+        for (int i = (int)position.x; i < position.x + arr2.GetLength(0); i++)
+        {
+            indy = 0;
+            for (int j = (int)position.y; j < position.y + arr2.GetLength(1); j++)
+            {
+                indz = 0;
+                for (int k = (int)position.z; k < position.z + arr2.GetLength(2); k++)
+                {
+                    arr1[i, j, k] = arr2[indx, indy, indz];
+                    indz++;
+                }
+                indy++;
+            }
+            indx++;
+        }
+        return arr1;
+    }
+
+    /// <summary>
+    /// Generates a structure (in an array) that is defined in a file
+    /// </summary>
+    /// <param name="fileName">Path to the structure file</param>
+    /// <returns>Structure array</returns>
+    private static int[,,] GenerateStructureFromFile(string fileName)
+    {
+        int[,,] arr = new int[1,1,1];
+        using (StreamReader read = new StreamReader(fileName))
+        {
+            string line;
+            string[] parts;
+            while ((line = read.ReadLine()) != null)
+            {
+                if (line == "size:")
+                {
+                    //getting size of the array
+                    line = read.ReadLine();
+                    if (line == null) continue;
+                    parts = line.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                    arr = new int[int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2])];
+                    
+                    //filling array with air blocks
+                    for (int i = 0; i < arr.GetLength(0); i++)
+                        for (int j = 0; j < arr.GetLength(1); j++)
+                            for (int k = 0; k < arr.GetLength(2); k++)
+                                arr[i, j, k] = -1;
+                }
+                else if (line == "blocks:")
+                {
+                    string blockline;
+                    int blockType = -1;
+                    while ((blockline = read.ReadLine()) != null)
+                    {
+                        if (blockline[0] == '.')
+                        {
+                            //getting block type
+                            blockType = int.Parse(blockline.Substring(1, blockline.Length - 1));
+                        }
+                        else
+                        {
+                            //getting block positions
+                            parts = blockline.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                            arr[int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2])] = blockType;
+                        }
+                    }
+                    break;
+                }
+                
+            }
+        }
+
+        return arr;
+    }
+    
+    /// <summary>
+    /// Generates a cuboid of the given dimensions
+    /// </summary>
+    /// <param name="x">X length of the structure</param>
+    /// <param name="y">Y height of the structure</param>
+    /// <param name="z">Z length of the structure</param>
+    /// <param name="offset">Offset of the structure in the array</param>
+    /// <returns>Array of the generated cuboid</returns>
+    private static int[,,] GenerateCuboid(int x, int y, int z, int offset, int blockType)
+    {
+        int[,,] arr = new int[x + 2 * offset, y + offset, z + 2 * offset];
+        
+        for (int i = 0;  i < x + 2 * offset; i++)
+        for (int j = 0; j  < y + offset; j++)
+        for (int k = 0; k < z + 2 * offset; k++)
+            if ((i == offset || i == x + offset - 1) && k >= offset && k < z + offset || 
+                (k == offset || k == z + offset - 1) && i >= offset && i < x + offset || 
+                (j == 0 || j == y - 1 + offset) && k >= offset && k < z + offset - 1 && i >= offset && i < x + offset - 1)
+                arr[i, j, k] = blockType;
+            else
+                arr[i, j, k] = -1;
+        return arr;
+    }
+    
+    /// <summary>
+    /// Places given structure in the given position in the world
+    /// </summary>
+    /// <param name="arr">Array of the structure</param>
+    /// <param name="world">World object</param>
+    /// <param name="position">Position of the structure</param>
+    private static void PlaceStructure(int[,,] arr, World world, Vector3 position)
+    {
+        for (int i = (int)position.x; i < position.x + arr.GetLength(0); i++)
+        {
+            for (int j = (int)position.z; j < (int)position.z + arr.GetLength(2); j++)
+            {
+                int currentChunkX = i / Chunk.Width;
+                int currentChunkZ = j / Chunk.Width;
+                int chunkX = i % Chunk.Width;
+                int chunkZ = j % Chunk.Width;
+                for (int o = (int)position.y; o < (int)position.y + arr.GetLength(1); o++)
+                {
+                    world.chunks[currentChunkX, currentChunkZ].blocks[chunkX, o, chunkZ] = arr[i - (int)position.x, o - (int)position.y, j - (int)position.z];
+                }
+                for (int o = (int)position.y + arr.GetLength(1); o < (int)position.y + arr.GetLength(1) + 10; o++)
+                {
+                    world.chunks[currentChunkX, currentChunkZ].blocks[chunkX, o, chunkZ] = -1;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets the Y coordinate of the place where the entire perimeter of the structure touches the ground
+    /// </summary>
+    /// <param name="world">World object</param>
+    /// <param name="position">position of the structure</param>
+    /// <param name="X">X length of the structure</param>
+    /// <param name="Z">Z length of the structure</param>
+    /// <returns>calculated Y coordinate</returns>
+    private static int GetYcoord(World world, Vector3 position, int X, int Z, int from = 224)
+    {
+        int currentChunkX, currentChunkZ, chunkX, chunkZ;
+        bool found;
+
+        for (int y = from; y >= 0; y--)
+        {
+            found = true;
+            for (int i = (int)position.x; i < (int)position.x + X; i++)
+            {
+                for (int j = (int)position.z; j < (int)position.z + Z; j++)
+                {
+                    if (i != (int)position.x && i != (int)position.x + X - 1 && j != (int)position.z &&
+                        j != (int)position.z + Z - 1) continue;
+                    currentChunkX = i / Chunk.Width;
+                    currentChunkZ = j / Chunk.Width;
+                    chunkX = i % Chunk.Width;
+                    chunkZ = j % Chunk.Width;
+                    if (world.chunks[currentChunkX, currentChunkZ].blocks[chunkX, y, chunkZ] > 1 && 
+                        world.chunks[currentChunkX, currentChunkZ].blocks[chunkX, y, chunkZ] != 4)
+                        return -1;
+                    
+                    if (world.chunks[currentChunkX, currentChunkZ].blocks[chunkX, y, chunkZ] < 0)
+                        found = false;
+                }
+            }
+
+            if (found) return y;
+        }
+
+        return -1;
+    }
     
     /// <summary>
     /// Generates one tree within a specified chunk
@@ -36,84 +339,9 @@ public class Structures
                 {
                     if (i == 0 && j == trunkHeight && k == 0) continue;
                     if (leafWidth != 1 && Math.Abs(i) == leafWidth / 2 && Math.Abs(k) == leafWidth / 2) continue;
-                    if (chunk.blocks[i + (int)position.x, j + (int)position.y, k + (int)position.z] == 2) continue; 
+                    if (chunk.blocks[i + (int)position.x, j + (int)position.y, k + (int)position.z] != -1) continue; 
                     chunk.blocks[i + (int)position.x, j + (int)position.y, k + (int)position.z] = 3;
                 }
-        }
-    }
-
-    public static void GenerateGrass(World world)
-    {
-        int randX, randZ, x, y, z, chunkX, chunkZ;
-        int numGrass = (int)(world.WorldSizeInBlocks * GrassDensity);
-        for (int i = 0; i <= numGrass; i++)
-        {
-            y = -100;
-            randX = Random.Range((World.WorldSize / 2 - world.viewDistance) * Chunk.Width, (World.WorldSize / 2 + world.viewDistance) * Chunk.Width);
-            randZ = Random.Range((World.WorldSize / 2 - world.viewDistance) * Chunk.Width, (World.WorldSize / 2 + world.viewDistance) * Chunk.Width);
-            x = randX / Chunk.Width;
-            z = randZ / Chunk.Width;
-            chunkX = randX % Chunk.Width;
-            chunkZ = randZ % Chunk.Width;
-            for (int j = Chunk.Height - 1; j >= 0; j--)
-                if (world.chunks[x, z].blocks[chunkX, j, chunkZ] == 1)
-                {
-                    y = j + 1;
-                    break;
-                }
-                else if (world.chunks[x, z].blocks[chunkX, j, chunkZ] > -1)
-                {
-                    y = -100;
-                    break;
-                }
-            if (y == -100)
-            {
-                i--;
-                continue;
-            }
-            world.chunks[x, z].blocks[chunkX, y, chunkZ] = 4;
-        }
-    }
-    
-    /// <summary>
-    /// Generates trees in a world randomly
-    /// </summary>
-    /// <param name="world">World object</param>
-    public static void GenerateTrees(World world)
-    {
-        int numTrees = (int)(world.WorldSizeInBlocks * TreeDensity);
-        int randX, randZ, x, y, z, chunkX, chunkZ;
-        for (int i = 0; i < numTrees; i++)
-        {
-            y = -100;
-            randX = Random.Range((World.WorldSize / 2 - world.viewDistance) * Chunk.Width, (World.WorldSize / 2 + world.viewDistance) * Chunk.Width);
-            randZ = Random.Range((World.WorldSize / 2 - world.viewDistance) * Chunk.Width, (World.WorldSize / 2 + world.viewDistance) * Chunk.Width);
-            x = randX / Chunk.Width;
-            z = randZ / Chunk.Width;
-            chunkX = randX % Chunk.Width;
-            chunkZ = randZ % Chunk.Width;
-            if (chunkX - 3 < 0 || chunkX + 3 > Chunk.Width - 1 || chunkZ - 3 < 0 || chunkZ + 3 > Chunk.Width - 1)
-            {
-                i--;
-                continue;
-            }
-            for (int j = Chunk.Height - 1; j >= 0; j--)
-                if (world.chunks[x, z].blocks[chunkX, j, chunkZ] == 1)
-                {
-                    y = j + 1;
-                    break;
-                }
-                else if (world.chunks[x, z].blocks[chunkX, j, chunkZ] > -1)
-                {
-                    y = -100;
-                    break;
-                }
-            if (y == -100)
-            {
-                i--;
-                continue;
-            }
-            GenerateTree(new Vector3(chunkX, y, chunkZ), world.chunks[x, z]);
         }
     }
 }
