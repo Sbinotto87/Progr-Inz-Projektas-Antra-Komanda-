@@ -1,9 +1,11 @@
-using Assets.Scripts;
+﻿using Assets.Scripts;
 using System;
 using System.Collections.Generic;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
-using static UnityEditor.Searcher.SearcherWindow.Alignment;
 
 public class Chunk
 {
@@ -12,6 +14,7 @@ public class Chunk
     GameObject chunkObject;
     World world;
     public ChunkCoord coord;
+    public BiomeData biome; //needed for multithreading
 
 
     /// <summary>
@@ -48,11 +51,15 @@ public class Chunk
         set { chunkObject.SetActive(value); }
     }
     /// <summary>
+    /// 
+    /// </summary>
+    public bool isPopulated;
+    /// <summary>
     /// Creates blocks in the array based off the perlin noise generated in the other class
     /// </summary>
     public void PopulateBlockArray()
     {
-
+        /*
         for (int i = 0; i < Width; i++)
         {
             for (int j = 0; j < Height; j++)
@@ -63,6 +70,41 @@ public class Chunk
                 }
             }
         }
+        Debug.Log("generatedchunk");
+        */
+        int totalBlocks = Width * Height * Width;
+        NativeArray<int> jobResult = new NativeArray<int>(totalBlocks, Allocator.TempJob);
+        biome = world.biome;
+
+        var job = new ChunkDataJob
+        {
+            ResultBlocks = jobResult,
+            Width = Width,
+            Height = Height,
+            // Pass your ChunkCoord here
+            ChunkCoord = new int2(this.coord.x, this.coord.z),
+            offsetX = world.offsetX,
+            offsetZ = world.offsetZ,
+            TerrainHeight = biome.terrainHeight,
+            TerrainScale = biome.terrainScale,
+            SolidGroundHeight = biome.solidGroundHeight
+        };
+
+        // Schedule and Wait
+        JobHandle handle = job.Schedule(totalBlocks, 64);
+        handle.Complete();
+
+        // Copy to your managed array
+        for (int i = 0; i < totalBlocks; i++)
+        {
+            int x = i % Width;
+            int y = (i / Width) % Height;
+            int z = i / (Width * Height);
+            blocks[x, y, z] = jobResult[i];
+        }
+
+        jobResult.Dispose();
+        isPopulated = true;
     }
     /// <summary>
     /// creates a mesh based on the data in the lists
@@ -89,6 +131,7 @@ public class Chunk
     /// </summary>
     public void CreateMeshData()
     {
+        while (!isPopulated) { }
         for (int i = 0; i < Width; i++)
         {
             for (int j = 0; j < Height; j++)
@@ -433,6 +476,65 @@ public class Chunk
         {
             var n = world.chunks[coord.x, coord.z + 1];
             if (n != null) n.UpdateChunk();
+        }
+    }
+
+    [BurstCompile]
+    public struct ChunkDataJob : IJobParallelFor
+    {
+        public NativeArray<int> ResultBlocks;
+
+        [ReadOnly] public int Width;
+        [ReadOnly] public int Height;
+        [ReadOnly] public int2 ChunkCoord; // Using int2 for (x, z)
+        [ReadOnly] public float offsetX;
+        [ReadOnly] public float offsetZ;
+
+        [ReadOnly] public float TerrainHeight;
+        [ReadOnly] public float TerrainScale;
+        [ReadOnly] public int SolidGroundHeight;
+
+        public void Execute(int index)
+        {
+            //flatten array su kočėlu
+            int x = index % Width;
+            int y = (index / Width) % Height;
+            int z = index / (Width * Height);
+
+            //convert coords to world coord for perlin noise
+            float worldX = (ChunkCoord.x * Width) + x;
+            float worldZ = (ChunkCoord.y * Width) + z;
+
+            /* BASIC TERRAIN PASS */
+            //perlinis garsas
+            float2 noiseInput = new float2(worldX + 0.1f + offsetX, worldZ + 0.1f + offsetZ) * (TerrainScale / Width);
+            float noiseValue = (noise.snoise(noiseInput) + 1f) * 0.5f; //normalize noise for 0 - 1
+            int calculatedHeight = (int)(TerrainHeight * noiseValue) + SolidGroundHeight;
+
+            //blocks
+            if (y == 0)
+                ResultBlocks[index] = 0; // Bedrock
+            else if (y > calculatedHeight)
+                ResultBlocks[index] = -1; // Air
+            else if (y == calculatedHeight || (y < calculatedHeight && y > calculatedHeight - 4))
+                ResultBlocks[index] = 1; // Dirt
+            else
+                ResultBlocks[index] = 0; // Stone
+
+            /* SECOND PASS */
+            //second pass is for random nodes of stuff in terrain like dirt in terrain in mc
+
+            //if (voxelValue == 2)
+            //    {
+            //        foreach (Lode lode in biome.lodes)
+            //        {
+            //            if (yPos > lode.minHeight && yPos < lode.maxHeight)
+            //        {
+            //            if (PerlinNoise.Get3DPerlinNoise(pos, lode.noiseOffset, lode.scale, lode.threshold))
+            //            voxelValue = lode.blockID;
+            //        }
+            //    }
+            //}
         }
     }
 }

@@ -4,16 +4,14 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.LightTransport;
 
 namespace Assets.Scripts
 {
     public static class PerlinNoise
     {
-        public static float Get2DPerlinNoise(UnityEngine.Vector2 position , float offset, float scale)
-        {
-            return Mathf.PerlinNoise((position.x + 0.1f) / Chunk.Width * scale + offset, (position.y + 0.1f) / Chunk.Width * scale + offset);
-        }
         public static bool Get3DPerlinNoise(UnityEngine.Vector3 position, float offset, float scale, float threshold)
         {
             float x = (position.x + offset + 0.1f) * scale;
@@ -31,6 +29,12 @@ namespace Assets.Scripts
                 return true;
             else
                 return false;
+        }
+        public static float Get2DPerlinNoise(UnityEngine.Vector2 position , float offset, float scale, float offsetX, float offsetZ)
+        {
+            float2 noiseInput = new float2(position.x + 0.1f + offsetX, position.y + 0.1f + offsetZ) * (scale / Chunk.Width);
+            float noiseValue = (noise.snoise(noiseInput) + 1f) * 0.5f; //normalize noise for 0 - 1
+            return noiseValue;
         }
     }
 }
