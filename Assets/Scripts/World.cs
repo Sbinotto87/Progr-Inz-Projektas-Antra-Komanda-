@@ -76,7 +76,7 @@ namespace Assets.Scripts
         private Transform playerTransform;
         private void Awake()
         {
-            spawnPosition = spawnPosition = new Vector3((WorldSize * Chunk.Width) / 2f, Chunk.Height + 2f, (WorldSize * Chunk.Width) / 2f);
+            spawnPosition = spawnPosition = new Vector3((WorldSize * Chunk.Width) / 2f, Chunk.Height - 5, (WorldSize * Chunk.Width) / 2f);
             var player = Instantiate(Player, spawnPosition, Quaternion.identity); //spawns player
 
             player.name = Player.name;
