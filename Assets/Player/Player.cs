@@ -266,4 +266,31 @@ public class Player : MonoBehaviour
             grounded = false; // Player is now in the air
         }
     }
+
+    public void SetMouseSensitivity(float sensitivity)
+    {
+        mouseSensitivity = Mathf.Clamp(sensitivity, 0.05f, 5f);
+    }
+
+    public void SetFovRange(float min, float max)
+    {
+        float minClamped = Mathf.Clamp(min, 30f, 170f);
+        float maxClamped = Mathf.Clamp(max, minClamped, 170f);
+        float targetFov = minClamped;
+
+        UnityEngine.Camera camComponent = null;
+        if (Camera != null)
+        {
+            camComponent = Camera.GetComponent<UnityEngine.Camera>();
+        }
+        if (camComponent == null)
+        {
+            camComponent = UnityEngine.Camera.main;
+        }
+
+        if (camComponent != null)
+        {
+            camComponent.fieldOfView = targetFov;
+        }
+    }
 }
