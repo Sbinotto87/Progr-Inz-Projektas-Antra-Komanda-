@@ -22,17 +22,24 @@ public class EnemyController : MonoBehaviour
     private bool isGrounded;
     private float nextAttackTime;
 
+    private float gruntTimer;
+    public float hearingDistance = 10f;
+
     void Start()
     {
         health = maxHealth;
 
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
         world = FindObjectOfType<World>();
+
+        ResetGruntTimer();
     }
 
     void Update()
     {
         if (player == null || world == null) return;
+
+        HandleGrunts();
 
         Vector3 toPlayer = player.position - transform.position;
         toPlayer.y = 0f;
@@ -50,6 +57,31 @@ public class EnemyController : MonoBehaviour
         TryJump(moveDir);
         MoveXZ(moveDir);
         ApplyGravity();
+    }
+
+    void HandleGrunts()
+    {
+        gruntTimer -= Time.deltaTime;
+
+        if (gruntTimer > 0f)
+            return;
+
+        ResetGruntTimer();
+
+        if (player == null)
+            return;
+
+        float distance = Vector3.Distance(transform.position, player.position);
+
+        if (distance <= hearingDistance)
+        {
+            AudioManager.Instance.PlayEnemyGrunt(transform.position);
+        }
+    }
+
+    void ResetGruntTimer()
+    {
+        gruntTimer = Random.Range(2f, 6f);
     }
 
     void MoveXZ(Vector3 dir)
