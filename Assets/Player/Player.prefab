@@ -137,7 +137,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory
   maxWeight: 100
   currentWeight: 0
-  items: []
+  slots: []
+  startingItem: {fileID: 11400000, guid: 4fc2e63909ee00c4eaa8654f3e81a100, type: 2}
+  startingAmount: 5
 --- !u!114 &-1370188723294015091
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -168,3 +170,6 @@ MonoBehaviour:
   health: 100
   hunger: 100
   thirst: 100
+  stamina: 100
+  staminaDrainRate: 15
+  staminaRegenRate: 10
