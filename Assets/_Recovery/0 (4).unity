@@ -2529,9 +2529,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04f47accf44e8da42889c7da7048f756, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  health: 20
   speed: 2
-  damage: 5
+  pathUpdateInterval: 0.5
 --- !u!54 &2135260413
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3412,7 +3411,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2189117492197485753, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.00001880469
+      value: 0.00038218682
       objectReference: {fileID: 0}
     - target: {fileID: 4987976902964535875, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
       propertyPath: m_AnchorMax.x

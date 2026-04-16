@@ -12,6 +12,7 @@ namespace Assets.Scripts
     
     public class World: MonoBehaviour
     {
+        public static World Instance;
         /// <summary>
         /// Player gameObject prefab
         /// </summary>
@@ -76,6 +77,7 @@ namespace Assets.Scripts
         private Transform playerTransform;
         private void Awake()
         {
+            Instance = this;
             spawnPosition = spawnPosition = new Vector3((WorldSize * Chunk.Width) / 2f, Chunk.Height - 5, (WorldSize * Chunk.Width) / 2f);
             var player = Instantiate(Player, spawnPosition, Quaternion.identity); //spawns player
 
@@ -106,6 +108,16 @@ namespace Assets.Scripts
             }
 
         }
+        public bool IsBlockSolid(Vector3Int pos)
+        {
+            int id = GetVoxel(pos);
+
+            if (id < 0)
+                return false;
+
+            return MyBlocks.block[id].isSolid;
+        }
+
         /// <summary>
         /// tickrate, 20 ticks per second, used for ingame time
         /// </summary>

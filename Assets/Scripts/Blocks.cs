@@ -87,7 +87,7 @@ public class Blocks : MonoBehaviour
             faces = new byte[] { 2, 2, 2, 2, 2, 2 },
             dropItem = leafItem
         };
-        
+
         //Grass
         block[4] = new BlockType
         {
