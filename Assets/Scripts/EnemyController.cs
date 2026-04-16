@@ -1,49 +1,43 @@
-using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts;
 
 public class EnemyController : MonoBehaviour
 {
-    [Header("Movement")]
     public float moveSpeed = 3f;
-    public float pathUpdateInterval = 0.5f;
-    public float reachDistance = 0.8f;
-
-    [Header("Combat")]
     public float attackRange = 2f;
-    public int damage = 20;
     public float attackCooldown = 1.5f;
 
-    [Header("Body Size")]
+    public float jumpForce = 5f;
+    public float gravity = -20f;
     public float height = 1.8f;
-    public float radius = 0.4f;
 
-    private float halfHeight;
+    public int maxHealth = 100;
+
+    private int health;
 
     private Transform player;
     private World world;
 
-    private List<Vector3> path = new List<Vector3>();
-    private int pathIndex;
-
-    private float nextPathTime;
+    private float verticalVelocity;
+    private bool isGrounded;
     private float nextAttackTime;
 
     void Start()
     {
+        health = maxHealth;
+
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
         world = FindObjectOfType<World>();
-
-        halfHeight = height * 0.5f;
     }
 
     void Update()
     {
         if (player == null || world == null) return;
 
-        SnapToGround();
+        Vector3 toPlayer = player.position - transform.position;
+        toPlayer.y = 0f;
 
-        float dist = Vector3.Distance(transform.position, player.position);
+        float dist = toPlayer.magnitude;
 
         if (dist <= attackRange)
         {
@@ -51,69 +45,67 @@ public class EnemyController : MonoBehaviour
             return;
         }
 
-        if (Time.time >= nextPathTime)
-        {
-            nextPathTime = Time.time + pathUpdateInterval;
-            path = FindPath(transform.position, player.position);
-            pathIndex = 0;
-        }
+        Vector3 moveDir = toPlayer.normalized;
 
-        FollowPath();
+        TryJump(moveDir);
+        MoveXZ(moveDir);
+        ApplyGravity();
     }
 
-    // ---------------- COMBAT ----------------
-
-    void TryAttack()
+    void MoveXZ(Vector3 dir)
     {
-        if (Time.time < nextAttackTime) return;
+        Vector3 next = transform.position + dir * moveSpeed * Time.deltaTime;
+        next.y = transform.position.y;
 
-        nextAttackTime = Time.time + attackCooldown;
-
-        Player playerScript = player.GetComponent<Player>();
-        if (playerScript != null)
+        if (!IsBlocked(next))
         {
-            playerScript.health -= damage;
+            transform.position = next;
         }
     }
 
-    // ---------------- MOVEMENT ----------------
-
-    void FollowPath()
+    void TryJump(Vector3 dir)
     {
-        if (path == null || pathIndex >= path.Count) return;
+        if (!isGrounded) return;
 
-        Vector3 target = path[pathIndex];
+        Vector3 ahead = transform.position + dir * 0.6f;
 
-        Vector3 flatTarget = new Vector3(target.x, transform.position.y, target.z);
+        int x = Mathf.FloorToInt(ahead.x);
+        int z = Mathf.FloorToInt(ahead.z);
 
-        Vector3 dir = flatTarget - transform.position;
-        dir.y = 0f;
+        float currentGround = GetGroundY(
+            Mathf.FloorToInt(transform.position.x),
+            Mathf.FloorToInt(transform.position.z)
+        );
 
-        if (dir.magnitude < reachDistance)
+        float nextGround = GetGroundY(x, z);
+
+        float step = nextGround - currentGround;
+
+        if (step > 0.1f && step <= 2f)
         {
-            pathIndex++;
-            return;
+            verticalVelocity = jumpForce;
+            isGrounded = false;
         }
-
-        transform.position += dir.normalized * moveSpeed * Time.deltaTime;
-
-        SnapToGround();
     }
 
-    // ---------------- GROUNDING (FIXED TYPES) ----------------
-
-    void SnapToGround()
+    void ApplyGravity()
     {
+        verticalVelocity += gravity * Time.deltaTime;
+
         Vector3 pos = transform.position;
+        pos.y += verticalVelocity * Time.deltaTime;
 
-        int x = Mathf.FloorToInt(pos.x);
-        int z = Mathf.FloorToInt(pos.z);
+        float groundY = GetGroundY(
+            Mathf.FloorToInt(pos.x),
+            Mathf.FloorToInt(pos.z)
+        ) + height * 0.5f;
 
-        float groundY = GetGroundY(x, z);
-
-        float targetY = groundY + halfHeight;
-
-        pos.y = Mathf.Lerp(pos.y, targetY, Time.deltaTime * 12f);
+        if (pos.y <= groundY)
+        {
+            pos.y = groundY;
+            verticalVelocity = 0f;
+            isGrounded = true;
+        }
 
         transform.position = pos;
     }
@@ -123,146 +115,44 @@ public class EnemyController : MonoBehaviour
         for (int y = 255; y >= 0; y--)
         {
             if (world.GetVoxel(new Vector3(x, y, z)) != -1)
-            {
-                return (float)y + 1f;
-            }
+                return y + 1;
         }
 
         return 50f;
     }
 
-    // ---------------- PATHFINDING (XZ ONLY) ----------------
-
-    List<Vector3> FindPath(Vector3 startPos, Vector3 goalPos)
+    bool IsBlocked(Vector3 pos)
     {
-        Vector3Int start = ToGrid(startPos);
-        Vector3Int goal = ToGrid(goalPos);
-
-        var open = new SimplePriorityQueue();
-        var cameFrom = new Dictionary<Vector3Int, Vector3Int>();
-        var costSoFar = new Dictionary<Vector3Int, int>();
-
-        open.Enqueue(start, 0);
-        costSoFar[start] = 0;
-
-        while (open.Count > 0)
-        {
-            Vector3Int current = open.Dequeue();
-
-            if (current.x == goal.x && current.z == goal.z)
-                break;
-
-            foreach (Vector3Int next in GetNeighbors(current))
-            {
-                if (IsBlocked(next)) continue;
-
-                int newCost = costSoFar[current] + 1;
-
-                if (!costSoFar.ContainsKey(next) || newCost < costSoFar[next])
-                {
-                    costSoFar[next] = newCost;
-
-                    int priority = newCost + Heuristic(next, goal);
-                    open.Enqueue(next, priority);
-
-                    cameFrom[next] = current;
-                }
-            }
-        }
-
-        return BuildPath(cameFrom, start, goal);
-    }
-
-    List<Vector3> BuildPath(Dictionary<Vector3Int, Vector3Int> cameFrom,
-                            Vector3Int start,
-                            Vector3Int goal)
-    {
-        List<Vector3> result = new List<Vector3>();
-
-        if (!cameFrom.ContainsKey(goal))
-            return result;
-
-        Vector3Int current = goal;
-
-        while (current != start)
-        {
-            result.Add(ToWorld(current));
-            current = cameFrom[current];
-        }
-
-        result.Reverse();
-        return result;
-    }
-
-    // ---------------- GRID ----------------
-
-    Vector3Int ToGrid(Vector3 pos)
-    {
-        return new Vector3Int(
+        Vector3 p = new Vector3(
             Mathf.FloorToInt(pos.x),
-            0,
+            Mathf.FloorToInt(pos.y),
             Mathf.FloorToInt(pos.z)
         );
+
+        return world.GetVoxel(p) != -1;
     }
 
-    Vector3 ToWorld(Vector3Int pos)
+    void TryAttack()
     {
-        return new Vector3(pos.x + 0.5f, 0f, pos.z + 0.5f);
+        if (Time.time < nextAttackTime) return;
+
+        nextAttackTime = Time.time + attackCooldown;
+
+        Player p = player.GetComponent<Player>();
+        if (p != null)
+            p.health -= 20;
     }
 
-    IEnumerable<Vector3Int> GetNeighbors(Vector3Int p)
+    public void TakeDamage(int amount)
     {
-        yield return new Vector3Int(p.x + 1, 0, p.z);
-        yield return new Vector3Int(p.x - 1, 0, p.z);
-        yield return new Vector3Int(p.x, 0, p.z + 1);
-        yield return new Vector3Int(p.x, 0, p.z - 1);
+        health -= amount;
+
+        if (health <= 0)
+            Die();
     }
 
-    bool IsBlocked(Vector3Int pos)
+    void Die()
     {
-        int x = pos.x;
-        int z = pos.z;
-
-        float groundY = GetGroundY(x, z);
-
-        int feet = world.GetVoxel(new Vector3(x, groundY, z));
-        int head = world.GetVoxel(new Vector3(x, groundY + 1f, z));
-        int head2 = world.GetVoxel(new Vector3(x, groundY + 2f, z));
-
-        return feet != -1 || head != -1 || head2 != -1;
-    }
-
-    int Heuristic(Vector3Int a, Vector3Int b)
-    {
-        return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.z - b.z);
-    }
-
-    // ---------------- PRIORITY QUEUE ----------------
-
-    class SimplePriorityQueue
-    {
-        private List<(Vector3Int node, int priority)> items = new List<(Vector3Int, int)>();
-
-        public int Count => items.Count;
-
-        public void Enqueue(Vector3Int node, int priority)
-        {
-            items.Add((node, priority));
-        }
-
-        public Vector3Int Dequeue()
-        {
-            int best = 0;
-
-            for (int i = 1; i < items.Count; i++)
-            {
-                if (items[i].priority < items[best].priority)
-                    best = i;
-            }
-
-            Vector3Int node = items[best].node;
-            items.RemoveAt(best);
-            return node;
-        }
+        Destroy(gameObject);
     }
 }
