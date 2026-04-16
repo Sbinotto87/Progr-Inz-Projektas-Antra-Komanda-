@@ -406,4 +406,9 @@ public class Player : MonoBehaviour
     {
         mouseSensitivity = Mathf.Clamp(sensitivity, 0.05f, 5f);
     }
+
+    public void SetRenderDistance(int distance)
+    {
+        world.viewDistance = Mathf.Clamp(distance, 1, 100);
+    }
 }

@@ -13,6 +13,7 @@ public class SettingsPanelUI : MonoBehaviour
     [SerializeField] private Slider maxFovSlider;
     [SerializeField] private Slider mouseSensitivitySlider;
     [SerializeField] private Slider masterVolumeSlider;
+    [SerializeField] private Slider renderDistanceSlider;
 
     [Header("Optional Toggle")]
     [SerializeField] private bool pauseTimeWhenOpen;
@@ -99,6 +100,13 @@ public class SettingsPanelUI : MonoBehaviour
         }
     }
 
+    public void OnMouseSensitivityChanged(float value)
+    {
+        SettingsManager manager = EnsureManager();
+        if (manager == null) return;
+        manager.SetMouseSensitivity(value);
+    }
+
     public void OnMaxFovChanged(float value)
     {
         SettingsManager manager = EnsureManager();
@@ -113,11 +121,11 @@ public class SettingsPanelUI : MonoBehaviour
         }
     }
 
-    public void OnMouseSensitivityChanged(float value)
+    public void OnRenderDistanceChanged(float value)
     {
         SettingsManager manager = EnsureManager();
         if (manager == null) return;
-        manager.SetMouseSensitivity(value);
+        manager.SetRenderDistance((int) value);
     }
 
     public void OnMasterVolumeChanged(float value)
@@ -140,6 +148,8 @@ public class SettingsPanelUI : MonoBehaviour
             mouseSensitivitySlider.SetValueWithoutNotify(manager.MouseSensitivity);
         if (masterVolumeSlider != null)
             masterVolumeSlider.SetValueWithoutNotify(manager.MasterVolume);
+        if (renderDistanceSlider != null)
+            renderDistanceSlider.SetValueWithoutNotify(manager.RenderDistance);
     }
 
     private SettingsManager EnsureManager()
@@ -172,6 +182,8 @@ public class SettingsPanelUI : MonoBehaviour
             mouseSensitivitySlider.onValueChanged.AddListener(OnMouseSensitivityChanged);
         if (masterVolumeSlider != null)
             masterVolumeSlider.onValueChanged.AddListener(OnMasterVolumeChanged);
+        if (renderDistanceSlider != null)
+            renderDistanceSlider.onValueChanged.AddListener(OnRenderDistanceChanged);
 
         listenersRegistered = true;
     }
@@ -189,6 +201,8 @@ public class SettingsPanelUI : MonoBehaviour
             mouseSensitivitySlider.onValueChanged.RemoveListener(OnMouseSensitivityChanged);
         if (masterVolumeSlider != null)
             masterVolumeSlider.onValueChanged.RemoveListener(OnMasterVolumeChanged);
+        if (renderDistanceSlider != null)
+            renderDistanceSlider.onValueChanged.RemoveListener(OnRenderDistanceChanged);
 
         listenersRegistered = false;
     }
