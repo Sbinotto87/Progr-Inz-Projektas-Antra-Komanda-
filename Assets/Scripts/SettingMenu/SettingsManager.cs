@@ -9,17 +9,20 @@ public class SettingsManager : MonoBehaviour
     private const string MinFovKey = "MinFov";
     private const string MaxFovKey = "MaxFov";
     private const string MasterVolumeKey = "MasterVolume";
+    private const string RenderDistanceKey = "RenderDistance";
 
     [Header("Default Settings")]
     [SerializeField] private float defaultMouseSensitivity = 0.45f;
     [SerializeField] private float defaultMinFov = 70f;
     [SerializeField] private float defaultMaxFov = 80f;
     [SerializeField] private float defaultMasterVolume = 1f;
+    [SerializeField] private float defaultRenderDistance = 10f;
 
     public float MouseSensitivity { get; private set; }
     public float MinFov { get; private set; }
     public float MaxFov { get; private set; }
     public float MasterVolume { get; private set; }
+    public int RenderDistance { get; private set; }
 
     private void Awake()
     {
@@ -76,6 +79,13 @@ public class SettingsManager : MonoBehaviour
         PlayerPrefs.Save();
         ApplyMasterVolume();
     }
+    public void SetRenderDistance(int value)
+    {
+        RenderDistance = Mathf.Clamp(value, 1, 100);
+        PlayerPrefs.SetInt(RenderDistanceKey, RenderDistance);
+        PlayerPrefs.Save();
+        ApplyRenderDistance();
+    }
 
     public void ApplyAllSettings()
     {
@@ -90,11 +100,13 @@ public class SettingsManager : MonoBehaviour
         MinFov = PlayerPrefs.GetFloat(MinFovKey, defaultMinFov);
         MaxFov = PlayerPrefs.GetFloat(MaxFovKey, defaultMaxFov);
         MasterVolume = PlayerPrefs.GetFloat(MasterVolumeKey, defaultMasterVolume);
+        RenderDistance = PlayerPrefs.GetInt(RenderDistanceKey, (int)defaultRenderDistance);
 
         MouseSensitivity = Mathf.Clamp(MouseSensitivity, 0.05f, 5f);
         MinFov = Mathf.Clamp(MinFov, 30f, 170f);
         MaxFov = Mathf.Clamp(MaxFov, MinFov, 170f);
         MasterVolume = Mathf.Clamp01(MasterVolume);
+        RenderDistance = Mathf.Clamp(RenderDistance, 1, 100);
     }
 
     private void ApplyMouseSensitivity()
@@ -112,6 +124,14 @@ public class SettingsManager : MonoBehaviour
         if (player != null)
         {
             player.SetFovRange(MinFov, MaxFov);
+        }
+    }
+    private void ApplyRenderDistance()
+    {
+        Player player = FindFirstObjectByType<Player>();
+        if (player != null)
+        {
+            player.SetRenderDistance(RenderDistance);
         }
     }
 
