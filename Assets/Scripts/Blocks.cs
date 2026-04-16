@@ -17,6 +17,8 @@ public class Blocks : MonoBehaviour
     public Item woodItem;
     public Item leafItem;
     public Item grassItem;
+    public Item glassItem;
+    public Item defaultItem;
 
     [Header("Current block")]
     public int blockIndex;
@@ -34,8 +36,8 @@ public class Blocks : MonoBehaviour
 
     private void Awake()
     {
-        block = new BlockType[5];
-
+        block = new BlockType[9];
+        
         //Stone
         block[0] = new BlockType
         {
@@ -97,8 +99,57 @@ public class Blocks : MonoBehaviour
             isBreakable = true,
             tool = "Axe",
             hitCount = 1,
-            faces = new byte[] { 4, 4, 4, 4, 5, 5 },
+            faces = new byte[] { 4, 4, 4, 4, 15, 15 },
             dropItem = grassItem
+        };
+        
+        //Glass
+        block[5] = new BlockType
+        {
+            name = "Glass",
+            isSolid = true,
+            isTransparent = true,
+            isBreakable = true,
+            tool = "Axe",
+            hitCount = 2,
+            faces = new byte[] { 5, 5, 5, 5, 5, 5 },
+            dropItem = grassItem
+        };
+        
+        block[6] = new BlockType
+        {
+            name = "Bricks",
+            isSolid = true,
+            isTransparent = false,
+            isBreakable = true,
+            tool = "Pickaxe",
+            hitCount = 3,
+            faces = new byte[] { 6, 6, 6, 6, 6, 6 },
+            dropItem = defaultItem
+        };
+        
+        block[7] = new BlockType
+        {
+            name = "Copper",
+            isSolid = true,
+            isTransparent = false,
+            isBreakable = true,
+            tool = "Pickaxe",
+            hitCount = 3,
+            faces = new byte[] { 7, 7, 7, 7, 7, 7 },
+            dropItem = defaultItem
+        };
+        
+        block[8] = new BlockType
+        {
+            name = "Copper bricks",
+            isSolid = true,
+            isTransparent = false,
+            isBreakable = true,
+            tool = "pickaxe",
+            hitCount = 3,
+            faces = new byte[] { 8, 8, 8, 8, 8, 8 },
+            dropItem = defaultItem
         };
     }
 

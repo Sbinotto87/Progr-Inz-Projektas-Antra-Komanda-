@@ -1,9 +1,11 @@
-using Assets.Scripts;
+﻿using Assets.Scripts;
 using System;
 using System.Collections.Generic;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
-using static UnityEditor.Searcher.SearcherWindow.Alignment;
 
 public class Chunk
 {
@@ -12,6 +14,7 @@ public class Chunk
     GameObject chunkObject;
     World world;
     public ChunkCoord coord;
+    public BiomeData biome; //needed for multithreading
 
     public static int ChunkX;
     public static int ChunkY;
@@ -45,6 +48,41 @@ public class Chunk
                 }
             }
         }
+        Debug.Log("generatedchunk");
+        */
+        int totalBlocks = Width * Height * Width;
+        NativeArray<int> jobResult = new NativeArray<int>(totalBlocks, Allocator.TempJob);
+        biome = world.biome;
+
+        var job = new ChunkDataJob
+        {
+            ResultBlocks = jobResult,
+            Width = Width,
+            Height = Height,
+            // Pass your ChunkCoord here
+            ChunkCoord = new int2(this.coord.x, this.coord.z),
+            offsetX = world.offsetX,
+            offsetZ = world.offsetZ,
+            TerrainHeight = biome.terrainHeight,
+            TerrainScale = biome.terrainScale,
+            SolidGroundHeight = biome.solidGroundHeight
+        };
+
+        // Schedule and Wait
+        JobHandle handle = job.Schedule(totalBlocks, 64);
+        handle.Complete();
+
+        // Copy to your managed array
+        for (int i = 0; i < totalBlocks; i++)
+        {
+            int x = i % Width;
+            int y = (i / Width) % Height;
+            int z = i / (Width * Height);
+            blocks[x, y, z] = jobResult[i];
+        }
+
+        jobResult.Dispose();
+        isPopulated = true;
     }
 
     public void CreateChunkMesh()
@@ -66,6 +104,7 @@ public class Chunk
 
     public void CreateMeshData()
     {
+        while (!isPopulated) { }
         for (int i = 0; i < Width; i++)
         {
             for (int j = 0; j < Height; j++)
