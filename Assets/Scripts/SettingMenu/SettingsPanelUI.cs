@@ -1,33 +1,82 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
+/// <summary>
+/// Drives the settings overlay UI.
+/// The panel is divided into three category tabs: Audio, Graphics, and Keybinds.
+///
+/// Required UI hierarchy under settingsPanel:
+///   TabBar/
+///     AudioTabButton    (Button)
+///     GraphicsTabButton (Button)
+///     KeybindsTabButton (Button)
+///   AudioPanel/
+///     MasterVolumeSlider  (Slider)
+///     MusicVolumeSlider   (Slider)
+///     SFXVolumeSlider     (Slider)
+///   GraphicsPanel/
+///     MinFovSlider        (Slider)
+///     MaxFovSlider        (Slider)
+///     RenderDistanceSlider(Slider)
+///     QualityDropdown     (TMP_Dropdown)
+///     FullscreenToggle    (Toggle)
+///   KeybindsPanel/
+///     MouseSensitivitySlider (Slider)
+///     KeybindEntriesContainer (Transform – populated at runtime by KeybindManager)
+/// </summary>
 public class SettingsPanelUI : MonoBehaviour
 {
     public static SettingsPanelUI Instance { get; private set; }
 
-    [Header("Panel")]
+    [Header("Root Panel")]
     [SerializeField] private GameObject settingsPanel;
 
-    [Header("Sliders")]
+    // ── Tab buttons ──────────────────────────────────────────────────────────
+    [Header("Category Tab Buttons")]
+    [SerializeField] private Button audioTabButton;
+    [SerializeField] private Button graphicsTabButton;
+    [SerializeField] private Button keybindsTabButton;
+
+    // ── Category panels ───────────────────────────────────────────────────────
+    [Header("Category Panels")]
+    [SerializeField] private GameObject audioPanel;
+    [SerializeField] private GameObject graphicsPanel;
+    [SerializeField] private GameObject keybindsPanel;
+
+    // ── Audio sliders ─────────────────────────────────────────────────────────
+    [Header("Audio Sliders")]
+    [SerializeField] private Slider masterVolumeSlider;
+    [SerializeField] private Slider musicVolumeSlider;
+    [SerializeField] private Slider sfxVolumeSlider;
+
+    // ── Graphics controls ─────────────────────────────────────────────────────
+    [Header("Graphics Controls")]
     [SerializeField] private Slider minFovSlider;
     [SerializeField] private Slider maxFovSlider;
-    [SerializeField] private Slider mouseSensitivitySlider;
-    [SerializeField] private Slider masterVolumeSlider;
     [SerializeField] private Slider renderDistanceSlider;
+    [SerializeField] private TMP_Dropdown qualityDropdown;
+    [SerializeField] private Toggle fullscreenToggle;
 
-    [Header("Optional Toggle")]
+    // ── Keybinds / Controls ───────────────────────────────────────────────────
+    [Header("Keybinds / Controls")]
+    [SerializeField] private Slider mouseSensitivitySlider;
+
+    // ── Behaviour options ─────────────────────────────────────────────────────
+    [Header("Optional Behaviour")]
     [SerializeField] private bool pauseTimeWhenOpen;
 
-    [Header("Optional Parent Menus")]
+    [Header("Optional Parent Menu")]
     [SerializeField] private GameObject menuToHideWhenOpen;
+
     private bool listenersRegistered;
+
+    // ─────────────────────────────────────────────────────────────────────────
 
     private void Awake()
     {
         if (Instance != null && Instance != this)
-        {
             return;
-        }
 
         Instance = this;
     }
@@ -35,42 +84,41 @@ public class SettingsPanelUI : MonoBehaviour
     private void Start()
     {
         if (settingsPanel != null)
-        {
             settingsPanel.SetActive(false);
-        }
 
-        RegisterSliderListeners();
-        SyncSlidersFromSettings();
+        PopulateQualityDropdown();
+        RegisterListeners();
+        SyncAllFromSettings();
+        ShowTab(audioPanel);
     }
 
     private void OnDestroy()
     {
-        UnregisterSliderListeners();
+        UnregisterListeners();
     }
+
+    // ── Public API ────────────────────────────────────────────────────────────
 
     public void Open()
     {
         if (settingsPanel == null)
         {
-            Debug.LogWarning("Settings panel reference is missing.");
+            Debug.LogWarning("SettingsPanelUI: settingsPanel reference is missing.");
             return;
         }
 
         if (menuToHideWhenOpen != null)
-        {
             menuToHideWhenOpen.SetActive(false);
-        }
 
         settingsPanel.SetActive(true);
-        SyncSlidersFromSettings();
+        SyncAllFromSettings();
+        ShowTab(audioPanel);
 
         Cursor.lockState = CursorLockMode.Confined;
         Cursor.visible = true;
 
         if (pauseTimeWhenOpen)
-        {
             Time.timeScale = 0f;
-        }
     }
 
     public void Close()
@@ -81,128 +129,186 @@ public class SettingsPanelUI : MonoBehaviour
         settingsPanel.SetActive(false);
 
         if (menuToHideWhenOpen != null)
-        {
             menuToHideWhenOpen.SetActive(true);
-        }
     }
+
+    // ── Tab switching (called by tab buttons via OnClick) ─────────────────────
+
+    public void ShowAudioTab()     => ShowTab(audioPanel);
+    public void ShowGraphicsTab()  => ShowTab(graphicsPanel);
+    public void ShowKeybindsTab()  => ShowTab(keybindsPanel);
+
+    // ── Audio callbacks ───────────────────────────────────────────────────────
+
+    public void OnMasterVolumeChanged(float value)
+    {
+        SettingsManager m = EnsureManager();
+        if (m != null) m.SetMasterVolume(value);
+    }
+
+    public void OnMusicVolumeChanged(float value)
+    {
+        SettingsManager m = EnsureManager();
+        if (m != null) m.SetMusicVolume(value);
+    }
+
+    public void OnSFXVolumeChanged(float value)
+    {
+        SettingsManager m = EnsureManager();
+        if (m != null) m.SetSFXVolume(value);
+    }
+
+    // ── Graphics callbacks ────────────────────────────────────────────────────
 
     public void OnMinFovChanged(float value)
     {
-        SettingsManager manager = EnsureManager();
-        if (manager == null) return;
+        SettingsManager m = EnsureManager();
+        if (m == null) return;
 
-        float max = maxFovSlider != null ? maxFovSlider.value : manager.MaxFov;
-        manager.SetFovRange(value, max);
+        float max = maxFovSlider != null ? maxFovSlider.value : m.MaxFov;
+        m.SetFovRange(value, max);
 
-        if (maxFovSlider != null && maxFovSlider.value < manager.MinFov)
-        {
-            maxFovSlider.SetValueWithoutNotify(manager.MinFov);
-        }
-    }
-
-    public void OnMouseSensitivityChanged(float value)
-    {
-        SettingsManager manager = EnsureManager();
-        if (manager == null) return;
-        manager.SetMouseSensitivity(value);
+        if (maxFovSlider != null && maxFovSlider.value < m.MinFov)
+            maxFovSlider.SetValueWithoutNotify(m.MinFov);
     }
 
     public void OnMaxFovChanged(float value)
     {
-        SettingsManager manager = EnsureManager();
-        if (manager == null) return;
+        SettingsManager m = EnsureManager();
+        if (m == null) return;
 
-        float min = minFovSlider != null ? minFovSlider.value : manager.MinFov;
-        manager.SetFovRange(min, value);
+        float min = minFovSlider != null ? minFovSlider.value : m.MinFov;
+        m.SetFovRange(min, value);
 
-        if (minFovSlider != null && minFovSlider.value > manager.MaxFov)
-        {
-            minFovSlider.SetValueWithoutNotify(manager.MaxFov);
-        }
+        if (minFovSlider != null && minFovSlider.value > m.MaxFov)
+            minFovSlider.SetValueWithoutNotify(m.MaxFov);
     }
 
     public void OnRenderDistanceChanged(float value)
     {
-        SettingsManager manager = EnsureManager();
-        if (manager == null) return;
-        manager.SetRenderDistance((int) value);
+        SettingsManager m = EnsureManager();
+        if (m != null) m.SetRenderDistance((int)value);
     }
 
-    public void OnMasterVolumeChanged(float value)
+    public void OnQualityChanged(int index)
     {
-        SettingsManager manager = EnsureManager();
-        if (manager == null) return;
-        manager.SetMasterVolume(value);
+        SettingsManager m = EnsureManager();
+        if (m != null) m.SetQualityLevel(index);
     }
 
-    private void SyncSlidersFromSettings()
+    public void OnFullscreenChanged(bool value)
     {
-        SettingsManager manager = EnsureManager();
-        if (manager == null) return;
+        SettingsManager m = EnsureManager();
+        if (m != null) m.SetFullscreen(value);
+    }
 
-        if (minFovSlider != null)
-            minFovSlider.SetValueWithoutNotify(manager.MinFov);
-        if (maxFovSlider != null)
-            maxFovSlider.SetValueWithoutNotify(manager.MaxFov);
-        if (mouseSensitivitySlider != null)
-            mouseSensitivitySlider.SetValueWithoutNotify(manager.MouseSensitivity);
-        if (masterVolumeSlider != null)
-            masterVolumeSlider.SetValueWithoutNotify(manager.MasterVolume);
-        if (renderDistanceSlider != null)
-            renderDistanceSlider.SetValueWithoutNotify(manager.RenderDistance);
+    // ── Controls callbacks ────────────────────────────────────────────────────
+
+    public void OnMouseSensitivityChanged(float value)
+    {
+        SettingsManager m = EnsureManager();
+        if (m != null) m.SetMouseSensitivity(value);
+    }
+
+    // ── Private helpers ───────────────────────────────────────────────────────
+
+    private void ShowTab(GameObject activePanel)
+    {
+        if (audioPanel != null)    audioPanel.SetActive(audioPanel == activePanel);
+        if (graphicsPanel != null) graphicsPanel.SetActive(graphicsPanel == activePanel);
+        if (keybindsPanel != null) keybindsPanel.SetActive(keybindsPanel == activePanel);
+    }
+
+    private void PopulateQualityDropdown()
+    {
+        if (qualityDropdown == null) return;
+
+        qualityDropdown.ClearOptions();
+        var options = new System.Collections.Generic.List<string>(QualitySettings.names);
+        qualityDropdown.AddOptions(options);
+    }
+
+    private void SyncAllFromSettings()
+    {
+        SettingsManager m = EnsureManager();
+        if (m == null) return;
+
+        if (masterVolumeSlider != null)     masterVolumeSlider.SetValueWithoutNotify(m.MasterVolume);
+        if (musicVolumeSlider != null)      musicVolumeSlider.SetValueWithoutNotify(m.MusicVolume);
+        if (sfxVolumeSlider != null)        sfxVolumeSlider.SetValueWithoutNotify(m.SFXVolume);
+
+        if (minFovSlider != null)           minFovSlider.SetValueWithoutNotify(m.MinFov);
+        if (maxFovSlider != null)           maxFovSlider.SetValueWithoutNotify(m.MaxFov);
+        if (renderDistanceSlider != null)   renderDistanceSlider.SetValueWithoutNotify(m.RenderDistance);
+        if (qualityDropdown != null)        qualityDropdown.SetValueWithoutNotify(m.QualityLevel);
+        if (fullscreenToggle != null)       fullscreenToggle.SetIsOnWithoutNotify(m.IsFullscreen);
+
+        if (mouseSensitivitySlider != null) mouseSensitivitySlider.SetValueWithoutNotify(m.MouseSensitivity);
     }
 
     private SettingsManager EnsureManager()
     {
         if (SettingsManager.Instance != null)
-        {
             return SettingsManager.Instance;
-        }
 
         SettingsManager manager = FindFirstObjectByType<SettingsManager>();
         if (manager != null)
-        {
             return manager;
-        }
 
-        GameObject managerObject = new GameObject("SettingsManager");
-        return managerObject.AddComponent<SettingsManager>();
+        GameObject obj = new GameObject("SettingsManager");
+        return obj.AddComponent<SettingsManager>();
     }
 
-    private void RegisterSliderListeners()
+    private void RegisterListeners()
     {
-        if (listenersRegistered)
-            return;
+        if (listenersRegistered) return;
 
-        if (minFovSlider != null)
-            minFovSlider.onValueChanged.AddListener(OnMinFovChanged);
-        if (maxFovSlider != null)
-            maxFovSlider.onValueChanged.AddListener(OnMaxFovChanged);
-        if (mouseSensitivitySlider != null)
-            mouseSensitivitySlider.onValueChanged.AddListener(OnMouseSensitivityChanged);
-        if (masterVolumeSlider != null)
-            masterVolumeSlider.onValueChanged.AddListener(OnMasterVolumeChanged);
-        if (renderDistanceSlider != null)
-            renderDistanceSlider.onValueChanged.AddListener(OnRenderDistanceChanged);
+        // Tab buttons
+        if (audioTabButton != null)    audioTabButton.onClick.AddListener(ShowAudioTab);
+        if (graphicsTabButton != null) graphicsTabButton.onClick.AddListener(ShowGraphicsTab);
+        if (keybindsTabButton != null) keybindsTabButton.onClick.AddListener(ShowKeybindsTab);
+
+        // Audio
+        if (masterVolumeSlider != null)   masterVolumeSlider.onValueChanged.AddListener(OnMasterVolumeChanged);
+        if (musicVolumeSlider != null)    musicVolumeSlider.onValueChanged.AddListener(OnMusicVolumeChanged);
+        if (sfxVolumeSlider != null)      sfxVolumeSlider.onValueChanged.AddListener(OnSFXVolumeChanged);
+
+        // Graphics
+        if (minFovSlider != null)         minFovSlider.onValueChanged.AddListener(OnMinFovChanged);
+        if (maxFovSlider != null)         maxFovSlider.onValueChanged.AddListener(OnMaxFovChanged);
+        if (renderDistanceSlider != null) renderDistanceSlider.onValueChanged.AddListener(OnRenderDistanceChanged);
+        if (qualityDropdown != null)      qualityDropdown.onValueChanged.AddListener(OnQualityChanged);
+        if (fullscreenToggle != null)     fullscreenToggle.onValueChanged.AddListener(OnFullscreenChanged);
+
+        // Controls
+        if (mouseSensitivitySlider != null) mouseSensitivitySlider.onValueChanged.AddListener(OnMouseSensitivityChanged);
 
         listenersRegistered = true;
     }
 
-    private void UnregisterSliderListeners()
+    private void UnregisterListeners()
     {
-        if (!listenersRegistered)
-            return;
+        if (!listenersRegistered) return;
 
-        if (minFovSlider != null)
-            minFovSlider.onValueChanged.RemoveListener(OnMinFovChanged);
-        if (maxFovSlider != null)
-            maxFovSlider.onValueChanged.RemoveListener(OnMaxFovChanged);
-        if (mouseSensitivitySlider != null)
-            mouseSensitivitySlider.onValueChanged.RemoveListener(OnMouseSensitivityChanged);
-        if (masterVolumeSlider != null)
-            masterVolumeSlider.onValueChanged.RemoveListener(OnMasterVolumeChanged);
-        if (renderDistanceSlider != null)
-            renderDistanceSlider.onValueChanged.RemoveListener(OnRenderDistanceChanged);
+        // Tab buttons
+        if (audioTabButton != null)    audioTabButton.onClick.RemoveListener(ShowAudioTab);
+        if (graphicsTabButton != null) graphicsTabButton.onClick.RemoveListener(ShowGraphicsTab);
+        if (keybindsTabButton != null) keybindsTabButton.onClick.RemoveListener(ShowKeybindsTab);
+
+        // Audio
+        if (masterVolumeSlider != null)   masterVolumeSlider.onValueChanged.RemoveListener(OnMasterVolumeChanged);
+        if (musicVolumeSlider != null)    musicVolumeSlider.onValueChanged.RemoveListener(OnMusicVolumeChanged);
+        if (sfxVolumeSlider != null)      sfxVolumeSlider.onValueChanged.RemoveListener(OnSFXVolumeChanged);
+
+        // Graphics
+        if (minFovSlider != null)         minFovSlider.onValueChanged.RemoveListener(OnMinFovChanged);
+        if (maxFovSlider != null)         maxFovSlider.onValueChanged.RemoveListener(OnMaxFovChanged);
+        if (renderDistanceSlider != null) renderDistanceSlider.onValueChanged.RemoveListener(OnRenderDistanceChanged);
+        if (qualityDropdown != null)      qualityDropdown.onValueChanged.RemoveListener(OnQualityChanged);
+        if (fullscreenToggle != null)     fullscreenToggle.onValueChanged.RemoveListener(OnFullscreenChanged);
+
+        // Controls
+        if (mouseSensitivitySlider != null) mouseSensitivitySlider.onValueChanged.RemoveListener(OnMouseSensitivityChanged);
 
         listenersRegistered = false;
     }
