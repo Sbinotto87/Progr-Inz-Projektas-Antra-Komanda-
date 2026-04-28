@@ -133,6 +133,7 @@ public class Player : MonoBehaviour
         }
 
         ResolveGround();
+        BugRemoval();
     }
 
     void SpawnPosition()
@@ -152,7 +153,15 @@ public class Player : MonoBehaviour
         }
     }
 
-
+    void BugRemoval()
+    {
+        Vector3 pos = transform.position;
+        if (CheckBlocks(pos.x, pos.y+0.01f, pos.z))
+        {
+            pos.y += 1f;
+            transform.position = pos;
+        }
+    }
 
     /// <summary>
     /// gets the player inputs, checks for collisions, checks for sprinting
