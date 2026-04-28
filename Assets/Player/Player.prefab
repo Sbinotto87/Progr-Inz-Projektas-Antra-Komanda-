@@ -165,6 +165,6 @@ MonoBehaviour:
   fovLerpSpeed: 8
   speedForMaxFov: 7
   sneakEdgeTolerance: 0.22
-  health: 100
+  health: 1000
   hunger: 100
   thirst: 100

@@ -45,6 +45,12 @@ public class Chunk
     /// <summary>
     /// chunk status for gameplay and render distance
     /// </summary>
+    /// 
+
+    /// <summary>
+    /// This is for normals, to avoid Recalculatemesh()
+    /// </summary>
+    List<Vector3> normals = new List<Vector3>();
     public bool isActive
     {
         get { return chunkObject.activeSelf; }
@@ -115,8 +121,10 @@ public class Chunk
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
         mesh.uv = uvs.ToArray();
+        mesh.normals = normals.ToArray();
 
-        mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
+        //mesh.RecalculateNormals();
 
         meshFilter.mesh = mesh;
         MeshCollider col = chunkObject.GetComponent<MeshCollider>();
@@ -203,8 +211,14 @@ public class Chunk
                    vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 2]]);
                    vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 3]]);
                }
+                Vector3 normal = Voxel.faceChecks[i];
 
-               AddTexture(MyBlocks.block[blockID].faces[i]);
+                normals.Add(normal);
+                normals.Add(normal);
+                normals.Add(normal);
+                normals.Add(normal);
+
+                AddTexture(MyBlocks.block[blockID].faces[i]);
 
                triangles.Add(triangleIndex);
                triangles.Add(triangleIndex + 1);
@@ -442,7 +456,7 @@ public class Chunk
         triangles.Clear();
         uvs.Clear();
         triangleIndex = 0;
-
+        normals.Clear();
         // Rebuild
         CreateMeshData();
         CreateChunkMesh();
