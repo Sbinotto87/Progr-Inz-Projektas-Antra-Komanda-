@@ -231,6 +231,8 @@ public class Player : MonoBehaviour
         }
 
         transform.position = pos;
+        bool isRunning = grounded && movement.magnitude > 0.1f;
+        GetComponent<PlayerEffects>()?.SetRunDust(isRunning);
     }
 
     private void UpdateDynamicFov(Vector3 positionBeforeMove, Vector3 positionAfterMove, bool sprintingInput)
@@ -408,6 +410,7 @@ public class Player : MonoBehaviour
         {
             verticalVelocity = jumpStrength; // Adjust jump strength as needed
             grounded = false; // Player is now in the air
+            GetComponent<PlayerEffects>()?.PlayJumpDust(); // Dust while jumping
         }
     }
 
