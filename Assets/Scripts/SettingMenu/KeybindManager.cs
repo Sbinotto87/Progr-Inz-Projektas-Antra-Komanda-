@@ -32,6 +32,7 @@ public class KeybindManager : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
+            // Instance already points to the valid singleton; destroy this duplicate.
             Destroy(gameObject);
             return;
         }

@@ -12,17 +12,18 @@ using TMPro;
 ///     GraphicsTabButton (Button)
 ///     KeybindsTabButton (Button)
 ///   AudioPanel/
-///     MasterVolumeSlider  (Slider)
-///     MusicVolumeSlider   (Slider)
-///     SFXVolumeSlider     (Slider)
+///     MasterVolumeSlider  (Slider)  + MasterVolumeLabel  (TMP_Text – shows "80%")
+///     MusicVolumeSlider   (Slider)  + MusicVolumeLabel   (TMP_Text – shows "80%")
+///     SFXVolumeSlider     (Slider)  + SFXVolumeLabel     (TMP_Text – shows "100%")
 ///   GraphicsPanel/
 ///     MinFovSlider        (Slider)
 ///     MaxFovSlider        (Slider)
-///     RenderDistanceSlider(Slider)
+///     FovRangeLabel       (TMP_Text – shows "70 – 90", shared label for both FOV sliders)
+///     RenderDistanceSlider(Slider)  + RenderDistanceLabel(TMP_Text – shows "10")
 ///     QualityDropdown     (TMP_Dropdown)
 ///     FullscreenToggle    (Toggle)
 ///   KeybindsPanel/
-///     MouseSensitivitySlider (Slider)
+///     MouseSensitivitySlider (Slider)  + MouseSensitivityLabel (TMP_Text – shows "0.45")
 ///     KeybindEntriesContainer (Transform – populated at runtime by KeybindManager)
 /// </summary>
 public class SettingsPanelUI : MonoBehaviour
@@ -44,17 +45,23 @@ public class SettingsPanelUI : MonoBehaviour
     [SerializeField] private GameObject graphicsPanel;
     [SerializeField] private GameObject keybindsPanel;
 
-    // ── Audio sliders ─────────────────────────────────────────────────────────
+    // ── Audio sliders + labels ────────────────────────────────────────────────
     [Header("Audio Sliders")]
     [SerializeField] private Slider masterVolumeSlider;
+    [SerializeField] private TMP_Text masterVolumeLabel;
     [SerializeField] private Slider musicVolumeSlider;
+    [SerializeField] private TMP_Text musicVolumeLabel;
     [SerializeField] private Slider sfxVolumeSlider;
+    [SerializeField] private TMP_Text sfxVolumeLabel;
 
-    // ── Graphics controls ─────────────────────────────────────────────────────
+    // ── Graphics controls + labels ────────────────────────────────────────────
     [Header("Graphics Controls")]
     [SerializeField] private Slider minFovSlider;
     [SerializeField] private Slider maxFovSlider;
+    /// <summary>Single combined label that shows the FOV range, e.g. "70 – 90".</summary>
+    [SerializeField] private TMP_Text fovRangeLabel;
     [SerializeField] private Slider renderDistanceSlider;
+    [SerializeField] private TMP_Text renderDistanceLabel;
     [SerializeField] private TMP_Dropdown qualityDropdown;
     [SerializeField] private Toggle fullscreenToggle;
     [SerializeField] private TMP_Dropdown blockMaterialDropdown;
@@ -62,6 +69,7 @@ public class SettingsPanelUI : MonoBehaviour
     // ── Keybinds / Controls ───────────────────────────────────────────────────
     [Header("Keybinds / Controls")]
     [SerializeField] private Slider mouseSensitivitySlider;
+    [SerializeField] private TMP_Text mouseSensitivityLabel;
 
     // ── Behaviour options ─────────────────────────────────────────────────────
     [Header("Optional Behaviour")]
@@ -78,6 +86,7 @@ public class SettingsPanelUI : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
+            // Instance already points to the valid singleton; destroy this duplicate.
             Destroy(gameObject);
             return;
         }
@@ -149,18 +158,21 @@ public class SettingsPanelUI : MonoBehaviour
     {
         SettingsManager m = EnsureManager();
         if (m != null) m.SetMasterVolume(value);
+        SetLabel(masterVolumeLabel, FormatPercent(value));
     }
 
     public void OnMusicVolumeChanged(float value)
     {
         SettingsManager m = EnsureManager();
         if (m != null) m.SetMusicVolume(value);
+        SetLabel(musicVolumeLabel, FormatPercent(value));
     }
 
     public void OnSFXVolumeChanged(float value)
     {
         SettingsManager m = EnsureManager();
         if (m != null) m.SetSFXVolume(value);
+        SetLabel(sfxVolumeLabel, FormatPercent(value));
     }
 
     // ── Graphics callbacks ────────────────────────────────────────────────────
@@ -175,6 +187,8 @@ public class SettingsPanelUI : MonoBehaviour
 
         if (maxFovSlider != null && maxFovSlider.value < m.MinFov)
             maxFovSlider.SetValueWithoutNotify(m.MinFov);
+
+        UpdateFovLabel(m.MinFov, m.MaxFov);
     }
 
     public void OnMaxFovChanged(float value)
@@ -187,12 +201,15 @@ public class SettingsPanelUI : MonoBehaviour
 
         if (minFovSlider != null && minFovSlider.value > m.MaxFov)
             minFovSlider.SetValueWithoutNotify(m.MaxFov);
+
+        UpdateFovLabel(m.MinFov, m.MaxFov);
     }
 
     public void OnRenderDistanceChanged(float value)
     {
         SettingsManager m = EnsureManager();
         if (m != null) m.SetRenderDistance((int)value);
+        SetLabel(renderDistanceLabel, Mathf.RoundToInt(value).ToString());
     }
 
     public void OnQualityChanged(int index)
@@ -219,6 +236,7 @@ public class SettingsPanelUI : MonoBehaviour
     {
         SettingsManager m = EnsureManager();
         if (m != null) m.SetMouseSensitivity(value);
+        SetLabel(mouseSensitivityLabel, value.ToString("F2"));
     }
 
     // ── Private helpers ───────────────────────────────────────────────────────
@@ -268,7 +286,35 @@ public class SettingsPanelUI : MonoBehaviour
         if (blockMaterialDropdown != null)  blockMaterialDropdown.SetValueWithoutNotify(m.BlockMaterialIndex);
 
         if (mouseSensitivitySlider != null) mouseSensitivitySlider.SetValueWithoutNotify(m.MouseSensitivity);
+
+        UpdateAllLabels(m);
     }
+
+    /// <summary>Refreshes every value label to match the current settings state.</summary>
+    private void UpdateAllLabels(SettingsManager m)
+    {
+        SetLabel(masterVolumeLabel,      FormatPercent(m.MasterVolume));
+        SetLabel(musicVolumeLabel,       FormatPercent(m.MusicVolume));
+        SetLabel(sfxVolumeLabel,         FormatPercent(m.SFXVolume));
+        UpdateFovLabel(m.MinFov, m.MaxFov);
+        SetLabel(renderDistanceLabel,    m.RenderDistance.ToString());
+        SetLabel(mouseSensitivityLabel,  m.MouseSensitivity.ToString("F2"));
+    }
+
+    /// <summary>Sets the combined FOV label to "minFov – maxFov" (integer values).</summary>
+    private void UpdateFovLabel(float min, float max)
+    {
+        SetLabel(fovRangeLabel, $"{Mathf.RoundToInt(min)} – {Mathf.RoundToInt(max)}");
+    }
+
+    private static void SetLabel(TMP_Text label, string text)
+    {
+        if (label != null)
+            label.text = text;
+    }
+
+    private static string FormatPercent(float value)
+        => Mathf.RoundToInt(value * 100f) + "%";
 
     private SettingsManager EnsureManager()
     {

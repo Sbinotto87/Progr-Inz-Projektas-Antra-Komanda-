@@ -220,7 +220,8 @@ public class SettingsManager : MonoBehaviour
         MinFov = Mathf.Clamp(PlayerPrefs.GetFloat(MinFovKey, defaultMinFov), 30f, 170f);
         MaxFov = Mathf.Clamp(PlayerPrefs.GetFloat(MaxFovKey, defaultMaxFov), MinFov, 170f);
         RenderDistance = Mathf.Clamp(PlayerPrefs.GetInt(RenderDistanceKey, (int)defaultRenderDistance), 1, 100);
-        QualityLevel = Mathf.Clamp(PlayerPrefs.GetInt(QualityLevelKey, defaultQualityLevel), 0, QualitySettings.names.Length - 1);
+        int qualityMax = QualitySettings.names.Length > 0 ? QualitySettings.names.Length - 1 : 0;
+        QualityLevel = Mathf.Clamp(PlayerPrefs.GetInt(QualityLevelKey, defaultQualityLevel), 0, qualityMax);
         IsFullscreen = PlayerPrefs.GetInt(IsFullscreenKey, defaultIsFullscreen ? 1 : 0) == 1;
 
         MouseSensitivity = Mathf.Clamp(PlayerPrefs.GetFloat(MouseSensitivityKey, defaultMouseSensitivity), 0.05f, 5f);
