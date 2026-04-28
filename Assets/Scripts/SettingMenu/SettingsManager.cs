@@ -1,5 +1,17 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Assets.Scripts;
+
+/// <summary>
+/// A named material option that appears in the block-material selector dropdown.
+/// Add as many entries as you like in the Inspector under "Block Materials".
+/// </summary>
+[System.Serializable]
+public struct BlockMaterialOption
+{
+    public string displayName;
+    public Material material;
+}
 
 public class SettingsManager : MonoBehaviour
 {
@@ -15,6 +27,7 @@ public class SettingsManager : MonoBehaviour
     private const string RenderDistanceKey = "RenderDistance";
     private const string QualityLevelKey = "QualityLevel";
     private const string IsFullscreenKey = "IsFullscreen";
+    private const string BlockMaterialIndexKey = "BlockMaterialIndex";
 
     [Header("Default Settings – Audio")]
     [SerializeField] private float defaultMasterVolume = 1f;
@@ -27,6 +40,10 @@ public class SettingsManager : MonoBehaviour
     [SerializeField] private float defaultRenderDistance = 10f;
     [SerializeField] private int defaultQualityLevel = 2;
     [SerializeField] private bool defaultIsFullscreen = true;
+
+    [Header("Default Settings – Block Material")]
+    [SerializeField] private BlockMaterialOption[] blockMaterialOptions;
+    [SerializeField] private int defaultBlockMaterialIndex = 0;
 
     [Header("Default Settings – Controls")]
     [SerializeField] private float defaultMouseSensitivity = 0.45f;
@@ -45,6 +62,9 @@ public class SettingsManager : MonoBehaviour
 
     // Controls
     public float MouseSensitivity { get; private set; }
+
+    // Block material
+    public int BlockMaterialIndex { get; private set; }
 
     private void Awake()
     {
@@ -138,6 +158,32 @@ public class SettingsManager : MonoBehaviour
         ApplyFullscreen();
     }
 
+    // ---- Block material ----
+
+    /// <summary>Returns the display names of all registered block material options.</summary>
+    public string[] GetBlockMaterialNames()
+    {
+        if (blockMaterialOptions == null || blockMaterialOptions.Length == 0)
+            return new string[] { "Default" };
+
+        string[] names = new string[blockMaterialOptions.Length];
+        for (int i = 0; i < blockMaterialOptions.Length; i++)
+            names[i] = string.IsNullOrEmpty(blockMaterialOptions[i].displayName)
+                ? $"Material {i + 1}"
+                : blockMaterialOptions[i].displayName;
+        return names;
+    }
+
+    public void SetBlockMaterialIndex(int index)
+    {
+        if (blockMaterialOptions == null || blockMaterialOptions.Length == 0) return;
+
+        BlockMaterialIndex = Mathf.Clamp(index, 0, blockMaterialOptions.Length - 1);
+        PlayerPrefs.SetInt(BlockMaterialIndexKey, BlockMaterialIndex);
+        PlayerPrefs.Save();
+        ApplyBlockMaterial();
+    }
+
     // ---- Controls ----
 
     public void SetMouseSensitivity(float value)
@@ -159,6 +205,7 @@ public class SettingsManager : MonoBehaviour
         ApplyRenderDistance();
         ApplyQualityLevel();
         ApplyFullscreen();
+        ApplyBlockMaterial();
         ApplyMouseSensitivity();
     }
 
@@ -177,6 +224,10 @@ public class SettingsManager : MonoBehaviour
         IsFullscreen = PlayerPrefs.GetInt(IsFullscreenKey, defaultIsFullscreen ? 1 : 0) == 1;
 
         MouseSensitivity = Mathf.Clamp(PlayerPrefs.GetFloat(MouseSensitivityKey, defaultMouseSensitivity), 0.05f, 5f);
+
+        int maxMatIndex = (blockMaterialOptions != null && blockMaterialOptions.Length > 0)
+            ? blockMaterialOptions.Length - 1 : 0;
+        BlockMaterialIndex = Mathf.Clamp(PlayerPrefs.GetInt(BlockMaterialIndexKey, defaultBlockMaterialIndex), 0, maxMatIndex);
     }
 
     // ---- Private apply helpers ----
@@ -238,5 +289,17 @@ public class SettingsManager : MonoBehaviour
     private void ApplyFullscreen()
     {
         Screen.fullScreen = IsFullscreen;
+    }
+
+    private void ApplyBlockMaterial()
+    {
+        if (blockMaterialOptions == null || blockMaterialOptions.Length == 0) return;
+
+        Material mat = blockMaterialOptions[BlockMaterialIndex].material;
+        if (mat == null) return;
+
+        World world = FindFirstObjectByType<World>();
+        if (world != null)
+            world.SetBlockMaterial(mat);
     }
 }

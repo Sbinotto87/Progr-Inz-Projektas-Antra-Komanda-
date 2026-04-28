@@ -63,9 +63,14 @@ public class KeybindManager : MonoBehaviour
         InputAction action = inputActionAsset.FindActionMap(PlayerMapName)?.FindAction(actionName);
         if (action == null) return "?";
 
-        int index = action.GetBindingIndexForControl(InputSystem.GetDevice<Keyboard>());
-        if (index < 0)
-            index = action.GetBindingIndexForControl(InputSystem.GetDevice<Mouse>());
+        Keyboard keyboard = InputSystem.GetDevice<Keyboard>();
+        Mouse mouse = InputSystem.GetDevice<Mouse>();
+
+        int index = -1;
+        if (keyboard != null)
+            index = action.GetBindingIndexForControl(keyboard);
+        if (index < 0 && mouse != null)
+            index = action.GetBindingIndexForControl(mouse);
         if (index < 0 && action.bindings.Count > 0)
             index = 0;
 

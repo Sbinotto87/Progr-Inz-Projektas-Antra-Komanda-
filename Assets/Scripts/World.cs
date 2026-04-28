@@ -385,6 +385,23 @@ namespace Assets.Scripts
             else
                 return false;
         }
+
+        /// <summary>
+        /// Replaces the block material on every instantiated chunk renderer.
+        /// Called by SettingsManager when the player switches material pack.
+        /// </summary>
+        public void SetBlockMaterial(Material mat)
+        {
+            if (mat == null) return;
+
+            material = mat;
+
+            foreach (Chunk chunk in chunks)
+            {
+                if (chunk != null && chunk.meshRenderer != null)
+                    chunk.meshRenderer.sharedMaterial = mat;
+            }
+        }
     }
     /// <summary>
     /// chunk coordinate class

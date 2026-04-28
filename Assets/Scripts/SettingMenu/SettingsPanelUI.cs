@@ -57,6 +57,7 @@ public class SettingsPanelUI : MonoBehaviour
     [SerializeField] private Slider renderDistanceSlider;
     [SerializeField] private TMP_Dropdown qualityDropdown;
     [SerializeField] private Toggle fullscreenToggle;
+    [SerializeField] private TMP_Dropdown blockMaterialDropdown;
 
     // ── Keybinds / Controls ───────────────────────────────────────────────────
     [Header("Keybinds / Controls")]
@@ -76,7 +77,10 @@ public class SettingsPanelUI : MonoBehaviour
     private void Awake()
     {
         if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
             return;
+        }
 
         Instance = this;
     }
@@ -87,6 +91,7 @@ public class SettingsPanelUI : MonoBehaviour
             settingsPanel.SetActive(false);
 
         PopulateQualityDropdown();
+        PopulateBlockMaterialDropdown();
         RegisterListeners();
         SyncAllFromSettings();
         ShowTab(audioPanel);
@@ -202,6 +207,12 @@ public class SettingsPanelUI : MonoBehaviour
         if (m != null) m.SetFullscreen(value);
     }
 
+    public void OnBlockMaterialChanged(int index)
+    {
+        SettingsManager m = EnsureManager();
+        if (m != null) m.SetBlockMaterialIndex(index);
+    }
+
     // ── Controls callbacks ────────────────────────────────────────────────────
 
     public void OnMouseSensitivityChanged(float value)
@@ -217,6 +228,18 @@ public class SettingsPanelUI : MonoBehaviour
         if (audioPanel != null)    audioPanel.SetActive(audioPanel == activePanel);
         if (graphicsPanel != null) graphicsPanel.SetActive(graphicsPanel == activePanel);
         if (keybindsPanel != null) keybindsPanel.SetActive(keybindsPanel == activePanel);
+    }
+
+    private void PopulateBlockMaterialDropdown()
+    {
+        if (blockMaterialDropdown == null) return;
+
+        SettingsManager m = EnsureManager();
+        blockMaterialDropdown.ClearOptions();
+        string[] names = m != null
+            ? m.GetBlockMaterialNames()
+            : new string[] { "Default" };
+        blockMaterialDropdown.AddOptions(new System.Collections.Generic.List<string>(names));
     }
 
     private void PopulateQualityDropdown()
@@ -242,6 +265,7 @@ public class SettingsPanelUI : MonoBehaviour
         if (renderDistanceSlider != null)   renderDistanceSlider.SetValueWithoutNotify(m.RenderDistance);
         if (qualityDropdown != null)        qualityDropdown.SetValueWithoutNotify(m.QualityLevel);
         if (fullscreenToggle != null)       fullscreenToggle.SetIsOnWithoutNotify(m.IsFullscreen);
+        if (blockMaterialDropdown != null)  blockMaterialDropdown.SetValueWithoutNotify(m.BlockMaterialIndex);
 
         if (mouseSensitivitySlider != null) mouseSensitivitySlider.SetValueWithoutNotify(m.MouseSensitivity);
     }
@@ -279,6 +303,7 @@ public class SettingsPanelUI : MonoBehaviour
         if (renderDistanceSlider != null) renderDistanceSlider.onValueChanged.AddListener(OnRenderDistanceChanged);
         if (qualityDropdown != null)      qualityDropdown.onValueChanged.AddListener(OnQualityChanged);
         if (fullscreenToggle != null)     fullscreenToggle.onValueChanged.AddListener(OnFullscreenChanged);
+        if (blockMaterialDropdown != null) blockMaterialDropdown.onValueChanged.AddListener(OnBlockMaterialChanged);
 
         // Controls
         if (mouseSensitivitySlider != null) mouseSensitivitySlider.onValueChanged.AddListener(OnMouseSensitivityChanged);
@@ -306,6 +331,7 @@ public class SettingsPanelUI : MonoBehaviour
         if (renderDistanceSlider != null) renderDistanceSlider.onValueChanged.RemoveListener(OnRenderDistanceChanged);
         if (qualityDropdown != null)      qualityDropdown.onValueChanged.RemoveListener(OnQualityChanged);
         if (fullscreenToggle != null)     fullscreenToggle.onValueChanged.RemoveListener(OnFullscreenChanged);
+        if (blockMaterialDropdown != null) blockMaterialDropdown.onValueChanged.RemoveListener(OnBlockMaterialChanged);
 
         // Controls
         if (mouseSensitivitySlider != null) mouseSensitivitySlider.onValueChanged.RemoveListener(OnMouseSensitivityChanged);
