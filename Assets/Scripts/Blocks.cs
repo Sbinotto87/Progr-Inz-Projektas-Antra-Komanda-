@@ -12,6 +12,13 @@ public class Blocks : MonoBehaviour
 
     public BlockType[] block;
 
+    [Header("Break Sounds")] 
+    public AudioClip stoneBreakSound;
+    public AudioClip grassBreakSound;
+    public AudioClip woodBreakSound;
+    public AudioClip leafBreakSound;
+
+
     public Item stoneItem;
     public Item grassBlockItem;
     public Item woodItem;
@@ -48,7 +55,8 @@ public class Blocks : MonoBehaviour
             tool = "Pickaxe",
             hitCount = 1,
             faces = new byte[] { 1, 1, 1, 1, 1, 1 },
-            dropItem = stoneItem
+            dropItem = stoneItem,
+            breakSound = stoneBreakSound
         };
 
         //Grass (block)
@@ -61,7 +69,8 @@ public class Blocks : MonoBehaviour
             tool = "Shovel",
             hitCount = 1,
             faces = new byte[] { 0, 0, 0, 0, 2, 0 },
-            dropItem = grassBlockItem
+            dropItem = grassBlockItem,
+            breakSound = grassBreakSound
         };
 
         //Wood
@@ -74,7 +83,8 @@ public class Blocks : MonoBehaviour
             tool = "Axe",
             hitCount = 2,
             faces = new byte[] { 3, 3, 3, 3, 3, 3 },
-            dropItem = woodItem
+            dropItem = woodItem,
+            breakSound = woodBreakSound
         };
 
         //Leaves
@@ -87,7 +97,8 @@ public class Blocks : MonoBehaviour
             tool = "Axe",
             hitCount = 1,
             faces = new byte[] { 2, 2, 2, 2, 2, 2 },
-            dropItem = leafItem
+            dropItem = leafItem,
+            breakSound = leafBreakSound
         };
         
         //Grass
@@ -100,7 +111,8 @@ public class Blocks : MonoBehaviour
             tool = "Axe",
             hitCount = 1,
             faces = new byte[] { 4, 4, 4, 4, 15, 15 },
-            dropItem = grassItem
+            dropItem = grassItem,
+            breakSound = grassBreakSound
         };
         
         //Glass
@@ -208,4 +220,6 @@ public class BlockType
     //always set 6 faces
     public byte[] faces;    //front, back, right, left, top, bottom
     public Item dropItem;
+
+    public AudioClip breakSound; // for breaking sounds
 }

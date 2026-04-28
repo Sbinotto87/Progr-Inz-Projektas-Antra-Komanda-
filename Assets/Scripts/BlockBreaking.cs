@@ -5,12 +5,14 @@ public class BlockBreaking : MonoBehaviour
 {
     public BlockSelector selector;
     private Inventory playerInventory;
+    private AudioSource audioSource; // for block breaking sounds
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         playerInventory = player.GetComponent<Inventory>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -33,6 +35,14 @@ public class BlockBreaking : MonoBehaviour
                     {
                         playerInventory.AddItem(type.dropItem);
                     }
+
+                    if (type.breakSound != null && audioSource != null)
+                    {
+                        audioSource.Stop();
+                        audioSource.clip = type.breakSound;
+                        audioSource.Play();
+                        StartCoroutine(StopSoundAfter(0.3f)); // 0.3 sekundės
+                    }
                 }
 
                 // Remove block
@@ -42,5 +52,11 @@ public class BlockBreaking : MonoBehaviour
                 selector.currentChunk.UpdateNeighborChunks(pos.x, pos.z);
             }
         }
+    }
+
+    private System.Collections.IEnumerator StopSoundAfter(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        audioSource.Stop();
     }
 }

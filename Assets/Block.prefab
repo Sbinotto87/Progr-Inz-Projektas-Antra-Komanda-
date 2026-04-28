@@ -106,10 +106,15 @@ MonoBehaviour:
   meshRenderer: {fileID: 963162131471398369}
   meshFilter: {fileID: 4434475266173198894}
   blockMaterial: {fileID: 2100000, guid: b5b0e307c89ba64468d9c75ed30a924e, type: 2}
-  block:
-  - name: Block
-    isSolid: 0
-    isBreakable: 0
-    tool: 
-    hitCount: 0
-    faces: 010101010101
+  stoneBreakSound: {fileID: 8300000, guid: c0b5bf3762c79b8409ee0212eb04ae41, type: 3}
+  grassBreakSound: {fileID: 8300000, guid: 7fa264c0f8238234c8c437f43164f41f, type: 3}
+  woodBreakSound: {fileID: 8300000, guid: 63e27dabab2a1c14ea10f2c87e86601a, type: 3}
+  leafBreakSound: {fileID: 8300000, guid: 37a49318b836c1746b11344e97c489e4, type: 3}
+  stoneItem: {fileID: 0}
+  grassBlockItem: {fileID: 0}
+  woodItem: {fileID: 0}
+  leafItem: {fileID: 0}
+  grassItem: {fileID: 0}
+  glassItem: {fileID: 0}
+  defaultItem: {fileID: 0}
+  blockIndex: 0
