@@ -26,12 +26,13 @@ public class EnemySpawner : MonoBehaviour
     {
         world = FindObjectOfType<World>();
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
-        nextSpawnTime = 10;
+        nextSpawnTime = Time.time + 1f;
     }
 
     void Update()
     {
         if (world == null || player == null) return;
+
         if (!ShouldSpawn(world.DayTime))
         {
             DespawnAll();
@@ -50,7 +51,7 @@ public class EnemySpawner : MonoBehaviour
         if (time < spawnStopTime || time >= spawnStartTime)
             return true;
 
-        return true;
+        return true; //?
     }
 
     void TrySpawn()
@@ -71,13 +72,16 @@ public class EnemySpawner : MonoBehaviour
             if (groundY < 0) continue;
 
             int blockBelowId = world.GetVoxel(new Vector3(x, groundY - 1, z));
-            
-            if (blockBelowId != 11) 
+
+            if (blockBelowId != 11)
                 continue;
 
             Vector3 spawnPos = new Vector3(x + 0.5f, groundY + 0.1f, z + 0.5f);
 
             if (!IsValidSpawnPosition(x, groundY, z))
+                continue;
+
+            if (HasLineOfSight(spawnPos))
                 continue;
 
             GameObject enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
@@ -86,6 +90,7 @@ public class EnemySpawner : MonoBehaviour
             return;
         }
     }
+
     void DespawnAll()
     {
         for (int i = 0; i < activeEnemies.Count; i++)
@@ -114,5 +119,23 @@ public class EnemySpawner : MonoBehaviour
         }
 
         return -1f;
+    }
+
+    bool HasLineOfSight(Vector3 spawnPos)
+    {
+        Vector3 origin = player.position + Vector3.up * 1.6f;
+        Vector3 direction = spawnPos - origin;
+        float distance = direction.magnitude;
+
+        Ray ray = new Ray(origin, direction.normalized);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, distance))
+        {
+            if (Vector3.Distance(hit.point, spawnPos) > 0.5f)
+                return false;
+        }
+
+        return true;
     }
 }
