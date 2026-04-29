@@ -57,6 +57,8 @@ public class Player : MonoBehaviour
     public float swimUpStrength = 5f;
     public float waterDrag = 0.9f; // To smooth out movement
     private bool inWater = false;
+    public bool isSubmerged = false;
+    public bool isInRadiation = false;
 
     private InputAction moveAction;
     private InputAction sprintAction;
@@ -110,7 +112,7 @@ public class Player : MonoBehaviour
         {
             Debug.LogWarning("Player camera is not assigned and no MainCamera was found.");
         }
-
+        
         if (world == null)
         {
             GameObject worldObject = GameObject.Find("World");
@@ -151,13 +153,15 @@ public class Player : MonoBehaviour
 
         if (inWater)
         {
+            float buoyancyMultiplier = swimSpeed / walkSpeed;
+
             if (jumpAction.IsPressed()) // Swim Up
             {
-                verticalVelocity = grounded ? jumpStrength * 0.7f : swimUpStrength;
+                verticalVelocity = grounded ? jumpStrength * 0.7f : (swimUpStrength * buoyancyMultiplier);
             }
             else if (sneakAction.IsPressed()) // Swim Down
             {
-                verticalVelocity = -swimUpStrength;
+                verticalVelocity = -(swimUpStrength * buoyancyMultiplier);
             }
         }
         else if (jumpAction.IsPressed() && grounded && verticalVelocity <= 0f)
@@ -203,42 +207,39 @@ public class Player : MonoBehaviour
     {
         Vector2 movement = moveAction.ReadValue<Vector2>();
         bool sneaking = IsSneaking();
-        bool swimming = IsSwimming();
         bool sprinting = sprintAction.IsPressed();
 
-        float speed;
-        if (inWater)
-            speed = swimSpeed; 
-        else
-            speed = sneaking ? sneakSpeed : (sprinting ? sprintSpeed : walkSpeed);
+        // 1. Handle Stamina Logic first
+        bool wantsToSprint = sprinting && movement.sqrMagnitude > 0.01f && !sneaking && !inWater;
 
-        bool wantsToSprint = sprintAction.IsPressed() && movement.sqrMagnitude > 0.01f && !sneaking;
+        if (stamina <= 0.01f) wasOutOfStamina = true;
+        if (wasOutOfStamina && stamina >= staminaRecoveryThreshold) wasOutOfStamina = false;
 
-        // If player ran out → lock sprint
-        if (stamina <= 0.01f)
-        {
-            wasOutOfStamina = true;
-        }
-
-        // Unlock sprint only after enough recovery
-        if (wasOutOfStamina && stamina >= staminaRecoveryThreshold)
-        {
-            wasOutOfStamina = false;
-        }
-
-        // Final sprint condition
         bool canSprint = wantsToSprint && !wasOutOfStamina && stamina > 0.02f;
 
-        // Drain or Regen stamina based on that check
         if (canSprint)
             stamina = Mathf.Max(0, stamina - staminaDrainRate * Time.deltaTime);
         else
             stamina = Mathf.Min(100, stamina + staminaRegenRate * Time.deltaTime);
 
-        // Calculate speed based on the same check
-        speed = sneaking ? sneakSpeed : (canSprint ? sprintSpeed : walkSpeed);
-
-        //float speed = sneaking ? sneakSpeed : (sprinting ? sprintSpeed : walkSpeed);
+        // 2. Final Speed Calculation (Priority Order: Water > Sneak > Sprint > Walk)
+        float speed;
+        if (inWater)
+        {
+            speed = swimSpeed; // Uses the slowdown value from CheckWater()
+        }
+        else if (sneaking)
+        {
+            speed = sneakSpeed;
+        }
+        else if (canSprint)
+        {
+            speed = sprintSpeed;
+        }
+        else
+        {
+            speed = walkSpeed;
+        }
 
         Vector3 move = (transform.right * movement.x + transform.forward * movement.y).normalized * speed * Time.deltaTime;
 
@@ -374,14 +375,27 @@ public class Player : MonoBehaviour
     {
         if (inWater)
         {
-            verticalVelocity = Mathf.Lerp(verticalVelocity, waterBuoyancy, Time.deltaTime * 2f);
+            // 1. Calculate a multiplier based on how much the liquid slows the player down
+            // If walkSpeed is 4 and swimSpeed is 2, the multiplier is 0.5 (sinking is 50% speed)
+            float buoyancyMultiplier = swimSpeed / walkSpeed;
+
+            // 2. Scale the target buoyancy by this multiplier
+            float scaledBuoyancy = waterBuoyancy * buoyancyMultiplier;
+
+            // 3. Lerp toward the scaled target
+            // We also scale the Lerp speed by the multiplier so the transition itself feels 'thicker'
+            verticalVelocity = Mathf.Lerp(verticalVelocity, scaledBuoyancy, Time.deltaTime * 2f * buoyancyMultiplier);
         }
         else if (!grounded)
+        {
             verticalVelocity += gravity * Time.deltaTime;
+        }
 
+        // Apply the movement (same as before)
         Vector3 pos = transform.position;
         float newY = pos.y + verticalVelocity * Time.deltaTime;
 
+        // Head collision check...
         if (verticalVelocity > 0 &&
               (CheckBlocks(pos.x + HalfWidth, newY + HalfHeight + HeadCheckEpsilon, pos.z + HalfWidth) ||
                CheckBlocks(pos.x + HalfWidth, newY + HalfHeight + HeadCheckEpsilon, pos.z - HalfWidth) ||
@@ -510,8 +524,8 @@ public class Player : MonoBehaviour
         if (blockID != -1)
         {
             swimSpeed = chunk.MyBlocks.block[blockID].swimSlowdown;
+            if (chunk.blocks[localX, (int)(blockY + HalfHeight - SkinWidth), localZ] == 11) // effect
             return chunk.MyBlocks.block[blockID].isSwimable;
-            // Alternatively, if water is a specific ID (e.g., 5): return blockID == 5;
         }
         return false;
     }
@@ -520,7 +534,6 @@ public class Player : MonoBehaviour
     {
         mouseSensitivity = Mathf.Clamp(sensitivity, 0.05f, 5f);
     }
-
 
     // To eat/drink ======
     public void AddHunger(float amount)

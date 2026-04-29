@@ -16,6 +16,7 @@ public class StatBarUI : MonoBehaviour
     public Slider ThirstBar;
     public Slider Staminabar; 
 
+    private float radMultiplier = 1f;
 
 
     public float depletionRate = 5f; 
@@ -31,6 +32,10 @@ public class StatBarUI : MonoBehaviour
         if (player.hunger <= 0 || player.thirst <= 0)
         {
             player.health -= (depletionRate / 2) * Time.deltaTime;
+        }
+        if(player.isInRadiation)
+        {
+            player.health -= radMultiplier * Time.deltaTime;
         }
 
         // 3. Update the visual bars 

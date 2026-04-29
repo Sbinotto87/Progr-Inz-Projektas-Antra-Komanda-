@@ -44,7 +44,7 @@ public class Blocks : MonoBehaviour
 
     private void Awake()
     {
-        block = new BlockType[11];
+        block = new BlockType[12];
         GameObject createdItems = GameObject.Find("CreatedItems");
         if (createdItems == null)
             createdItems = new GameObject("CreatedItems", typeof(CreatedItems));
@@ -217,10 +217,26 @@ public class Blocks : MonoBehaviour
             isSolid = true,
             isTransparent = false,
             isBreakable = true,
+            isCutout = false,
+            isSwimable = false,
             tool = "pickaxe",
             hitCount = 3,
             faces = new byte[] { 8, 8, 8, 8, 8, 8 },
             dropItem = items[8]
+        };
+        block[11] = new BlockType
+        {
+            name = "Oil",
+            isSolid = false,
+            isTransparent = true,
+            isBreakable = false,
+            isCutout = false,
+            isSwimable = true,
+            swimSlowdown = 1.0f,
+            tool = "NA",
+            hitCount = 99,
+            faces = new byte[] { 1, 1, 1, 1, 1, 1 },
+            dropItem = null
         };
     }
     

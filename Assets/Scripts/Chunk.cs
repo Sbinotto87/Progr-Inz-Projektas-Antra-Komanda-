@@ -61,7 +61,7 @@ public class Chunk
     /// chunk status for gameplay and render distance
     /// </summary>
     /// 
-
+    public bool isRadioactive;
 
     public bool isActive
     {
@@ -77,13 +77,16 @@ public class Chunk
     /// </summary>
     public void PopulateBlockArray()
     {
+        isRadioactive = false;
         int totalBlocks = Width * Height * Width;
         NativeArray<int> jobResult = new NativeArray<int>(totalBlocks, Allocator.TempJob);
+        NativeArray<bool> radioactivity = new NativeArray<bool>(1, Allocator.TempJob);
         biome = world.biome;
 
         var job = new ChunkDataJob
         {
             ResultBlocks = jobResult,
+            isRadioactive = radioactivity,
             Width = Width,
             Height = Height,
             // Pass your ChunkCoord here
@@ -107,9 +110,11 @@ public class Chunk
             int z = i / (Width * Height);
             blocks[x, y, z] = jobResult[i];
         }
-
+        isRadioactive = radioactivity[0];
+        if(radioactivity[0]) UnityEngine.Debug.Log("generatedRadioactivChunk");
         jobResult.Dispose();
         isPopulated = true;
+        
     }
     /// <summary>
     /// creates a mesh based on the data in the lists
@@ -367,13 +372,14 @@ public class Chunk
     public struct ChunkDataJob : IJobParallelFor
     {
         public NativeArray<int> ResultBlocks;
+        [NativeDisableParallelForRestriction]
+        public NativeArray<bool> isRadioactive;
 
         [ReadOnly] public int Width;
         [ReadOnly] public int Height;
         [ReadOnly] public int2 ChunkCoord; // Using int2 for (x, z)
         [ReadOnly] public float offsetX;
         [ReadOnly] public float offsetZ;
-
         [ReadOnly] public float TerrainHeight;
         [ReadOnly] public float TerrainScale;
         [ReadOnly] public int SolidGroundHeight;
@@ -400,9 +406,13 @@ public class Chunk
                 ResultBlocks[index] = 0; // Bedrock
             else if (y > calculatedHeight)
                 if (y < 61)
-                    ResultBlocks[index] = 9;
+                {
+                    ResultBlocks[index] = 11; // oil
+                    if (!isRadioactive[0])
+                        isRadioactive[0] = true;
+                }
                 else
-                    ResultBlocks[index] = - 1; // Air
+                    ResultBlocks[index] = -1; // Air
             else if (y == calculatedHeight || (y < calculatedHeight && y > calculatedHeight - 4))
                 ResultBlocks[index] = 1; // Dirt
             else
