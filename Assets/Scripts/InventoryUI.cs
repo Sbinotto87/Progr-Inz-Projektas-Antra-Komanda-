@@ -105,20 +105,22 @@ public class InventoryUI : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        foreach (Item item in playerInventory.items)
+        foreach (InventorySlot slot in playerInventory.slots)
         {
             GameObject newSlot = Instantiate(slotPrefab, listParent);
 
-            // Finds text inside button prefab
-            //newSlot.GetComponentInChildren<TextMeshProUGUI>().text = $"{item.itemName} ({item.weight} kg)";
             var text = newSlot.GetComponentInChildren<TextMeshProUGUI>();
-            text.text = $"{item.itemName} ({item.weight} kg)";
+            if (text != null)
+            {
+                // FIXED: Added count display (x5)
+                string countText = slot.itemData.isStackable ? $" x{slot.count}" : "";
+                text.text = $"{slot.itemData.itemName}{countText} ({slot.itemData.weight * slot.count} kg)";
+            }
 
-            // Link data to drag script
             DraggableItem dragScript = newSlot.GetComponent<DraggableItem>();
             if (dragScript != null)
             {
-                dragScript.itemData = item;
+                dragScript.itemData = slot.itemData;
             }
         }
 

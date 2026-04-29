@@ -41,8 +41,16 @@ public class Player : MonoBehaviour
     public float hunger = 100f;
     public float thirst = 100f;
 
+    // --- STAMINA VARIABLES ---
+    public float stamina = 100f;
+    public float staminaDrainRate = 15f;
+    public float staminaRegenRate = 10f;
+    //public bool isSprinting { get; private set; }
+
 
     private bool grounded = true;
+    private bool wasOutOfStamina = false;
+    float staminaRecoveryThreshold = 20f; // % needed before sprint allowed again
 
     public float swimSpeed = 2.0f;
     public float waterBuoyancy = -2f; // Slower sinking than gravity
@@ -128,10 +136,16 @@ public class Player : MonoBehaviour
         inWater = CheckWater(transform.position.x, transform.position.y - HalfHeight + SkinWidth, transform.position.z);
 
         Vector3 positionBeforeMove = transform.position;
-        bool sprintingInput = sprintAction.IsPressed();
+        //bool sprintingInput = sprintAction.IsPressed();
         CameraControl();
         Movement();
-        UpdateDynamicFov(positionBeforeMove, transform.position, sprintingInput);
+
+        // Pass the stamina check directly into the FOV logic
+        bool isMoving = moveAction.ReadValue<Vector2>().sqrMagnitude > 0.01f;
+        UpdateDynamicFov(positionBeforeMove, transform.position, (sprintAction.IsPressed() && stamina > 0 && isMoving && !wasOutOfStamina));
+
+
+        //UpdateDynamicFov(positionBeforeMove, transform.position, sprintingInput);
         ApplyGravity();
         transform.Translate(verticalVelocity * Time.deltaTime * Vector3.up, Space.World);
 
@@ -197,6 +211,34 @@ public class Player : MonoBehaviour
             speed = swimSpeed; 
         else
             speed = sneaking ? sneakSpeed : (sprinting ? sprintSpeed : walkSpeed);
+
+        bool wantsToSprint = sprintAction.IsPressed() && movement.sqrMagnitude > 0.01f && !sneaking;
+
+        // If player ran out → lock sprint
+        if (stamina <= 0.01f)
+        {
+            wasOutOfStamina = true;
+        }
+
+        // Unlock sprint only after enough recovery
+        if (wasOutOfStamina && stamina >= staminaRecoveryThreshold)
+        {
+            wasOutOfStamina = false;
+        }
+
+        // Final sprint condition
+        bool canSprint = wantsToSprint && !wasOutOfStamina && stamina > 0.02f;
+
+        // Drain or Regen stamina based on that check
+        if (canSprint)
+            stamina = Mathf.Max(0, stamina - staminaDrainRate * Time.deltaTime);
+        else
+            stamina = Mathf.Min(100, stamina + staminaRegenRate * Time.deltaTime);
+
+        // Calculate speed based on the same check
+        float speed = sneaking ? sneakSpeed : (canSprint ? sprintSpeed : walkSpeed);
+
+        //float speed = sneaking ? sneakSpeed : (sprinting ? sprintSpeed : walkSpeed);
 
         Vector3 move = (transform.right * movement.x + transform.forward * movement.y).normalized * speed * Time.deltaTime;
 
@@ -479,6 +521,19 @@ public class Player : MonoBehaviour
         mouseSensitivity = Mathf.Clamp(sensitivity, 0.05f, 5f);
     }
 
+
+    // To eat/drink ======
+    public void AddHunger(float amount)
+    {
+        hunger = Mathf.Min(hunger + amount, 100f);
+        Debug.Log($"Ate food! Hunger is now: {hunger}");
+    }
+
+    public void AddThirst(float amount)
+    {
+        thirst = Mathf.Min(thirst + amount, 100f);
+        Debug.Log($"Drank water! Thirst is now: {thirst}");
+    }
     public void SetRenderDistance(int distance)
     {
         world.viewDistance = Mathf.Clamp(distance, 1, 100);
