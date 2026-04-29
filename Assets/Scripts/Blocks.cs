@@ -45,7 +45,9 @@ public class Blocks : MonoBehaviour
     private void Awake()
     {
         block = new BlockType[10];
-        GameObject createdItems = new GameObject("CreatedItems", typeof(CreatedItems));
+        GameObject createdItems = GameObject.Find("CreatedItems");
+        if (createdItems == null)
+            createdItems = new GameObject("CreatedItems", typeof(CreatedItems));
         CreatedItems createdItems1 = createdItems.GetComponent<CreatedItems>();
         items = createdItems1.items;
         
