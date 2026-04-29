@@ -145,6 +145,7 @@ public class Player : MonoBehaviour
         }
 
         ResolveGround();
+        BugRemoval();
     }
 
     void SpawnPosition()
@@ -164,7 +165,15 @@ public class Player : MonoBehaviour
         }
     }
 
-
+    void BugRemoval()
+    {
+        Vector3 pos = transform.position;
+        if (CheckBlocks(pos.x, pos.y+0.01f, pos.z))
+        {
+            pos.y += 1f;
+            transform.position = pos;
+        }
+    }
 
     /// <summary>
     /// gets the player inputs, checks for collisions, checks for sprinting
@@ -246,6 +255,8 @@ public class Player : MonoBehaviour
         }
 
         transform.position = pos;
+        bool isRunning = grounded && movement.magnitude > 0.1f;
+        GetComponent<PlayerEffects>()?.SetRunDust(isRunning);
     }
 
     private void UpdateDynamicFov(Vector3 positionBeforeMove, Vector3 positionAfterMove, bool sprintingInput)
@@ -423,6 +434,7 @@ public class Player : MonoBehaviour
         {
             verticalVelocity = jumpStrength; // Adjust jump strength as needed
             grounded = false; // Player is now in the air
+            GetComponent<PlayerEffects>()?.PlayJumpDust(); // Dust while jumping
         }
     }
 
@@ -443,5 +455,8 @@ public class Player : MonoBehaviour
     {
         thirst = Mathf.Min(thirst + amount, 100f);
         Debug.Log($"Drank water! Thirst is now: {thirst}");
+    public void SetRenderDistance(int distance)
+    {
+        world.viewDistance = Mathf.Clamp(distance, 1, 100);
     }
 }

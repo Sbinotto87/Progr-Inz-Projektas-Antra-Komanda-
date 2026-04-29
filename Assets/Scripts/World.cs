@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Unity.Mathematics;
-using Unity.VisualScripting;
+using System.Diagnostics;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Assets.Scripts
 {
@@ -54,6 +50,8 @@ namespace Assets.Scripts
         /// signed 32bit int for seed
         /// </summary>
         public int Seed;
+        public float offsetX;
+        public float offsetZ;
         /// <summary>
         /// current biome to generate 
         /// </summary>
@@ -74,6 +72,8 @@ namespace Assets.Scripts
         /// player position cause for some reason i cant pull it from gameObject player
         /// </summary>
         private Transform playerTransform;
+        Queue<ChunkCoord> chunksToRender;
+
         private void Awake()
         {
             spawnPosition = spawnPosition = new Vector3((WorldSize * Chunk.Width) / 2f, Chunk.Height - 5, (WorldSize * Chunk.Width) / 2f);
@@ -84,14 +84,22 @@ namespace Assets.Scripts
         private void Start()
         {
             MyBlocks = GameObject.Find("Block").GetComponent<Blocks>();
-            Seed = UnityEngine.Random.Range(0, int.MaxValue);
+            UnityEngine.Random.InitState((int)System.DateTime.Now.Ticks);
+            Seed = UnityEngine.Random.Range(0, 10000);
             UnityEngine.Random.InitState(Seed);
+            UnityEngine.Debug.Log(Seed.ToString());
+            offsetX = (float)(Seed % 10000);
+            offsetZ = (float)((Seed / 100) % 10000);
             DayTime = 0;
             CurrentDay = 0;
             Tick = 0;
             viewDistance = 8;
+            chunksToRender = new Queue<ChunkCoord> ();
 
+            UnityEngine.Debug.Log("generating");
             GenerateWorld();
+            UnityEngine.Debug.Log("generated");
+            
             playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
             playerLastChunkCoord = GetChunkCoordFromVector3(playerTransform.position);
         }
@@ -99,12 +107,20 @@ namespace Assets.Scripts
         {
             playerChunkCoord = GetChunkCoordFromVector3(playerTransform.position);
 
+            Stopwatch sw = Stopwatch.StartNew();
             if (!playerChunkCoord.Equals(playerLastChunkCoord)) //if player moved from chunk, update 
             {
                 CheckViewDistance();
                 playerLastChunkCoord = playerChunkCoord;
+                UnityEngine.Debug.Log(sw.Elapsed);
             }
-
+            if(chunksToRender.Count>0)
+            {
+                ChunkCoord coord = chunksToRender.Dequeue();
+                CreateChunk(new ChunkCoord(coord.x, coord.z));
+                chunks[coord.x, coord.z].CreateMeshData();
+                chunks[coord.x, coord.z].CreateChunkMesh();
+            }
         }
         /// <summary>
         /// tickrate, 20 ticks per second, used for ingame time
@@ -148,23 +164,29 @@ namespace Assets.Scripts
             {
                 for (int z = (WorldSize / 2) - viewDistance; z < (WorldSize / 2) + viewDistance; z++)
                 {
-                    CreateChunk(new ChunkCoord(x, z));
+                    //CreateChunk(new ChunkCoord(x, z));
+                    chunks[x, z] = new Chunk(new ChunkCoord(x, z), this, MyBlocks);
+                    
                 }
             }
             
-            //Generate structures
-            Structures.GenerateGrass(this);
-            Structures.GenerateTrees(this);
+            Structures.GenerateMall(this, spawnPosition);
+            Structures.GenerateBuildings(this, spawnPosition, (viewDistance - 2) * Chunk.Width, (viewDistance - 2) * Chunk.Width);
             
-            //Generate chunks (together with terrain and structures)
             for (int x = (WorldSize / 2) - viewDistance; x < (WorldSize / 2) + viewDistance; x++)
             {
                 for (int z = (WorldSize / 2) - viewDistance; z < (WorldSize / 2) + viewDistance; z++)
                 {
+                    Structures.GenerateGrass(chunks[x, z]);
+                    Structures.GenerateTrees(chunks[x, z]);
+                    
                     chunks[x, z].CreateMeshData();
                     chunks[x, z].CreateChunkMesh();
+        
+                    activeChunks.Add(new ChunkCoord(x, z));
                 }
             }
+            
             Player.transform.position = spawnPosition;
         }
         /// <summary>
@@ -174,6 +196,10 @@ namespace Assets.Scripts
         private void CreateChunk(ChunkCoord coord)
         {
             chunks[coord.x, coord.z] = new Chunk(new ChunkCoord(coord.x, coord.z), this, MyBlocks);
+            
+            //Generate structures
+            Structures.GenerateGrass(chunks[coord.x, coord.z]);
+            Structures.GenerateTrees(chunks[coord.x, coord.z]);
 
             chunks[coord.x, coord.z].CreateMeshData();
             chunks[coord.x, coord.z].CreateChunkMesh();
@@ -257,7 +283,7 @@ namespace Assets.Scripts
                 }
             }
 
-            // fallback: terrain generation (ONLY for ungenerated areas)
+            // fallback: terrain generation (ONLY for ungenerated areas)           
             return GenerateTerrainVoxel(x, y, z);
         }
         private int GenerateTerrainVoxel(int x, int y, int z)
@@ -267,16 +293,15 @@ namespace Assets.Scripts
 
             int terrainHeight =
                 Mathf.FloorToInt(biome.terrainHeight *
-                PerlinNoise.Get2DPerlinNoise(new Vector2(x, z), 0, biome.terrainScale))
+                PerlinNoise.Get2DPerlinNoise(new Vector2(x, z), 0, biome.terrainScale, this.offsetX, this.offsetZ))
                 + biome.solidGroundHeight;
-
             if (y > terrainHeight)
                 return -1;
 
             if (y == terrainHeight)
                 return 1;
 
-            if (y < terrainHeight && y > terrainHeight - 4)
+            if (y < terrainHeight && y > terrainHeight - 20)
                 return 1;
 
             return 0;
@@ -312,7 +337,7 @@ namespace Assets.Scripts
                         //create if doesnt exist
                         if (chunks[x,z] == null)
                         {
-                            CreateChunk(new ChunkCoord(x, z));
+                            chunksToRender.Enqueue(new ChunkCoord(x, z));
                         }
                         //activate
                         else if (!chunks[x, z].isActive)
@@ -380,5 +405,4 @@ namespace Assets.Scripts
             return false;
         }
     }
-
 }

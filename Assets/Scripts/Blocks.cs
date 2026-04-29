@@ -12,11 +12,20 @@ public class Blocks : MonoBehaviour
 
     public BlockType[] block;
 
+    [Header("Break Sounds")] 
+    public AudioClip stoneBreakSound;
+    public AudioClip grassBreakSound;
+    public AudioClip woodBreakSound;
+    public AudioClip leafBreakSound;
+
+
     public Item stoneItem;
     public Item grassBlockItem;
     public Item woodItem;
     public Item leafItem;
     public Item grassItem;
+    public Item glassItem;
+    public Item defaultItem;
 
     [Header("Current block")]
     public int blockIndex;
@@ -34,8 +43,8 @@ public class Blocks : MonoBehaviour
 
     private void Awake()
     {
-        block = new BlockType[5];
-
+        block = new BlockType[9];
+        
         //Stone
         block[0] = new BlockType
         {
@@ -46,7 +55,8 @@ public class Blocks : MonoBehaviour
             tool = "Pickaxe",
             hitCount = 1,
             faces = new byte[] { 1, 1, 1, 1, 1, 1 },
-            dropItem = stoneItem
+            dropItem = stoneItem,
+            breakSound = stoneBreakSound
         };
 
         //Grass (block)
@@ -59,7 +69,8 @@ public class Blocks : MonoBehaviour
             tool = "Shovel",
             hitCount = 1,
             faces = new byte[] { 0, 0, 0, 0, 2, 0 },
-            dropItem = grassBlockItem
+            dropItem = grassBlockItem,
+            breakSound = grassBreakSound
         };
 
         //Wood
@@ -72,7 +83,8 @@ public class Blocks : MonoBehaviour
             tool = "Axe",
             hitCount = 2,
             faces = new byte[] { 3, 3, 3, 3, 3, 3 },
-            dropItem = woodItem
+            dropItem = woodItem,
+            breakSound = woodBreakSound
         };
 
         //Leaves
@@ -85,7 +97,8 @@ public class Blocks : MonoBehaviour
             tool = "Axe",
             hitCount = 1,
             faces = new byte[] { 2, 2, 2, 2, 2, 2 },
-            dropItem = leafItem
+            dropItem = leafItem,
+            breakSound = leafBreakSound
         };
         
         //Grass
@@ -97,8 +110,58 @@ public class Blocks : MonoBehaviour
             isBreakable = true,
             tool = "Axe",
             hitCount = 1,
-            faces = new byte[] { 4, 4, 4, 4, 5, 5 },
+            faces = new byte[] { 4, 4, 4, 4, 15, 15 },
+            dropItem = grassItem,
+            breakSound = grassBreakSound
+        };
+        
+        //Glass
+        block[5] = new BlockType
+        {
+            name = "Glass",
+            isSolid = true,
+            isTransparent = true,
+            isBreakable = true,
+            tool = "Axe",
+            hitCount = 2,
+            faces = new byte[] { 5, 5, 5, 5, 5, 5 },
             dropItem = grassItem
+        };
+        
+        block[6] = new BlockType
+        {
+            name = "Bricks",
+            isSolid = true,
+            isTransparent = false,
+            isBreakable = true,
+            tool = "Pickaxe",
+            hitCount = 3,
+            faces = new byte[] { 6, 6, 6, 6, 6, 6 },
+            dropItem = defaultItem
+        };
+        
+        block[7] = new BlockType
+        {
+            name = "Copper",
+            isSolid = true,
+            isTransparent = false,
+            isBreakable = true,
+            tool = "Pickaxe",
+            hitCount = 3,
+            faces = new byte[] { 7, 7, 7, 7, 7, 7 },
+            dropItem = defaultItem
+        };
+        
+        block[8] = new BlockType
+        {
+            name = "Copper bricks",
+            isSolid = true,
+            isTransparent = false,
+            isBreakable = true,
+            tool = "pickaxe",
+            hitCount = 3,
+            faces = new byte[] { 8, 8, 8, 8, 8, 8 },
+            dropItem = defaultItem
         };
     }
 
@@ -157,4 +220,6 @@ public class BlockType
     //always set 6 faces
     public byte[] faces;    //front, back, right, left, top, bottom
     public Item dropItem;
+
+    public AudioClip breakSound; // for breaking sounds
 }
