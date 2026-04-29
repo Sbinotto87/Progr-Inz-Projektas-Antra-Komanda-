@@ -24,10 +24,10 @@ public class BlockPlacer : MonoBehaviour
     private void PlaceBlock()
     {
         if (selector == null || !selector.hasBlockSelected) return;
-        if (playerInventory == null || playerInventory.items.Count == 0) return;
+        if (playerInventory == null || playerInventory.slots.Count == 0) return;
 
         // Use first item in inventory (later can select specific slot)
-        Item itemToPlace = playerInventory.items[0];
+        Item itemToPlace = playerInventory.slots[0].itemData;
         if (itemToPlace == null) return;
 
         Chunk chunk = selector.currentChunk;

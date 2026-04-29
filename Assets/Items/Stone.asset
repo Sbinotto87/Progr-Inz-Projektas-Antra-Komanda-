@@ -12,7 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20c7d56732b266f448e8ef63aafdaa11, type: 3}
   m_Name: Stone
   m_EditorClassIdentifier: Assembly-CSharp::Item
+  category: 4
   itemName: Stone
   weight: 10
   icon: {fileID: 0}
-  isStackable: 0
+  isStackable: 1
+  blockIndex: 0
+  hungerRestoreValue: 0
