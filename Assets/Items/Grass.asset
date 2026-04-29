@@ -16,6 +16,6 @@ MonoBehaviour:
   itemName: Grass
   weight: 10
   icon: {fileID: 0}
-  isStackable: 0
+  isStackable: 1
   blockIndex: 4
   hungerRestoreValue: 0

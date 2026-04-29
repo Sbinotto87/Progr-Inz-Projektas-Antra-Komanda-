@@ -2,12 +2,14 @@ using UnityEngine;
 using UnityEngine.EventSystems; // This is the "magic" include for dragging
 using UnityEngine.UI;
 
-public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
     [HideInInspector] public Item itemData;
     private Inventory playerInventory;
     private CanvasGroup canvasGroup;
     private Transform originalParent;
+    public Item equippedItem;
+    private bool equipped;
 
     private void Awake()
     {
@@ -72,7 +74,10 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         // Double click check
         if (eventData.clickCount == 2 && eventData.button == PointerEventData.InputButton.Left)
         {
-            ConsumeItem();
+            if (itemData.category == ItemCategory.Food || itemData.category == ItemCategory.Drink)
+                ConsumeItem();
+            if (itemData.category == ItemCategory.Weapon || itemData.category == ItemCategory.Tool)
+                EquipItem();
         }
     }
 
@@ -138,5 +143,24 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             transform.SetParent(originalParent);
             transform.localPosition = Vector3.zero;
         }
+    }
+    
+    public void EquipItem()
+    {
+        Transform tool = GameObject.Find("UI elements").transform.Find("tool");
+        if (!equipped)
+        {
+            Image toolImage = tool.GetComponent<Image>();
+            tool.gameObject.SetActive(true);
+            toolImage.sprite = itemData.icon;
+            equippedItem = itemData;
+            equipped = !equipped;
+        }
+        else
+        {
+            tool.gameObject.SetActive(false);
+            equipped = !equipped;
+        }
+        
     }
 }

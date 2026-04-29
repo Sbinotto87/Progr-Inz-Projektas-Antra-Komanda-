@@ -16,6 +16,6 @@ MonoBehaviour:
   itemName: Leaf
   weight: 10
   icon: {fileID: 0}
-  isStackable: 0
+  isStackable: 1
   blockIndex: 3
   hungerRestoreValue: 0

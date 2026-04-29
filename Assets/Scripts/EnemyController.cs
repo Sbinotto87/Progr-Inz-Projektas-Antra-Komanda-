@@ -54,8 +54,8 @@ public class EnemyController : MonoBehaviour
 
         Vector3 moveDir = toPlayer.normalized;
 
-        TryJump(moveDir);
-        MoveXZ(moveDir);
+        //TryJump(moveDir);
+        //MoveXZ(moveDir);
         ApplyGravity();
     }
 
