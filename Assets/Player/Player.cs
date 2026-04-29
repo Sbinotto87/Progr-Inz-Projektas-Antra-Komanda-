@@ -49,6 +49,8 @@ public class Player : MonoBehaviour
 
 
     private bool grounded = true;
+    private bool wasOutOfStamina = false;
+    float staminaRecoveryThreshold = 20f; // % needed before sprint allowed again
 
     private InputAction moveAction;
     private InputAction sprintAction;
@@ -132,7 +134,7 @@ public class Player : MonoBehaviour
 
         // Pass the stamina check directly into the FOV logic
         bool isMoving = moveAction.ReadValue<Vector2>().sqrMagnitude > 0.01f;
-        UpdateDynamicFov(positionBeforeMove, transform.position, (sprintAction.IsPressed() && stamina > 0 && isMoving));
+        UpdateDynamicFov(positionBeforeMove, transform.position, (sprintAction.IsPressed() && stamina > 0 && isMoving && !wasOutOfStamina));
 
 
         //UpdateDynamicFov(positionBeforeMove, transform.position, sprintingInput);
@@ -183,9 +185,22 @@ public class Player : MonoBehaviour
         Vector2 movement = moveAction.ReadValue<Vector2>();
         bool sneaking = IsSneaking();
 
-        //bool sprinting = sprintAction.IsPressed();
-        // Check if player is holding sprint, moving, not sneaking, and has stamina
-        bool canSprint = sprintAction.IsPressed() && movement.sqrMagnitude > 0.01f && !sneaking && stamina > 0;
+        bool wantsToSprint = sprintAction.IsPressed() && movement.sqrMagnitude > 0.01f && !sneaking;
+
+        // If player ran out → lock sprint
+        if (stamina <= 0.01f)
+        {
+            wasOutOfStamina = true;
+        }
+
+        // Unlock sprint only after enough recovery
+        if (wasOutOfStamina && stamina >= staminaRecoveryThreshold)
+        {
+            wasOutOfStamina = false;
+        }
+
+        // Final sprint condition
+        bool canSprint = wantsToSprint && !wasOutOfStamina && stamina > 0.02f;
 
         // Drain or Regen stamina based on that check
         if (canSprint)
@@ -455,6 +470,7 @@ public class Player : MonoBehaviour
     {
         thirst = Mathf.Min(thirst + amount, 100f);
         Debug.Log($"Drank water! Thirst is now: {thirst}");
+    }
     public void SetRenderDistance(int distance)
     {
         world.viewDistance = Mathf.Clamp(distance, 1, 100);
