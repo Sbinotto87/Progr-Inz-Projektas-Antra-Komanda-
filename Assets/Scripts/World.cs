@@ -74,6 +74,7 @@ namespace Assets.Scripts
         /// </summary>
         private Transform playerTransform;
         Queue<ChunkCoord> chunksToRender;
+        public bool IsInRadiation;
 
         private void Awake()
         {
@@ -84,6 +85,7 @@ namespace Assets.Scripts
         }
         private void Start()
         {
+            IsInRadiation = false;
             MyBlocks = GameObject.Find("Block").GetComponent<Blocks>();
             UnityEngine.Random.InitState((int)System.DateTime.Now.Ticks);
             Seed = UnityEngine.Random.Range(0, 10000);
@@ -111,6 +113,17 @@ namespace Assets.Scripts
             Stopwatch sw = Stopwatch.StartNew();
             if (!playerChunkCoord.Equals(playerLastChunkCoord)) //if player moved from chunk, update 
             {
+                bool radiation = chunks[playerChunkCoord.x, playerChunkCoord.z].isRadioactive;
+                if (radiation && !IsInRadiation)
+                {
+                    UnityEngine.Debug.Log("rads");
+                    IsInRadiation = true;
+                }
+                else if(!radiation && IsInRadiation)
+                {
+                    IsInRadiation = false;
+                }
+
                 CheckViewDistance();
                 playerLastChunkCoord = playerChunkCoord;
                 UnityEngine.Debug.Log(sw.Elapsed);
@@ -302,7 +315,7 @@ namespace Assets.Scripts
 
             if (y > terrainHeight)
                 if (y < 61)
-                    return 9;
+                    return 11;
                 else 
                 return -1; // Air
             else if (y == terrainHeight || (y < terrainHeight && y > terrainHeight - 4))
