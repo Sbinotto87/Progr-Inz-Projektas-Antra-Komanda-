@@ -180,7 +180,7 @@ namespace Assets.Scripts
                 {
                     Structures.GenerateGrass(chunks[x, z]);
                     Structures.GenerateTrees(chunks[x, z]);
-                    Structures.GenerateOres(chunks[x, z], 9);
+                    Structures.GenerateOres(chunks[x, z], 10);
                     
                     chunks[x, z].CreateMeshData();
                     chunks[x, z].CreateChunkMesh();
@@ -202,7 +202,7 @@ namespace Assets.Scripts
             //Generate structures
             Structures.GenerateGrass(chunks[coord.x, coord.z]);
             Structures.GenerateTrees(chunks[coord.x, coord.z]);
-            Structures.GenerateOres(chunks[coord.x, coord.z], 9);
+            Structures.GenerateOres(chunks[coord.x, coord.z], 10);
 
             chunks[coord.x, coord.z].CreateMeshData();
             chunks[coord.x, coord.z].CreateChunkMesh();

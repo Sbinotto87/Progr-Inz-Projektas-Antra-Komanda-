@@ -44,7 +44,7 @@ public class Blocks : MonoBehaviour
 
     private void Awake()
     {
-        block = new BlockType[10];
+        block = new BlockType[11];
         GameObject createdItems = GameObject.Find("CreatedItems");
         if (createdItems == null)
             createdItems = new GameObject("CreatedItems", typeof(CreatedItems));
@@ -148,9 +148,8 @@ public class Blocks : MonoBehaviour
             swimSlowdown = 1.0f,
             tool = "Axe",
             hitCount = 2,
-            faces = new byte[] { 5, 5, 5, 5, 5, 5 },
+            faces = new byte[] { 2, 2, 2, 2, 2, 2 },
             dropItem = defaultItem,
-            breakSound = grassBreakSound
         };
         
         block[6] = new BlockType
@@ -212,7 +211,7 @@ public class Blocks : MonoBehaviour
             dropItem = defaultItem
         };
         
-        block[9] = new BlockType
+        block[10] = new BlockType
         {
             name = "Iron ore",
             isSolid = true,

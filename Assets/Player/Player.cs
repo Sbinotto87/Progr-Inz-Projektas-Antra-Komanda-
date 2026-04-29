@@ -236,7 +236,7 @@ public class Player : MonoBehaviour
             stamina = Mathf.Min(100, stamina + staminaRegenRate * Time.deltaTime);
 
         // Calculate speed based on the same check
-        float speed = sneaking ? sneakSpeed : (canSprint ? sprintSpeed : walkSpeed);
+        speed = sneaking ? sneakSpeed : (canSprint ? sprintSpeed : walkSpeed);
 
         //float speed = sneaking ? sneakSpeed : (sprinting ? sprintSpeed : walkSpeed);
 
