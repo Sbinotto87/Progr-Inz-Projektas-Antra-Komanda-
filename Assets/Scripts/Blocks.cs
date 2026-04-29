@@ -142,7 +142,7 @@ public class Blocks : MonoBehaviour
             swimSlowdown = 1.0f,
             tool = "Axe",
             hitCount = 2,
-            faces = new byte[] { 5, 5, 5, 5, 5, 5 },
+            faces = new byte[] { 2, 2, 2, 2, 2, 2 },
             dropItem = grassItem
         };
         
@@ -201,7 +201,7 @@ public class Blocks : MonoBehaviour
             swimSlowdown = 2.0f,
             tool = "NA",
             hitCount = 99,
-            faces = new byte[] { 9, 9, 9, 9, 9, 9 },
+            faces = new byte[] { 0, 0, 0, 0, 0, 0 },
             dropItem = defaultItem
         };
     }

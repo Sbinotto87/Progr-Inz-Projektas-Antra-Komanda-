@@ -2554,6 +2554,7 @@ MonoBehaviour:
   Player: {fileID: 6941386855807311954, guid: 788a3b82a5a63eb4f9ea53a54fb60b95, type: 3}
   viewDistance: 0
   material: {fileID: 2100000, guid: d4533934b2ce22ac3b63b11296203585, type: 2}
+  transparentMaterial: {fileID: 2100000, guid: b6dd333def3587f44b1b5157bb7098fd, type: 2}
   DayTime: 0
   CurrentDay: 0
   Tick: 0
@@ -4780,7 +4781,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2189117492197485753, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.010931265
+      value: 0.00002031117
       objectReference: {fileID: 0}
     - target: {fileID: 4987976902964535875, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
       propertyPath: m_AnchorMax.x
