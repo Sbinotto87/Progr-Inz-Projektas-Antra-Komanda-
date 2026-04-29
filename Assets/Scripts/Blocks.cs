@@ -11,6 +11,7 @@ public class Blocks : MonoBehaviour
     public Material blockMaterial;
 
     public BlockType[] block;
+    private Item[] items;
 
     [Header("Break Sounds")] 
     public AudioClip stoneBreakSound;
@@ -44,7 +45,12 @@ public class Blocks : MonoBehaviour
     private void Awake()
     {
         block = new BlockType[10];
-
+        GameObject createdItems = GameObject.Find("CreatedItems");
+        if (createdItems == null)
+            createdItems = new GameObject("CreatedItems", typeof(CreatedItems));
+        CreatedItems createdItems1 = createdItems.GetComponent<CreatedItems>();
+        items = createdItems1.items;
+        
         //Stone
         block[0] = new BlockType
         {
@@ -58,7 +64,7 @@ public class Blocks : MonoBehaviour
             tool = "Pickaxe",
             hitCount = 1,
             faces = new byte[] { 1, 1, 1, 1, 1, 1 },
-            dropItem = stoneItem,
+            dropItem = items[0],
             breakSound = stoneBreakSound
         };
 
@@ -75,7 +81,7 @@ public class Blocks : MonoBehaviour
             tool = "Shovel",
             hitCount = 1,
             faces = new byte[] { 0, 0, 0, 0, 2, 0 },
-            dropItem = grassBlockItem,
+            dropItem = items[1],
             breakSound = grassBreakSound
         };
 
@@ -92,7 +98,7 @@ public class Blocks : MonoBehaviour
             tool = "Axe",
             hitCount = 2,
             faces = new byte[] { 3, 3, 3, 3, 3, 3 },
-            dropItem = woodItem,
+            dropItem = items[2],
             breakSound = woodBreakSound
         };
 
@@ -109,7 +115,7 @@ public class Blocks : MonoBehaviour
             tool = "Axe",
             hitCount = 1,
             faces = new byte[] { 2, 2, 2, 2, 2, 2 },
-            dropItem = leafItem,
+            dropItem = items[3],
             breakSound = leafBreakSound
         };
         
@@ -126,7 +132,7 @@ public class Blocks : MonoBehaviour
             tool = "Axe",
             hitCount = 1,
             faces = new byte[] { 4, 4, 4, 4, 15, 15 },
-            dropItem = grassItem,
+            dropItem = items[4],
             breakSound = grassBreakSound
         };
         
@@ -142,8 +148,9 @@ public class Blocks : MonoBehaviour
             swimSlowdown = 1.0f,
             tool = "Axe",
             hitCount = 2,
-            faces = new byte[] { 2, 2, 2, 2, 2, 2 },
-            dropItem = grassItem
+            faces = new byte[] { 5, 5, 5, 5, 5, 5 },
+            dropItem = defaultItem,
+            breakSound = grassBreakSound
         };
         
         block[6] = new BlockType
@@ -204,46 +211,20 @@ public class Blocks : MonoBehaviour
             faces = new byte[] { 0, 0, 0, 0, 0, 0 },
             dropItem = defaultItem
         };
+        
+        block[9] = new BlockType
+        {
+            name = "Iron ore",
+            isSolid = true,
+            isTransparent = false,
+            isBreakable = true,
+            tool = "pickaxe",
+            hitCount = 3,
+            faces = new byte[] { 8, 8, 8, 8, 8, 8 },
+            dropItem = items[8]
+        };
     }
-
-        //private void Start()
-    //{
-        //Mesh combinedMesh = new Mesh();
-        //CombineInstance[] combine = new CombineInstance[block.Length];
-
-        //for (int i = 0; i < block.Length; i++)
-        //{
-        //    Mesh m = Cube.GenerateMesh(new Vector3(i * 1.2f, 0, 0), i);
-        //    combine[i].mesh = m;
-        //    combine[i].transform = Matrix4x4.identity;
-        //}
-
-        //combinedMesh.CombineMeshes(combine, true, false);
-
-        //meshFilter.mesh = combinedMesh;
-        //meshRenderer.material = blockMaterial;
-        /*
-         //meshFilter.mesh = Cube.GenerateMesh(new Vector3(0, 0, 1), 0);
-         //for testing
-         //creates 3 blocks and combines them together into a single mesh
-         Mesh block1 = Cube.GenerateMesh(new Vector3(10, 7, 1), 0);
-         Mesh block2 = Cube.GenerateMesh(new Vector3(10, 8, 2), 0);
-         Mesh block3 = Cube.GenerateMesh(new Vector3(10, 7, 2), 0);
-         Mesh combinedMesh = new Mesh();
-         combinedMesh.CombineMeshes(new CombineInstance[] {
-             new() {
-             mesh = block1,
-             transform = meshFilter.transform.localToWorldMatrix },
-             new() {
-             mesh = block2,
-             transform = meshFilter.transform.localToWorldMatrix },
-             new() {
-             mesh = block3,
-             transform = meshFilter.transform.localToWorldMatrix }
-         });
-         meshFilter.mesh = combinedMesh;
-        */
-    //}
+    
 }
 
 /// <summary>

@@ -32,7 +32,7 @@ public class Inventory : MonoBehaviour
         {
             foreach (InventorySlot slot in slots)
             {
-                if (slot.itemData.itemName == newItem.itemName)
+                if (slot.itemData.Equals(newItem))
                 {
                     slot.count++;
                     foundStack = true;
@@ -63,7 +63,7 @@ public class Inventory : MonoBehaviour
 
         foreach (InventorySlot slot in slots)
         {
-            if (slot.itemData == itemToRemove)
+            if (slot.itemData.Equals(itemToRemove))
             {
                 slot.count--;
                 currentWeight -= itemToRemove.weight;

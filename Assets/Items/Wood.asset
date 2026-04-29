@@ -16,6 +16,6 @@ MonoBehaviour:
   itemName: Wood
   weight: 10
   icon: {fileID: 0}
-  isStackable: 0
+  isStackable: 1
   blockIndex: 2
   hungerRestoreValue: 0

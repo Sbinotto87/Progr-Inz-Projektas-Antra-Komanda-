@@ -16,6 +16,6 @@ MonoBehaviour:
   itemName: Stone
   weight: 10
   icon: {fileID: 0}
-  isStackable: 0
+  isStackable: 1
   blockIndex: 0
   hungerRestoreValue: 0

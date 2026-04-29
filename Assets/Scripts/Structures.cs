@@ -11,6 +11,26 @@ public class Structures
     private static readonly double BuildingsDensity = 0.01;
     private static readonly int mallX = 50, mallY = 8, mallZ = 25, mallOffset = 0;  //Do not change values without consulting
 
+    
+    public static void GenerateOres(Chunk chunk, int blockType)
+    {
+        int oresInChunk = Random.Range(2, 5);
+        for (int i = 0; i < oresInChunk; i++)
+        {
+            int length = Random.Range(2, 5);
+            int height = Random.Range(3, 6);
+            int width = Random.Range(2, 5);
+            int x = Random.Range(length, Chunk.Width - length - 1);
+            int z = Random.Range(width, Chunk.Width - width - 1);
+            int y = Random.Range(height, Chunk.Height / 3);
+            for (int j = x - length; j < x + length; j++)
+            for (int k = z - width; k < z + width; k++)
+            for (int l = y - height; l < y + height; l++)
+                if (chunk.blocks[j, l, k] == 0 && Random.value < 0.6)
+                    chunk.blocks[j, l, k] = blockType;
+        }
+    }
+    
     /// <summary>
     /// Generates a mall in the given position
     /// </summary>
