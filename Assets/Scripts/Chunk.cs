@@ -9,9 +9,14 @@ using UnityEngine;
 
 public class Chunk
 {
+    public MeshRenderer transparentMeshRenderer;
+    public MeshFilter transparentMeshFilter;
+    GameObject transparentObject;
+
     public MeshRenderer meshRenderer;
     public MeshFilter meshFilter;
     GameObject chunkObject;
+
     World world;
     public ChunkCoord coord;
     public BiomeData biome; //needed for multithreading
@@ -36,6 +41,16 @@ public class Chunk
     List<Vector3> vertices = new List<Vector3>();
     List<int> triangles = new List<int>();
     List<Vector2> uvs = new List<Vector2>();
+    List<Vector3> normals = new List<Vector3>();
+
+    /// <summary>
+    /// transparent mesh information
+    /// </summary>
+    int transparentTriangleIndex = 0;
+    List<Vector3> transparentVertices = new List<Vector3>();
+    List<int> transparentTriangles = new List<int>();
+    List<Vector2> transparentUvs = new List<Vector2>();
+    List<Vector3> transparentNormals = new List<Vector3>();
 
     public int[,,] blocks; //3d array of blocks in the world (-1 denotes air block)
     /// <summary>
@@ -47,10 +62,7 @@ public class Chunk
     /// </summary>
     /// 
 
-    /// <summary>
-    /// This is for normals, to avoid Recalculatemesh()
-    /// </summary>
-    List<Vector3> normals = new List<Vector3>();
+
     public bool isActive
     {
         get { return chunkObject.activeSelf; }
@@ -65,19 +77,6 @@ public class Chunk
     /// </summary>
     public void PopulateBlockArray()
     {
-        /*
-        for (int i = 0; i < Width; i++)
-        {
-            for (int j = 0; j < Height; j++)
-            {
-                for (int k = 0; k < Width; k++)
-                {
-                    blocks[i, j, k] = world.GetVoxel(new Vector3(i, j, k) + position);
-                }
-            }
-        }
-        Debug.Log("generatedchunk");
-        */
         int totalBlocks = Width * Height * Width;
         NativeArray<int> jobResult = new NativeArray<int>(totalBlocks, Allocator.TempJob);
         biome = world.biome;
@@ -133,13 +132,20 @@ public class Chunk
             col = chunkObject.AddComponent<MeshCollider>();
 
         col.sharedMesh = mesh;
+
+        Mesh transMesh = new Mesh();
+        transMesh.vertices = transparentVertices.ToArray();
+        transMesh.triangles = transparentTriangles.ToArray();
+        transMesh.uv = transparentUvs.ToArray();
+        transMesh.normals = transparentNormals.ToArray();
+        transMesh.RecalculateBounds();
+        transparentMeshFilter.mesh = transMesh;
     }
     /// <summary>
     /// adds mesh data to the lists in this class based on the data in the block array
     /// </summary>
     public void CreateMeshData()
     {
-        while (!isPopulated) { }
         for (int i = 0; i < Width; i++)
         {
             for (int j = 0; j < Height; j++)
@@ -160,98 +166,81 @@ public class Chunk
     /// <param name="pos">Position of the block</param>
     void AddVoxelDataToChunk(Vector3 pos)
     {
-       /* int blockID = blocks[(int)pos.x, (int)pos.y, (int)pos.z];
+        int blockID = blocks[(int)pos.x, (int)pos.y, (int)pos.z];
+        bool isBlockTransparent = MyBlocks.block[blockID].isTransparent;
+
         for (int i = 0; i < 6; i++)
         {
-            if (!CheckIfBlockIsSolid(pos + Voxel.faceChecks[i]))
+
+            if (CheckIfBlockIsSolid(pos + Voxel.faceChecks[i], blockID))
             {
-                if (blockID == 4 && i == 4) break;
-                if (blockID == 4)
+                List<Vector3> vList = isBlockTransparent ? transparentVertices : vertices;
+                List<int> tList = isBlockTransparent ? transparentTriangles : triangles;
+                List<Vector2> uList = isBlockTransparent ? transparentUvs : uvs;
+                List<Vector3> nList = isBlockTransparent ? transparentNormals : normals;
+                int tIndex = isBlockTransparent ? transparentTriangleIndex : triangleIndex;
+
+                if (blockID == 4) //zaza
                 {
-                    vertices.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 0]]);
-                    vertices.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 1]]);
-                    vertices.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 2]]);
-                    vertices.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 3]]);
+                    vList.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 0]]);
+                    vList.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 1]]);
+                    vList.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 2]]);
+                    vList.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 3]]);
                 }
                 else
                 {
-                    vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 0]]);
-                    vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 1]]);
-                    vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 2]]);
-                    vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 3]]);
+                    vList.Add(pos + Voxel.Vertices[Voxel.Faces[i, 0]]);
+                    vList.Add(pos + Voxel.Vertices[Voxel.Faces[i, 1]]);
+                    vList.Add(pos + Voxel.Vertices[Voxel.Faces[i, 2]]);
+                    vList.Add(pos + Voxel.Vertices[Voxel.Faces[i, 3]]);
                 }
 
-                AddTexture(MyBlocks.block[blockID].faces[i]);
-
-                triangles.Add(triangleIndex);
-                triangles.Add(triangleIndex + 1);
-                triangles.Add(triangleIndex + 2);
-                triangles.Add(triangleIndex + 2);
-                triangles.Add(triangleIndex + 3);
-                triangles.Add(triangleIndex);
-                triangleIndex += 4;
-            }
-        }*/
-       int blockID = blocks[(int)pos.x, (int)pos.y, (int)pos.z];
-       for (int i = 0; i < 6; i++)
-       {
-           if (!CheckIfBlockIsSolid(pos + Voxel.faceChecks[i]) || MyBlocks.block[blockID].isTransparent)
-           {
-               if (blockID == 4)
-               {
-                   vertices.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 0]]);
-                   vertices.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 1]]);
-                   vertices.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 2]]);
-                   vertices.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 3]]);
-               }
-               else
-               {
-                   vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 0]]);
-                   vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 1]]);
-                   vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 2]]);
-                   vertices.Add(pos + Voxel.Vertices[Voxel.Faces[i, 3]]);
-               }
                 Vector3 normal = Voxel.faceChecks[i];
+                for (int n = 0; n < 4; n++) nList.Add(normal);
 
-                normals.Add(normal);
-                normals.Add(normal);
-                normals.Add(normal);
-                normals.Add(normal);
+                AddTexture(MyBlocks.block[blockID].faces[i], uList);
 
-                AddTexture(MyBlocks.block[blockID].faces[i]);
+                tList.Add(tIndex);
+                tList.Add(tIndex + 1);
+                tList.Add(tIndex + 2);
+                tList.Add(tIndex + 2);
+                tList.Add(tIndex + 3);
+                tList.Add(tIndex);
 
-               triangles.Add(triangleIndex);
-               triangles.Add(triangleIndex + 1);
-               triangles.Add(triangleIndex + 2);
-               triangles.Add(triangleIndex + 2);
-               triangles.Add(triangleIndex + 3);
-               triangles.Add(triangleIndex);
-               triangleIndex += 4;
-
-           }
-       }
+                if (isBlockTransparent) transparentTriangleIndex += 4;
+                else triangleIndex += 4;
+            }
+        }
     }
     /// <summary>
     /// cheks if the block is solid(also does checks for blocks outside the chunk)
     /// </summary>
     /// <param name="pos">position in chunk</param>
     /// <returns>true if block is solid, false otherwise</returns>
-    bool CheckIfBlockIsSolid(Vector3 pos)
+    bool CheckIfBlockIsSolid(Vector3 pos, int currentBlockID)
     {
         int x = Mathf.FloorToInt(pos.x);
         int y = Mathf.FloorToInt(pos.y);
         int z = Mathf.FloorToInt(pos.z);
+        if (y < 0) return false;
+        int neighborID;
 
         if (!IsVoxelInChunk(x, y, z))
         {
-            if(world.GetVoxel(pos + position) != -1)
-                return MyBlocks.block[world.GetVoxel(pos + position)].isSolid;
+            neighborID = world.GetVoxel(pos + position);
         }
-        if (y < 0) return true;
-        if (x < 0 || x > Width - 1 || y < 0 || y > Height - 1 || z < 0 || z > Width - 1 || blocks[x, y, z] == -1 || MyBlocks.block[blocks[x, y, z]].isTransparent)
-            return false;
-        return MyBlocks.block[blocks[x, y, z]].isSolid;
+        else
+        {
+            neighborID = blocks[x, y, z];
+        }
 
+        if (neighborID == -1) return true;
+
+        if (neighborID == currentBlockID && MyBlocks.block[currentBlockID].isTransparent)
+        {
+            return false;
+        }
+        return MyBlocks.block[neighborID].isTransparent || !MyBlocks.block[neighborID].isSolid;
     }
     /// <summary>
     /// chesk if voxel within the limits of the chunk
@@ -271,7 +260,7 @@ public class Chunk
     /// Aplies texture info to face
     /// </summary>
     /// <param name="textureID">texture id to add from the atlas</param>
-    void AddTexture(int textureID)
+    void AddTexture(int textureID, List<Vector2> targetUvList)
     {
         float y = textureID / Voxel.TextureAtlasWidth;
         float x = textureID - y * Voxel.TextureAtlasWidth;
@@ -279,10 +268,10 @@ public class Chunk
         y *= Voxel.NormalizedBlockSize;
         y = 1f - y - Voxel.NormalizedBlockSize;
 
-        uvs.Add(new Vector2(x, y));
-        uvs.Add(new Vector2(x, y + Voxel.NormalizedBlockSize));
-        uvs.Add(new Vector2(x + Voxel.NormalizedBlockSize, y + Voxel.NormalizedBlockSize));
-        uvs.Add(new Vector2(x + Voxel.NormalizedBlockSize, y));
+        targetUvList.Add(new Vector2(x, y));
+        targetUvList.Add(new Vector2(x, y + Voxel.NormalizedBlockSize));
+        targetUvList.Add(new Vector2(x + Voxel.NormalizedBlockSize, y + Voxel.NormalizedBlockSize));
+        targetUvList.Add(new Vector2(x + Voxel.NormalizedBlockSize, y));
     }
 
     public Vector3 position
@@ -303,161 +292,42 @@ public class Chunk
 
         chunkObject = new GameObject();
         chunkObject.transform.position = new Vector3(coord.x * Width, 0f, coord.z * Width);
+        chunkObject.transform.SetParent(world.transform);
+        chunkObject.name = coord.x + ", " + coord.z;
 
         meshRenderer = chunkObject.AddComponent<MeshRenderer>();
         meshFilter = chunkObject.AddComponent<MeshFilter>();
-
-        chunkObject.transform.SetParent(world.transform);
         meshRenderer.material = world.material;
 
-        chunkObject.name = coord.x + ", " + coord.z;
+        transparentObject = new GameObject();
+        transparentObject.transform.SetParent(chunkObject.transform);
+        transparentObject.transform.localPosition = Vector3.zero;
+        transparentObject.name = "Transparent" + coord.x + ", " + coord.z;
+
+        transparentMeshFilter = transparentObject.AddComponent<MeshFilter>();
+        transparentMeshRenderer = transparentObject.AddComponent<MeshRenderer>();
+        transparentMeshRenderer.material = world.transparentMaterial;
 
         blocks = new int[Width, Height, Width];
 
-        //InitializeBlocks();
-
-
-        //world gen  testing
-        //CreateLayerOfBlocks(0, 255, 0);//layer of 0 blocks
-        //CreateLayerOfBlocks(0, 1, 0);//layer of 0 blocks
-        //CreateLayerOfBlocks(2, 4, 1);//4 layer of 1 blocks
-        //CreateLayerOfBlocks(1, 3, 5);//3 layers of 2 blocks
-        //blocks[10, 8, 10] = 1;
         PopulateBlockArray();
-
-        //CreateMeshData();
-
-        //CreateChunkMesh();
-    }
-
-    //Legacy code from this point onwards
-    //-------------------------------------------------------------------------------------------------
-    //OBSOLETE
-    /// <summary>
-    /// Creates a flat layer of blocks
-    /// </summary>
-    /// <param name="BlockID">id of blocks to fill the layer with</param>
-    /// <param name="thickness">layer thickness</param>
-    /// <param name="offset">how far is the layer from y=0</param>
-    public void CreateLayerOfBlocks(int BlockID, int thickness, int offset)
-    {
-
-        for (int i = 0; i < Width; i++)
-        {
-            for (int j = offset; j < thickness + offset; j++)
-            {
-                for (int k = 0; k < Width; k++)
-                {
-                    blocks[i, j, k] = BlockID;
-                }
-            }
-        }
-    }
-    //OBSOLETE
-    /// <summary>
-    /// Creates a flat layer of blocks
-    /// </summary>
-    /// <param name="BlockID">id of blocks to fill the layer with</param>
-    /// <param name="thickness">layer thickness</param>
-    /// <param name="offset">how far is the layer from y=0</param>
-    /// <returns>CombineInstance containing meshes of the layer of blocks</returns>
-    public List<CombineInstance> RenderLayerOfBlocks(int BlockID, int thickness, int offset)
-    {
-        //NOT USED ANYMORE
-        Mesh combinedMesh = new Mesh();
-        combinedMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32; // fixes array size so that we dont overflow via max size chunk
-        var combineInstance = new List<CombineInstance>();
-        for (int i = 0; i < Width; i++)
-        {
-            for (int j = offset; j < thickness + offset; j++)
-            {
-                for (int k = 0; k < Width; k++)
-                {
-                    if (BlockID != -1)
-                    {
-                        Mesh mesh = Cube.GenerateMesh(new Vector3(i, j, k), BlockID);
-                        CombineInstance temp = new CombineInstance();
-                        temp.mesh = mesh;
-                        temp.transform = Matrix4x4.identity;
-                        combineInstance.Add(temp);
-                    }
-                }
-            }
-        }
-        return combineInstance;
-    }
-    /// <summary>
-    /// creates chunk based on blocks in the block data array
-    /// </summary>
-    public void CreateChunkBlocksOld()
-    {
-        Mesh combinedMesh = new Mesh();
-        combinedMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32; // fixes array size so that we dont overflow via max size chunk
-        var combineInstance = new List<CombineInstance>();
-
-        for (int i = 0; i < Width; i++)
-        {
-            for (int j = 0; j < Height; j++)
-            {
-                for (int k = 0; k < Width; k++)
-                {
-                    if (blocks[i, j, k] != -1 && !CheckIFBLockIsSurrounded(i, j, k))
-                    {
-
-                        Mesh mesh = Cube.GenerateMesh(new Vector3(i, j, k), blocks[i, j, k]);
-                        CombineInstance temp = new CombineInstance();
-                        temp.mesh = mesh;
-                        temp.transform = Matrix4x4.identity;
-                        combineInstance.Add(temp);
-                    }
-                }
-            }
-        }
-        combinedMesh.CombineMeshes(combineInstance.ToArray());
-        meshFilter.mesh = combinedMesh;
-    }
-    //OBSOLETE
-    /// <summary>
-    /// checks if the block at the specified coordinates is surrounded on all sides by blocks
-    /// </summary>
-    /// <param name="x">block x coord</param>
-    /// <param name="y">block y coord</param>
-    /// <param name="z">block z coord/param>
-    /// <returns>true if surrounded, false if at least 1 side is exposed to air</returns>
-    bool CheckIFBLockIsSurrounded(int x, int y, int z)
-    {
-        if (x != 0 && y != 0 && z != 0 &&//corner
-           x != Width - 1 && y != Height - 1 && z != Width - 1 //eliminates all edge blocks from check so so that no indexOutOfBounds
-            )
-        {
-            //Debug.Log(String.Format("x: {0} y: {1} z: {2}", x.ToString(), y.ToString(), z.ToString()));
-            if (blocks[x + 1, y, z] != -1 && blocks[x - 1, y, z] != -1 && //x dirrection
-                blocks[x, y + 1, z] != -1 && blocks[x, y - 1, z] != -1 && //y dirrection
-                blocks[x, y, z + 1] != -1 && blocks[x, y, z - 1] != -1) //z dirrection
-                return true;
-        }
-        return false;
-    }
-    /// <summary>
-    /// helper method to create the blocks array and fill it with -1 (air blocks)
-    /// </summary>
-    void InitializeBlocks()
-    {
-        for (int x = 0; x < Width; x++)
-            for (int y = 0; y < Height; y++)
-                for (int z = 0; z < Width; z++)
-                    blocks[x, y, z] = -1;
     }
 
     public void UpdateChunk()
     {
-        // Reset mesh data
+        // Reset all data
         vertices.Clear();
         triangles.Clear();
         uvs.Clear();
-        triangleIndex = 0;
         normals.Clear();
-        // Rebuild
+        triangleIndex = 0;
+
+        transparentVertices.Clear();
+        transparentTriangles.Clear();
+        transparentUvs.Clear();
+        transparentNormals.Clear();
+        transparentTriangleIndex = 0;
+
         CreateMeshData();
         CreateChunkMesh();
     }
@@ -529,7 +399,10 @@ public class Chunk
             if (y == 0)
                 ResultBlocks[index] = 0; // Bedrock
             else if (y > calculatedHeight)
-                ResultBlocks[index] = -1; // Air
+                if (y < 61)
+                    ResultBlocks[index] = 9;
+                else
+                    ResultBlocks[index] = - 1; // Air
             else if (y == calculatedHeight || (y < calculatedHeight && y > calculatedHeight - 4))
                 ResultBlocks[index] = 1; // Dirt
             else
