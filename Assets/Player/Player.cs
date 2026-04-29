@@ -44,6 +44,12 @@ public class Player : MonoBehaviour
 
     private bool grounded = true;
 
+    public float swimSpeed = 2.0f;
+    public float waterBuoyancy = -2f; // Slower sinking than gravity
+    public float swimUpStrength = 5f;
+    public float waterDrag = 0.9f; // To smooth out movement
+    private bool inWater = false;
+
     private InputAction moveAction;
     private InputAction sprintAction;
     private InputAction lookAction;
@@ -119,6 +125,8 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        inWater = CheckWater(transform.position.x, transform.position.y - HalfHeight + SkinWidth, transform.position.z);
+
         Vector3 positionBeforeMove = transform.position;
         bool sprintingInput = sprintAction.IsPressed();
         CameraControl();
@@ -127,7 +135,18 @@ public class Player : MonoBehaviour
         ApplyGravity();
         transform.Translate(verticalVelocity * Time.deltaTime * Vector3.up, Space.World);
 
-        if (jumpAction.IsPressed() && grounded && verticalVelocity <= 0f)
+        if (inWater)
+        {
+            if (jumpAction.IsPressed()) // Swim Up
+            {
+                verticalVelocity = grounded ? jumpStrength * 0.7f : swimUpStrength;
+            }
+            else if (sneakAction.IsPressed()) // Swim Down
+            {
+                verticalVelocity = -swimUpStrength;
+            }
+        }
+        else if (jumpAction.IsPressed() && grounded && verticalVelocity <= 0f)
         {
             Jump();
         }
@@ -170,9 +189,14 @@ public class Player : MonoBehaviour
     {
         Vector2 movement = moveAction.ReadValue<Vector2>();
         bool sneaking = IsSneaking();
+        bool swimming = IsSwimming();
         bool sprinting = sprintAction.IsPressed();
 
-        float speed = sneaking ? sneakSpeed : (sprinting ? sprintSpeed : walkSpeed);
+        float speed;
+        if (inWater)
+            speed = swimSpeed; 
+        else
+            speed = sneaking ? sneakSpeed : (sprinting ? sprintSpeed : walkSpeed);
 
         Vector3 move = (transform.right * movement.x + transform.forward * movement.y).normalized * speed * Time.deltaTime;
 
@@ -267,6 +291,10 @@ public class Player : MonoBehaviour
     {
         return sneakAction != null && sneakAction.IsPressed();
     }
+    private bool IsSwimming()
+    {
+        return sneakAction != null && sneakAction.IsPressed();
+    }
 
     public void SetFovRange(float min, float max)
     {
@@ -302,7 +330,11 @@ public class Player : MonoBehaviour
     /// <remarks>If player is not grounded, apply gravity to vertical velocity.</remarks>
     void ApplyGravity()
     {
-        if (!grounded)
+        if (inWater)
+        {
+            verticalVelocity = Mathf.Lerp(verticalVelocity, waterBuoyancy, Time.deltaTime * 2f);
+        }
+        else if (!grounded)
             verticalVelocity += gravity * Time.deltaTime;
 
         Vector3 pos = transform.position;
@@ -412,6 +444,34 @@ public class Player : MonoBehaviour
             grounded = false; // Player is now in the air
             GetComponent<PlayerEffects>()?.PlayJumpDust(); // Dust while jumping
         }
+    }
+    public bool CheckWater(float posx, float posy, float posz)
+    {
+        int blockX = Mathf.FloorToInt(posx);
+        int blockY = Mathf.FloorToInt(posy);
+        int blockZ = Mathf.FloorToInt(posz);
+
+        if (blockY < 0 || blockY >= Chunk.Height) return false;
+
+        int chunkX = Mathf.FloorToInt((float)blockX / Chunk.Width);
+        int chunkZ = Mathf.FloorToInt((float)blockZ / Chunk.Width);
+
+        if (chunkX < 0 || chunkX >= World.WorldSize || chunkZ < 0 || chunkZ >= World.WorldSize) return false;
+
+        Chunk chunk = world.chunks[chunkX, chunkZ];
+        if (chunk == null) return false;
+
+        int localX = blockX - chunkX * Chunk.Width;
+        int localZ = blockZ - chunkZ * Chunk.Width;
+
+        int blockID = chunk.blocks[localX, blockY, localZ];
+        if (blockID != -1)
+        {
+            swimSpeed = chunk.MyBlocks.block[blockID].swimSlowdown;
+            return chunk.MyBlocks.block[blockID].isSwimable;
+            // Alternatively, if water is a specific ID (e.g., 5): return blockID == 5;
+        }
+        return false;
     }
 
     public void SetMouseSensitivity(float sensitivity)

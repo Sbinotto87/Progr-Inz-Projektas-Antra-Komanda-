@@ -37,6 +37,7 @@ namespace Assets.Scripts
         /// no clu, pavogiau koda
         /// </summary>
         public Material material;
+        public Material transparentMaterial;
         /// <summary>
         /// world time
         /// </summary>
@@ -291,20 +292,21 @@ namespace Assets.Scripts
             if (y == 0)
                 return 0;
 
+
             int terrainHeight =
                 Mathf.FloorToInt(biome.terrainHeight *
                 PerlinNoise.Get2DPerlinNoise(new Vector2(x, z), 0, biome.terrainScale, this.offsetX, this.offsetZ))
                 + biome.solidGroundHeight;
+
             if (y > terrainHeight)
-                return -1;
-
-            if (y == terrainHeight)
-                return 1;
-
-            if (y < terrainHeight && y > terrainHeight - 20)
-                return 1;
-
-            return 0;
+                if (y < 61)
+                    return 9;
+                else 
+                return -1; // Air
+            else if (y == terrainHeight || (y < terrainHeight && y > terrainHeight - 4))
+                return 1; // dirt
+            else
+                return 0; // Stone
         }
         /// <summary>
         /// gets chunk coord from world coord
