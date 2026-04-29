@@ -10,6 +10,7 @@ public class SettingsManager : MonoBehaviour
     private const string MaxFovKey = "MaxFov";
     private const string MasterVolumeKey = "MasterVolume";
     private const string RenderDistanceKey = "RenderDistance";
+    private const string SfxVolumeKey = "SfxVolume";
 
     [Header("Default Settings")]
     [SerializeField] private float defaultMouseSensitivity = 0.45f;
@@ -17,12 +18,14 @@ public class SettingsManager : MonoBehaviour
     [SerializeField] private float defaultMaxFov = 80f;
     [SerializeField] private float defaultMasterVolume = 1f;
     [SerializeField] private float defaultRenderDistance = 10f;
+    [SerializeField] private float defaultSfxVolume = 1f;
 
     public float MouseSensitivity { get; private set; }
     public float MinFov { get; private set; }
     public float MaxFov { get; private set; }
     public float MasterVolume { get; private set; }
     public int RenderDistance { get; private set; }
+    public float SfxVolume { get; private set; }
 
     private void Awake()
     {
@@ -107,6 +110,16 @@ public class SettingsManager : MonoBehaviour
         MaxFov = Mathf.Clamp(MaxFov, MinFov, 170f);
         MasterVolume = Mathf.Clamp01(MasterVolume);
         RenderDistance = Mathf.Clamp(RenderDistance, 1, 100);
+
+        SfxVolume = PlayerPrefs.GetFloat(SfxVolumeKey, defaultSfxVolume);
+        SfxVolume = Mathf.Clamp01(SfxVolume); // for audio settings 
+    }
+
+    public void SetSfxVolume(float value)
+    {
+        SfxVolume = Mathf.Clamp01(value);
+        PlayerPrefs.SetFloat(SfxVolumeKey, SfxVolume);
+        PlayerPrefs.Save();
     }
 
     private void ApplyMouseSensitivity()
