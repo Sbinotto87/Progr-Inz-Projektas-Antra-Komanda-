@@ -30,10 +30,11 @@ public class EnemyController : MonoBehaviour
         health = maxHealth;
 
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
-        world = FindObjectOfType<World>();
+        world = FindFirstObjectByType<World>();
 
         ResetGruntTimer();
     }
+    
 
     void Update()
     {
@@ -54,8 +55,8 @@ public class EnemyController : MonoBehaviour
 
         Vector3 moveDir = toPlayer.normalized;
 
-        //TryJump(moveDir);
-        //MoveXZ(moveDir);
+        TryJump(moveDir);
+        MoveXZ(moveDir);
         ApplyGravity();
     }
 
