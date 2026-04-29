@@ -58,6 +58,9 @@ public class Blocks : MonoBehaviour
             isSolid = true,
             isTransparent = false,
             isBreakable = true,
+            isCutout = false,
+            isSwimable = false,
+            swimSlowdown = 1.0f,
             tool = "Pickaxe",
             hitCount = 1,
             faces = new byte[] { 1, 1, 1, 1, 1, 1 },
@@ -72,6 +75,9 @@ public class Blocks : MonoBehaviour
             isSolid = true,
             isTransparent = false,
             isBreakable = true,
+            isCutout = false,
+            isSwimable = false,
+            swimSlowdown = 1.0f,
             tool = "Shovel",
             hitCount = 1,
             faces = new byte[] { 0, 0, 0, 0, 2, 0 },
@@ -86,6 +92,9 @@ public class Blocks : MonoBehaviour
             isSolid = true,
             isTransparent = false,
             isBreakable = true,
+            isCutout = false,
+            isSwimable = false,
+            swimSlowdown = 1.0f,
             tool = "Axe",
             hitCount = 2,
             faces = new byte[] { 3, 3, 3, 3, 3, 3 },
@@ -100,6 +109,9 @@ public class Blocks : MonoBehaviour
             isSolid = true,
             isTransparent = false,
             isBreakable = true,
+            isCutout = false,
+            isSwimable = false,
+            swimSlowdown = 1.0f,
             tool = "Axe",
             hitCount = 1,
             faces = new byte[] { 2, 2, 2, 2, 2, 2 },
@@ -112,8 +124,11 @@ public class Blocks : MonoBehaviour
         {
             name = "Grass",
             isSolid = false,
-            isTransparent = true,
+            isTransparent = false,
             isBreakable = true,
+            isCutout = true,
+            isSwimable = false,
+            swimSlowdown = 1.0f,
             tool = "Axe",
             hitCount = 1,
             faces = new byte[] { 4, 4, 4, 4, 15, 15 },
@@ -128,6 +143,9 @@ public class Blocks : MonoBehaviour
             isSolid = true,
             isTransparent = true,
             isBreakable = true,
+            isCutout = false,
+            isSwimable = false,
+            swimSlowdown = 1.0f,
             tool = "Axe",
             hitCount = 2,
             faces = new byte[] { 5, 5, 5, 5, 5, 5 },
@@ -141,6 +159,9 @@ public class Blocks : MonoBehaviour
             isSolid = true,
             isTransparent = false,
             isBreakable = true,
+            isCutout = false,
+            isSwimable = false,
+            swimSlowdown = 1.0f,
             tool = "Pickaxe",
             hitCount = 3,
             faces = new byte[] { 6, 6, 6, 6, 6, 6 },
@@ -153,6 +174,9 @@ public class Blocks : MonoBehaviour
             isSolid = true,
             isTransparent = false,
             isBreakable = true,
+            isCutout = false,
+            isSwimable = false,
+            swimSlowdown = 1.0f,
             tool = "Pickaxe",
             hitCount = 3,
             faces = new byte[] { 7, 7, 7, 7, 7, 7 },
@@ -165,9 +189,26 @@ public class Blocks : MonoBehaviour
             isSolid = true,
             isTransparent = false,
             isBreakable = true,
+            isCutout = false,
+            isSwimable = false,
+            swimSlowdown = 1.0f,
             tool = "pickaxe",
             hitCount = 3,
             faces = new byte[] { 8, 8, 8, 8, 8, 8 },
+            dropItem = defaultItem
+        };
+        block[9] = new BlockType
+        {
+            name = "Water",
+            isSolid = false,
+            isTransparent = true,
+            isBreakable = false,
+            isCutout = false,
+            isSwimable = true,
+            swimSlowdown = 2.0f,
+            tool = "NA",
+            hitCount = 99,
+            faces = new byte[] { 0, 0, 0, 0, 0, 0 },
             dropItem = defaultItem
         };
         
@@ -194,6 +235,9 @@ public class BlockType
     public string name;
     public bool isSolid;
     public bool isTransparent;
+    public bool isCutout; //for non see-through like grass
+    public bool isSwimable;
+    public float swimSlowdown;
     public bool isBreakable;
     public string tool;
     public int hitCount;
