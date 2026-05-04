@@ -11,7 +11,7 @@ public class EnemySpawner : MonoBehaviour
     public float spawnRadius = 30f;
 
     public int spawnStartTime = 1080;
-    public int despawnTime = 360;
+    public int spawnStopTime = 360;
 
     public float spawnInterval = 1f;
 
@@ -26,11 +26,13 @@ public class EnemySpawner : MonoBehaviour
     {
         world = FindObjectOfType<World>();
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        nextSpawnTime = Time.time + 1f;
     }
 
     void Update()
     {
         if (world == null || player == null) return;
+
         if (!ShouldSpawn(world.DayTime))
         {
             DespawnAll();
@@ -46,17 +48,19 @@ public class EnemySpawner : MonoBehaviour
 
     bool ShouldSpawn(int time)
     {
-        if (spawnStartTime > despawnTime)
-            return time >= spawnStartTime || time < despawnTime;
+        if (time < spawnStopTime || time >= spawnStartTime)
+            return true;
 
-        return time >= spawnStartTime && time < despawnTime;
+        return true; //?
     }
 
     void TrySpawn()
     {
+        activeEnemies.RemoveAll(item => item == null);
+
         if (activeEnemies.Count >= maxEnemies) return;
 
-        for (int attempt = 0; attempt < 5; attempt++)
+        for (int attempt = 0; attempt < 10; attempt++)
         {
             Vector2 offset = Random.insideUnitCircle.normalized * Random.Range(10f, spawnRadius);
 
@@ -67,9 +71,17 @@ public class EnemySpawner : MonoBehaviour
 
             if (groundY < 0) continue;
 
-            Vector3 spawnPos = new Vector3(x + 0.5f, groundY + 1f, z + 0.5f);
+            int blockBelowId = world.GetVoxel(new Vector3(x, groundY - 1, z));
+
+            if (blockBelowId != 11)
+                continue;
+
+            Vector3 spawnPos = new Vector3(x + 0.5f, groundY + 0.1f, z + 0.5f);
 
             if (!IsValidSpawnPosition(x, groundY, z))
+                continue;
+
+            if (HasLineOfSight(spawnPos))
                 continue;
 
             GameObject enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
@@ -92,11 +104,10 @@ public class EnemySpawner : MonoBehaviour
 
     bool IsValidSpawnPosition(int x, float groundY, int z)
     {
-        int feet = world.GetVoxel(new Vector3(x, groundY, z));
         int head = world.GetVoxel(new Vector3(x, groundY + 1, z));
         int head2 = world.GetVoxel(new Vector3(x, groundY + 2, z));
 
-        return feet == -1 && head == -1 && head2 == -1;
+        return head == -1 && head2 == -1;
     }
 
     float GetGroundY(int x, int z)
@@ -108,5 +119,23 @@ public class EnemySpawner : MonoBehaviour
         }
 
         return -1f;
+    }
+
+    bool HasLineOfSight(Vector3 spawnPos)
+    {
+        Vector3 origin = player.position + Vector3.up * 1.6f;
+        Vector3 direction = spawnPos - origin;
+        float distance = direction.magnitude;
+
+        Ray ray = new Ray(origin, direction.normalized);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, distance))
+        {
+            if (Vector3.Distance(hit.point, spawnPos) > 0.5f)
+                return false;
+        }
+
+        return true;
     }
 }

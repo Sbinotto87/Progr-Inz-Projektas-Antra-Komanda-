@@ -10,12 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 20c7d56732b266f448e8ef63aafdaa11, type: 3}
-  m_Name: Leaf
+  m_Name: Water
   m_EditorClassIdentifier: Assembly-CSharp::Item
-  category: 4
-  itemName: Leaf
-  weight: 10
+  itemName: Water
+  weight: 1
   icon: {fileID: 0}
   isStackable: 1
-  blockIndex: 3
-  hungerRestoreValue: 0
+  blockIndex: 9

@@ -79,8 +79,8 @@ public class CelestialBody : MonoBehaviour
         float height = Vector3.Dot(direction, Vector3.up);
         float visibility = Mathf.Clamp01(height);
 
-        SetAlpha(moonVisual, visibility);
-        SetAlpha(sunVisual, 1f - visibility);
+        //SetAlpha(moonVisual, visibility);
+        //SetAlpha(sunVisual, 1f - visibility);
     }
 
     void FacePlayer(Transform obj)
@@ -89,14 +89,14 @@ public class CelestialBody : MonoBehaviour
         obj.Rotate(0f, 180f, 0f);
     }
 
-    void SetAlpha(Transform obj, float a)
-    {
-        var renderer = obj.GetComponent<Renderer>();
-        if (renderer != null)
-        {
-            Color c = renderer.material.color;
-            c.a = a;
-            renderer.material.color = c;
-        }
-    }
+    //void SetAlpha(Transform obj, float a)
+    //{
+    //    var renderer = obj.GetComponent<Renderer>();
+    //    if (renderer != null)
+    //    {
+    //        Color c = renderer.material.color;
+    //        c.a = a;
+    //        renderer.material.color = c;
+    //    }
+    //}
 }

@@ -20,7 +20,7 @@ public class InventoryUI : MonoBehaviour
     {
         // Start with the menu hidden
         inventoryPanel.SetActive(false);
-
+        GameObject.Find("UI elements").transform.Find("tool").gameObject.SetActive(false);
         FindPlayer();
     }
 

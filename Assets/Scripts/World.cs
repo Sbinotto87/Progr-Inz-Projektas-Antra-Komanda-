@@ -37,6 +37,7 @@ namespace Assets.Scripts
         /// no clu, pavogiau koda
         /// </summary>
         public Material material;
+        public Material transparentMaterial;
         /// <summary>
         /// world time
         /// </summary>
@@ -73,6 +74,7 @@ namespace Assets.Scripts
         /// </summary>
         private Transform playerTransform;
         Queue<ChunkCoord> chunksToRender;
+        public bool IsInRadiation;
 
         private void Awake()
         {
@@ -83,6 +85,7 @@ namespace Assets.Scripts
         }
         private void Start()
         {
+            IsInRadiation = false;
             MyBlocks = GameObject.Find("Block").GetComponent<Blocks>();
             UnityEngine.Random.InitState((int)System.DateTime.Now.Ticks);
             Seed = UnityEngine.Random.Range(0, 10000);
@@ -110,6 +113,17 @@ namespace Assets.Scripts
             Stopwatch sw = Stopwatch.StartNew();
             if (!playerChunkCoord.Equals(playerLastChunkCoord)) //if player moved from chunk, update 
             {
+                bool radiation = chunks[playerChunkCoord.x, playerChunkCoord.z].isRadioactive;
+                if (radiation && !IsInRadiation)
+                {
+                    UnityEngine.Debug.Log("rads");
+                    IsInRadiation = true;
+                }
+                else if(!radiation && IsInRadiation)
+                {
+                    IsInRadiation = false;
+                }
+
                 CheckViewDistance();
                 playerLastChunkCoord = playerChunkCoord;
                 UnityEngine.Debug.Log(sw.Elapsed);
@@ -179,6 +193,7 @@ namespace Assets.Scripts
                 {
                     Structures.GenerateGrass(chunks[x, z]);
                     Structures.GenerateTrees(chunks[x, z]);
+                    Structures.GenerateOres(chunks[x, z], 10);
                     
                     chunks[x, z].CreateMeshData();
                     chunks[x, z].CreateChunkMesh();
@@ -200,6 +215,7 @@ namespace Assets.Scripts
             //Generate structures
             Structures.GenerateGrass(chunks[coord.x, coord.z]);
             Structures.GenerateTrees(chunks[coord.x, coord.z]);
+            Structures.GenerateOres(chunks[coord.x, coord.z], 10);
 
             chunks[coord.x, coord.z].CreateMeshData();
             chunks[coord.x, coord.z].CreateChunkMesh();
@@ -291,20 +307,21 @@ namespace Assets.Scripts
             if (y == 0)
                 return 0;
 
+
             int terrainHeight =
                 Mathf.FloorToInt(biome.terrainHeight *
                 PerlinNoise.Get2DPerlinNoise(new Vector2(x, z), 0, biome.terrainScale, this.offsetX, this.offsetZ))
                 + biome.solidGroundHeight;
+
             if (y > terrainHeight)
-                return -1;
-
-            if (y == terrainHeight)
-                return 1;
-
-            if (y < terrainHeight && y > terrainHeight - 20)
-                return 1;
-
-            return 0;
+                if (y < 61)
+                    return 11;
+                else 
+                return -1; // Air
+            else if (y == terrainHeight || (y < terrainHeight && y > terrainHeight - 4))
+                return 1; // dirt
+            else
+                return 0; // Stone
         }
         /// <summary>
         /// gets chunk coord from world coord
