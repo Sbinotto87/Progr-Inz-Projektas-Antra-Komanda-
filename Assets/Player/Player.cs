@@ -66,6 +66,10 @@ public class Player : MonoBehaviour
     private InputAction jumpAction;
     private InputAction sneakAction;
 
+    public bool HasOpenedInventory = false;
+    public bool HasOpenedChest = false;
+    public GameObject currentOpenedChest;
+
     private float xRotation = 0f;
 
     void Start()

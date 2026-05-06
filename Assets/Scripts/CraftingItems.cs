@@ -15,7 +15,7 @@ public class CraftingItems : MonoBehaviour
     
     private void Awake()
     {
-        craftingItems = new CraftingItem[3];
+        craftingItems = new CraftingItem[4];
         GameObject createdItems = GameObject.Find("CreatedItems");
         if (createdItems == null)
             createdItems = new GameObject("CreatedItems", typeof(CreatedItems));
@@ -50,6 +50,15 @@ public class CraftingItems : MonoBehaviour
                 new KeyValuePair<Item, int>(items[2], 2)
             },
             result = items[6]
+        };
+                
+        craftingItems[3] = new CraftingItem()
+        {
+            recipe = new()
+            {
+                new KeyValuePair<Item, int>(items[2], 3)
+            },
+            result = items[9]
         };
     }
 }

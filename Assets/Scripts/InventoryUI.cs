@@ -13,6 +13,7 @@ public class InventoryUI : MonoBehaviour
     public TextMeshProUGUI weightText;
 
     private PlayerInput playerInput;
+    private GameObject player;
 
     private Inventory playerInventory;
     private bool isOpen = false;
@@ -51,7 +52,7 @@ public class InventoryUI : MonoBehaviour
 
     private void FindPlayer()
     {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        player = GameObject.FindGameObjectWithTag("Player");
 
         if (player != null)
         {
@@ -69,6 +70,7 @@ public class InventoryUI : MonoBehaviour
     {
         // 1. Flip the true/false switch
         isOpen = !isOpen;
+        player.GetComponent<Player>().HasOpenedInventory = isOpen;
 
         // 2. Show or hide the actual UI panel
         inventoryPanel.SetActive(isOpen);

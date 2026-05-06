@@ -44,7 +44,7 @@ public class Blocks : MonoBehaviour
 
     private void Awake()
     {
-        block = new BlockType[12];
+        block = new BlockType[13];
         GameObject createdItems = GameObject.Find("CreatedItems");
         if (createdItems == null)
             createdItems = new GameObject("CreatedItems", typeof(CreatedItems));
@@ -61,7 +61,7 @@ public class Blocks : MonoBehaviour
             isCutout = false,
             isSwimable = false,
             swimSlowdown = 1.0f,
-            tool = "Pickaxe",
+            tool = ToolCategory.Pickaxe,
             hitCount = 1,
             faces = new byte[] { 1, 1, 1, 1, 1, 1 },
             dropItem = items[0],
@@ -78,7 +78,7 @@ public class Blocks : MonoBehaviour
             isCutout = false,
             isSwimable = false,
             swimSlowdown = 1.0f,
-            tool = "Shovel",
+            tool = ToolCategory.Shovel,
             hitCount = 1,
             faces = new byte[] { 0, 0, 0, 0, 2, 0 },
             dropItem = items[1],
@@ -95,7 +95,7 @@ public class Blocks : MonoBehaviour
             isCutout = false,
             isSwimable = false,
             swimSlowdown = 1.0f,
-            tool = "Axe",
+            tool = ToolCategory.Axe,
             hitCount = 2,
             faces = new byte[] { 3, 3, 3, 3, 3, 3 },
             dropItem = items[2],
@@ -112,7 +112,7 @@ public class Blocks : MonoBehaviour
             isCutout = false,
             isSwimable = false,
             swimSlowdown = 1.0f,
-            tool = "Axe",
+            tool = ToolCategory.Axe,
             hitCount = 1,
             faces = new byte[] { 2, 2, 2, 2, 2, 2 },
             dropItem = items[3],
@@ -129,7 +129,7 @@ public class Blocks : MonoBehaviour
             isCutout = true,
             isSwimable = false,
             swimSlowdown = 1.0f,
-            tool = "Axe",
+            tool = ToolCategory.Shovel,
             hitCount = 1,
             faces = new byte[] { 4, 4, 4, 4, 15, 15 },
             dropItem = items[4],
@@ -146,7 +146,7 @@ public class Blocks : MonoBehaviour
             isCutout = false,
             isSwimable = false,
             swimSlowdown = 1.0f,
-            tool = "Axe",
+            tool = ToolCategory.NA,
             hitCount = 2,
             faces = new byte[] { 2, 2, 2, 2, 2, 2 },
             dropItem = defaultItem,
@@ -161,7 +161,7 @@ public class Blocks : MonoBehaviour
             isCutout = false,
             isSwimable = false,
             swimSlowdown = 1.0f,
-            tool = "Pickaxe",
+            tool = ToolCategory.Pickaxe,
             hitCount = 3,
             faces = new byte[] { 6, 6, 6, 6, 6, 6 },
             dropItem = defaultItem
@@ -176,7 +176,7 @@ public class Blocks : MonoBehaviour
             isCutout = false,
             isSwimable = false,
             swimSlowdown = 1.0f,
-            tool = "Pickaxe",
+            tool = ToolCategory.Pickaxe,
             hitCount = 3,
             faces = new byte[] { 7, 7, 7, 7, 7, 7 },
             dropItem = defaultItem
@@ -191,7 +191,7 @@ public class Blocks : MonoBehaviour
             isCutout = false,
             isSwimable = false,
             swimSlowdown = 1.0f,
-            tool = "pickaxe",
+            tool = ToolCategory.Pickaxe,
             hitCount = 3,
             faces = new byte[] { 8, 8, 8, 8, 8, 8 },
             dropItem = defaultItem
@@ -205,7 +205,7 @@ public class Blocks : MonoBehaviour
             isCutout = false,
             isSwimable = true,
             swimSlowdown = 2.0f,
-            tool = "NA",
+            tool = ToolCategory.NA,
             hitCount = 99,
             faces = new byte[] { 0, 0, 0, 0, 0, 0 },
             dropItem = defaultItem
@@ -219,11 +219,12 @@ public class Blocks : MonoBehaviour
             isBreakable = true,
             isCutout = false,
             isSwimable = false,
-            tool = "pickaxe",
+            tool = ToolCategory.Pickaxe,
             hitCount = 3,
             faces = new byte[] { 8, 8, 8, 8, 8, 8 },
             dropItem = items[8]
         };
+        
         block[11] = new BlockType
         {
             name = "Oil",
@@ -233,10 +234,24 @@ public class Blocks : MonoBehaviour
             isCutout = false,
             isSwimable = true,
             swimSlowdown = 1.0f,
-            tool = "NA",
+            tool = ToolCategory.NA,
             hitCount = 99,
             faces = new byte[] { 1, 1, 1, 1, 1, 1 },
             dropItem = null
+        };
+        
+        block[12] = new BlockType
+        {
+            name = "Chest block",
+            isSolid = true,
+            isTransparent = false,
+            isBreakable = true,
+            isCutout = false,
+            isSwimable = false,
+            tool = ToolCategory.Axe,
+            hitCount = 4,
+            faces = new byte[] { 1, 1, 1, 1, 1, 1 },
+            dropItem = items[9]
         };
     }
     
@@ -254,7 +269,7 @@ public class BlockType
     public bool isSwimable;
     public float swimSlowdown;
     public bool isBreakable;
-    public string tool;
+    public ToolCategory tool;
     public int hitCount;
     
     //always set 6 faces
@@ -262,4 +277,12 @@ public class BlockType
     public Item dropItem;
 
     public AudioClip breakSound; // for breaking sounds
+}
+
+public enum ToolCategory
+{
+    Pickaxe,
+    Axe,
+    Shovel,
+    NA
 }
