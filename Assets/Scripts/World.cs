@@ -93,7 +93,7 @@ namespace Assets.Scripts
             UnityEngine.Debug.Log(Seed.ToString());
             offsetX = (float)(Seed % 10000);
             offsetZ = (float)((Seed / 100) % 10000);
-            DayTime = 0;
+            DayTime = 500;
             CurrentDay = 0;
             Tick = 0;
             viewDistance = 8;
