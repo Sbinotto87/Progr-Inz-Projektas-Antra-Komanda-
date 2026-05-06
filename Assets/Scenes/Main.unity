@@ -43,7 +43,7 @@ RenderSettings:
 LightmapSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 13
-  m_BakeOnSceneLoad: 0
+  m_BakeOnSceneLoad: 1
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -93,7 +93,7 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 112000000, guid: c323bbd5664d6a2459fcaccdc0feaa48, type: 2}
+  m_LightingDataAsset: {fileID: 112000000, guid: c5e9dd55c32dc4e4d9407f9f15198ad5, type: 2}
   m_LightingSettings: {fileID: 4890085278179872738, guid: 37dd799a8960a6d478ab75fc8f6a659b, type: 2}
 --- !u!196 &4
 NavMeshSettings:
@@ -14404,7 +14404,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1894568144303924818, guid: 956273af0ba681673b6a32baaf3e1862, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.000057846206
+      value: 0.00014577911
       objectReference: {fileID: 0}
     - target: {fileID: 3125051062121537081, guid: 956273af0ba681673b6a32baaf3e1862, type: 3}
       propertyPath: m_AnchorMax.x
@@ -15513,7 +15513,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2189117492197485753, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.000057846206
+      value: 0.00014577911
       objectReference: {fileID: 0}
     - target: {fileID: 2250239454947147457, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
       propertyPath: m_ShowMaskGraphic
