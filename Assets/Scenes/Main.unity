@@ -14404,7 +14404,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1894568144303924818, guid: 956273af0ba681673b6a32baaf3e1862, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.0033218807
+      value: 0.000057846206
       objectReference: {fileID: 0}
     - target: {fileID: 3125051062121537081, guid: 956273af0ba681673b6a32baaf3e1862, type: 3}
       propertyPath: m_AnchorMax.x
@@ -15513,7 +15513,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2189117492197485753, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.0033218807
+      value: 0.000057846206
       objectReference: {fileID: 0}
     - target: {fileID: 2250239454947147457, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
       propertyPath: m_ShowMaskGraphic
@@ -15650,6 +15650,10 @@ PrefabInstance:
     - target: {fileID: 8616966149428976844, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
       propertyPath: m_Size
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8827874000016324992, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
+      propertyPath: m_MaxValue
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 9036191002520389058, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
       propertyPath: m_Material
