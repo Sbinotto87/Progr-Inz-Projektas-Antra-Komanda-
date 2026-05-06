@@ -1,6 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Assets.Scripts;
 using UnityEngine;
 using UnityEngine.EventSystems; // This is the "magic" include for dragging
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
@@ -10,12 +15,13 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     private Transform originalParent;
     public Item equippedItem;
     private bool equipped;
+    private GameObject player;
 
     private void Awake()
     {
         canvasGroup = GetComponent<CanvasGroup>();
         // Find the player automatically so we don't have to drag it in the inspector
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        player = GameObject.FindGameObjectWithTag("Player");
         if (player != null) playerInventory = player.GetComponent<Inventory>();
     }
 
@@ -97,7 +103,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 if (itemData.category == ItemCategory.Food)
                     playerScript.AddHunger(itemData.hungerRestoreValue);
                 else
-                    playerScript.AddThirst(itemData.hungerRestoreValue);
+                    playerScript.AddThirst(itemData.thirstRestoreValue);
 
                 // Remove 1 item from the stack
                 playerInventory.RemoveItem(itemData);
@@ -139,9 +145,46 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
         else
         {
-            // Snap back to inventory if dropped inside
-            transform.SetParent(originalParent);
-            transform.localPosition = Vector3.zero;
+            Player player = this.player.GetComponent<Player>();
+            InventoryUI invUI = GameObject.Find("Inventory UI manager").GetComponent<InventoryUI>();
+            ChestBlock chestBlock = null;
+            if (player.HasOpenedChest)
+                chestBlock = player.currentOpenedChest.GetComponent<ChestBlock>();
+            GameObject isChest = eventData.hovered.Find(x => x.name == "ChestPanel");
+            GameObject isInventory = eventData.hovered.Find(x => x.name == "InventoryPanel");
+            if (isChest != null)
+            {
+                if (chestBlock.listParent == originalParent)
+                {
+                    transform.SetParent(originalParent);
+                    transform.localPosition = Vector3.zero;
+                    return;
+                }
+                transform.SetParent(originalParent);
+                this.player.GetComponent<Inventory>().RemoveItem(itemData);
+                invUI.RefreshUI();
+                chestBlock.addItem(itemData);
+                chestBlock.RefreshUI();
+            }
+            else if (isInventory != null)
+            {
+                if (invUI.listParent == originalParent)
+                {
+                    transform.SetParent(originalParent);
+                    transform.localPosition = Vector3.zero;
+                    return;
+                }
+                transform.SetParent(originalParent);
+                chestBlock.removeItem(itemData);
+                chestBlock.RefreshUI();
+                this.player.GetComponent<Inventory>().AddItem(itemData);
+                invUI.RefreshUI();
+            }
+            else
+            {
+                transform.SetParent(originalParent);
+                transform.localPosition = Vector3.zero;
+            }
         }
     }
     

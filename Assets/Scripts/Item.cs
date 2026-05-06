@@ -25,6 +25,7 @@ public class Item : ScriptableObject, IEquatable<Item>
 
     [Header("Consumable Stats")]
     public float hungerRestoreValue;
+    public float thirstRestoreValue;
     
     public bool Equals(Item other) => itemName.Equals(other.itemName);
 }
@@ -35,7 +36,7 @@ public class CreatedItems : MonoBehaviour
 
     public void Awake()
     {
-        items = new Item[9];
+        items = new Item[12];
         
         Item stone = ScriptableObject.CreateInstance<Item>();
         stone.category = ItemCategory.Block;
@@ -105,5 +106,30 @@ public class CreatedItems : MonoBehaviour
         IronOre.isStackable = true;
         IronOre.blockIndex = 9;
         items[8] = IronOre;
+                
+        Item chestblock = ScriptableObject.CreateInstance<Item>();
+        chestblock.category = ItemCategory.Block;
+        chestblock.itemName = "Chest block";
+        chestblock.weight = 5;
+        chestblock.isStackable = true;
+        chestblock.blockIndex = 12;
+        items[9] = chestblock;
+        
+        Item beer = ScriptableObject.CreateInstance<Item>();
+        beer.category = ItemCategory.Drink;
+        beer.itemName = "Beer";
+        beer.weight = 5;
+        beer.isStackable = true;
+        beer.hungerRestoreValue = 5;
+        beer.thirstRestoreValue = 40;
+        items[10] = beer;
+        
+        Item bread = ScriptableObject.CreateInstance<Item>();
+        bread.category = ItemCategory.Food;
+        bread.itemName = "Bread";
+        bread.weight = 5;
+        bread.isStackable = true;
+        bread.hungerRestoreValue = 40;
+        items[11] = bread;
     }
 }
