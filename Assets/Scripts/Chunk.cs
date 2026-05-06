@@ -113,6 +113,7 @@ public class Chunk
         isRadioactive = radioactivity[0];
         if(radioactivity[0]) UnityEngine.Debug.Log("generatedRadioactivChunk");
         jobResult.Dispose();
+        radioactivity.Dispose();
         isPopulated = true;
         
     }
