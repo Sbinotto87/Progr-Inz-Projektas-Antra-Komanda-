@@ -1,10 +1,14 @@
 using UnityEngine;
-using UnityEngine.EventSystems; // This is the "magic" include for dragging
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
     [HideInInspector] public Item itemData;
+
+    // ── NEW: for toolbar
+    [HideInInspector] public bool droppedOnToolbar = false;
+
     private Inventory playerInventory;
     private CanvasGroup canvasGroup;
     private Transform originalParent;
@@ -23,18 +27,21 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         originalParent = transform.parent;
 
-        // 1. Find the actual Canvas component in your scene
-        Canvas canvas = GetComponentInParent<Canvas>();
+        // Reset the flag at the START of every drag
+        droppedOnToolbar = false;
+
+        // Find the actual Canvas component in your scene
+        Canvas canvas = GetComponentInParent<Canvas>().rootCanvas;
         if (canvas != null)
         {
-            // 2. Move the item to the Canvas directly so it's above the Panels
+            // Move the item to the Canvas directly so it's above the Panels
             transform.SetParent(canvas.transform);
         }
 
-        // 3. Force it to the very front of the draw order
+        // Force it to the very front of the draw order
         transform.SetAsLastSibling();
 
-        // 4. Safety: Reset scale so it doesn't shrink or grow
+        // Safety: Reset scale so it doesn't shrink or grow
         transform.localScale = Vector3.one;
 
         canvasGroup.alpha = 0.6f;
@@ -117,6 +124,16 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         canvasGroup.alpha = 1f;
         canvasGroup.blocksRaycasts = true;
+
+        // ── TOOLBAR DROP: ToolbarSlot.OnDrop already recorded the item.
+        //    Just snap the visual back to the inventory — nothing else needed.
+        if (droppedOnToolbar)
+        {
+            droppedOnToolbar = false;
+            transform.SetParent(originalParent);
+            transform.localPosition = Vector3.zero;
+            return;
+        }
 
         // Check if we dropped it OUTSIDE the UI
         if (!EventSystem.current.IsPointerOverGameObject())

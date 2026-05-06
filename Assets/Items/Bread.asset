@@ -15,7 +15,7 @@ MonoBehaviour:
   category: 2
   itemName: Bread
   weight: 5
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: ac2fe84f3227c0341a409312b434b61b, type: 3}
   isStackable: 1
   blockIndex: 0
   hungerRestoreValue: 40

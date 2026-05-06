@@ -5,6 +5,7 @@ public class BlockPlacer : MonoBehaviour
 {
     public BlockSelector selector;       // assign in inspector
     private Inventory playerInventory;
+    private ToolBarUI toolbar;
 
     private void Start()
     {
@@ -12,23 +13,58 @@ public class BlockPlacer : MonoBehaviour
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
             playerInventory = player.GetComponent<Inventory>();
+
+        // Find toolbar
+        toolbar = Object.FindFirstObjectByType<ToolBarUI>();
     }
 
     private void Update()
     {
-        // Right click places a block
         if (Mouse.current.rightButton.wasPressedThisFrame)
-            PlaceBlock();
+        {
+            Item selectedItem = toolbar?.GetSelectedItem();
+            if (selectedItem == null) return;
+
+            switch (selectedItem.category)
+            {
+                case ItemCategory.Block:
+                    PlaceBlock(selectedItem);
+                    break;
+
+                case ItemCategory.Food:
+                    Player player = playerInventory.GetComponent<Player>();
+                    if (player != null)
+                    {
+                        player.AddHunger(selectedItem.hungerRestoreValue);
+                        playerInventory.RemoveItem(selectedItem);
+                        InventoryUI ui = Object.FindFirstObjectByType<InventoryUI>();
+                        if (ui != null) ui.RefreshUI();
+                    }
+                    break;
+
+                case ItemCategory.Drink:
+                    Player playerD = playerInventory.GetComponent<Player>();
+                    if (playerD != null)
+                    {
+                        playerD.AddThirst(selectedItem.hungerRestoreValue);
+                        playerInventory.RemoveItem(selectedItem);
+                        InventoryUI ui = Object.FindFirstObjectByType<InventoryUI>();
+                        if (ui != null) ui.RefreshUI();
+                    }
+                    break;
+            }
+        }
     }
 
-    private void PlaceBlock()
+    private void PlaceBlock(Item itemToPlace)
     {
         if (selector == null || !selector.hasBlockSelected) return;
         if (playerInventory == null || playerInventory.slots.Count == 0) return;
 
         // Use first item in inventory (later can select specific slot)
-        Item itemToPlace = playerInventory.slots[0].itemData;
-        if (itemToPlace == null) return;
+        //Item itemToPlace = toolbar?.GetSelectedItem();
+
+        if (itemToPlace == null || itemToPlace.category != ItemCategory.Block) return;
 
         Chunk chunk = selector.currentChunk;
         if (chunk == null) return;
