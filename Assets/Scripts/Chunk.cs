@@ -15,6 +15,7 @@ public class Chunk
     public MeshFilter transparentMeshFilter;
     GameObject transparentObject;
 
+
     public MeshRenderer meshRenderer;
     public MeshFilter meshFilter;
     GameObject chunkObject;
