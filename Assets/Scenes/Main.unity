@@ -1186,10 +1186,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   flashlight: {fileID: 365689975}
   maxBattery: 100
-  drainRate: 10
+  drainRate: 5
   rechargeRate: 5
-  restartDelay: 3
+  restartDelay: 5
   batteryBar: {fileID: 1339102177}
+  lowBatteryThreshold: 30
+  normalIntensity: 100
+  dimIntensity: 5
 --- !u!114 &365689974
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1230,10 +1233,10 @@ Light:
   serializedVersion: 12
   m_Type: 0
   m_Color: {r: 0.97647065, g: 1, b: 0.61960787, a: 1}
-  m_Intensity: 1
-  m_Range: 10
-  m_SpotAngle: 30
-  m_InnerSpotAngle: 21.80208
+  m_Intensity: 100
+  m_Range: 100
+  m_SpotAngle: 90
+  m_InnerSpotAngle: 75
   m_CookieSize2D: {x: 0.5, y: 0.5}
   m_Shadows:
     m_Type: 0
@@ -2220,7 +2223,7 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 800
+      scalar: 1000
       minScalar: 10
       maxCurve:
         serializedVersion: 2
@@ -6133,7 +6136,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 370ae0ec5cd023a4db7e41cb9f1af293, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombat
-  cameraTransform: {fileID: 0}
+  cameraTransform: {fileID: 330585546}
   offset: {x: 0, y: 10, z: 0}
 --- !u!1 &410087039
 GameObject:
@@ -7469,7 +7472,7 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 4
+      scalar: 10
       minScalar: 5
       maxCurve:
         serializedVersion: 2
@@ -7640,7 +7643,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.2
+      scalar: 0.3
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -12721,7 +12724,7 @@ MonoBehaviour:
   currentWeather: 0
   rainEffect: {fileID: 378845112}
   snowEffect: {fileID: 936930119}
-  changeInterval: 10
+  changeInterval: 30
 --- !u!4 &1171436000
 Transform:
   m_ObjectHideFlags: 0
@@ -15319,6 +15322,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1838957768502688484, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
       propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1838957768502688484, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
+      propertyPath: m_AnchorMin.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2016575086930927895, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
