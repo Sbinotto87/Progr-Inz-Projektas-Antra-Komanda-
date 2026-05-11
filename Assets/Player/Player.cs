@@ -41,6 +41,17 @@ public class Player : MonoBehaviour
     public float hunger = 100f;
     public float thirst = 100f;
 
+    [Header("Fall Damage")]
+    [SerializeField] private float minimumFallVelocity = -12f;
+    [SerializeField] private float fallDamageMultiplier = 4f;
+
+    private float highestYWhileGrounded;
+
+    [SerializeField] private float invincibilityDuration = 1f;
+
+    private bool isInvincible = false;
+    private float invincibilityTimer = 0f;
+
     // --- STAMINA VARIABLES ---
     public float stamina = 100f;
     public float staminaDrainRate = 15f;
@@ -133,12 +144,24 @@ public class Player : MonoBehaviour
             return;
         }
 
+        highestYWhileGrounded = transform.position.y;
+
         SpawnPosition();
     }
 
 
     void Update()
     {
+        if (isInvincible)
+        {
+            invincibilityTimer -= Time.deltaTime;
+
+            if (invincibilityTimer <= 0f)
+            {
+                isInvincible = false;
+            }
+        }
+
         inWater = CheckWater(transform.position.x, transform.position.y - HalfHeight + SkinWidth, transform.position.z);
 
         Vector3 positionBeforeMove = transform.position;
@@ -173,6 +196,7 @@ public class Player : MonoBehaviour
             Jump();
         }
 
+        HandleFallDamage();
         ResolveGround();
         BugRemoval();
     }
@@ -554,5 +578,40 @@ public class Player : MonoBehaviour
     public void SetRenderDistance(int distance)
     {
         world.viewDistance = Mathf.Clamp(distance, 1, 100);
+    }
+    public void TakeDamage(float damage)
+    {
+        if (isInvincible)
+            return;
+
+        health -= damage;
+
+        StartInvincibilityFrames();
+    }
+
+    private void StartInvincibilityFrames()
+    {
+        isInvincible = true;
+        invincibilityTimer = invincibilityDuration;
+    }
+
+    private void HandleFallDamage()
+    {
+        if (grounded)
+        {
+            highestYWhileGrounded = transform.position.y;
+            return;
+        }
+
+        if (!grounded && IsGrounded(transform.position))
+        {
+            float impactVelocity = verticalVelocity;
+            if (impactVelocity < minimumFallVelocity)
+            {
+                float damage = Mathf.Abs(impactVelocity - minimumFallVelocity) * fallDamageMultiplier;
+
+                TakeDamage(damage);
+            }
+        }
     }
 }
