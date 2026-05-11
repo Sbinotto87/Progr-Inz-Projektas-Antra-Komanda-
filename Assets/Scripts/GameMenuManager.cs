@@ -164,7 +164,7 @@ public class GameMenuManager : MonoBehaviour
     }
     public void EnableRadiation()
     {
-        colorAdjustments.colorFilter.value = new Color(0.77f, 1f, 0f, 0.25f);
+        colorAdjustments.colorFilter.value = new Color(0.77f, 1f, 0f, 0.125f);
         colorAdjustments.active = true;
         player.isInRadiation = true;
     }

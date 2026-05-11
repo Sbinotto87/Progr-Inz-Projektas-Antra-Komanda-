@@ -268,106 +268,106 @@ public class Blocks : MonoBehaviour
         };
         block[13] = new BlockType
         {
-            name = "Water0875",
+            name = "Oil0875",
             isSolid = false,
             isTransparent = true,
             isBreakable = false,
             isCutout = false,
             isSwimable = true,
-            swimSlowdown = 2.0f,
+            swimSlowdown = 1.0f,
             tool = ToolCategory.NA,
             hitCount = 99,
-            faces = new byte[] { 0, 0, 0, 0, 0, 0 },
+            faces = new byte[] { 1, 1, 1, 1, 1, 1 },
             dropItem = defaultItem,
             mesh = MeshType.Nf0875
         };
         block[14] = new BlockType
         {
-            name = "Water075",
+            name = "Oil075",
             isSolid = false,
             isTransparent = true,
             isBreakable = false,
             isCutout = false,
             isSwimable = true,
-            swimSlowdown = 2.0f,
+            swimSlowdown = 1.0f,
             tool = ToolCategory.NA,
             hitCount = 99,
-            faces = new byte[] { 0, 0, 0, 0, 0, 0 },
+            faces = new byte[] { 1, 1, 1, 1, 1, 1 },
             dropItem = defaultItem,
             mesh = MeshType.Nf075
         };
         block[15] = new BlockType
         {
-            name = "Water0625",
+            name = "Oil0625",
             isSolid = false,
             isTransparent = true,
             isBreakable = false,
             isCutout = false,
             isSwimable = true,
-            swimSlowdown = 2.0f,
+            swimSlowdown = 1.0f,
             tool = ToolCategory.NA,
             hitCount = 99,
-            faces = new byte[] { 0, 0, 0, 0, 0, 0 },
+            faces = new byte[] { 1, 1, 1, 1, 1, 1 },
             dropItem = defaultItem,
             mesh = MeshType.Nf0625
         };
         block[16] = new BlockType
         {
-            name = "Water05",
+            name = "Oil05",
             isSolid = false,
             isTransparent = true,
             isBreakable = false,
             isCutout = false,
             isSwimable = true,
-            swimSlowdown = 2.0f,
+            swimSlowdown = 1.0f,
             tool = ToolCategory.NA,
             hitCount = 99,
-            faces = new byte[] { 0, 0, 0, 0, 0, 0 },
+            faces = new byte[] { 1, 1, 1, 1, 1, 1 },
             dropItem = defaultItem,
             mesh = MeshType.Nf05
         };
         block[17] = new BlockType
         {
-            name = "Water0375",
+            name = "Oil0375",
             isSolid = false,
             isTransparent = true,
             isBreakable = false,
             isCutout = false,
             isSwimable = true,
-            swimSlowdown = 2.0f,
+            swimSlowdown = 1.0f,
             tool = ToolCategory.NA,
             hitCount = 99,
-            faces = new byte[] { 0, 0, 0, 0, 0, 0 },
+            faces = new byte[] { 1, 1, 1, 1, 1, 1 },
             dropItem = defaultItem,
             mesh = MeshType.Nf0375
         };
         block[18] = new BlockType
         {
-            name = "Water025",
+            name = "Oil025",
             isSolid = false,
             isTransparent = true,
             isBreakable = false,
             isCutout = false,
             isSwimable = true,
-            swimSlowdown = 2.0f,
+            swimSlowdown = 1.0f,
             tool = ToolCategory.NA,
             hitCount = 99,
-            faces = new byte[] { 0, 0, 0, 0, 0, 0 },
+            faces = new byte[] { 1, 1, 1, 1, 1, 1 },
             dropItem = defaultItem,
             mesh = MeshType.Nf025
         };
         block[19] = new BlockType
         {
-            name = "Water0125",
+            name = "Oil0125",
             isSolid = false,
             isTransparent = true,
             isBreakable = false,
             isCutout = false,
             isSwimable = true,
-            swimSlowdown = 2.0f,
+            swimSlowdown = 1.0f,
             tool = ToolCategory.NA,
             hitCount = 99,
-            faces = new byte[] { 0, 0, 0, 0, 0, 0 },
+            faces = new byte[] { 1, 1, 1, 1, 1, 1 },
             dropItem = defaultItem,
             mesh = MeshType.Nf0125
         };
