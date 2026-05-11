@@ -8,6 +8,8 @@ public class BlockBreaking : MonoBehaviour
     private Inventory playerInventory;
     private AudioSource audioSource; // for block breaking sounds
     private Player player;
+    private Vector3Int currentPos;
+    private int takenHits;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -27,18 +29,12 @@ public class BlockBreaking : MonoBehaviour
             if (selector.hasBlockSelected && selector.currentChunk != null)
             {
                 var pos = selector.currentLocalPosition;
-
                 int blockID = selector.currentChunk.blocks[pos.x, pos.y, pos.z];
+                BlockType type;
 
                 if (blockID != -1)
                 {
-                    BlockType type = selector.currentChunk.MyBlocks.block[blockID];
-
-                    if (type.dropItem != null && playerInventory != null)
-                    {
-                        playerInventory.AddItem(type.dropItem);
-                    }
-
+                    type = selector.currentChunk.MyBlocks.block[blockID];
                     if (type.breakSound != null && audioSource != null)
                     {
                         audioSource.Stop();
@@ -47,9 +43,26 @@ public class BlockBreaking : MonoBehaviour
                         StartCoroutine(StopSoundAfter(0.3f)); // 0.3 sekundės
                     }
                 }
+                else return;
+                
+                Blocks myBlocks = GameObject.Find("Block").GetComponent<Blocks>();
+                if (!myBlocks.block[blockID].isBreakable) return;
+
+                float toolEffectiveness = 1;
+                if (player.HasEquippedTool && player.currentEquippedTool.toolcategory == myBlocks.block[blockID].tool)
+                    toolEffectiveness = player.currentEquippedTool.toolEffectiveness;
+                
+                if (pos == currentPos) takenHits++;
+                else
+                {
+                    takenHits = 1;
+                    currentPos = pos;
+                }
+                if (takenHits * toolEffectiveness < myBlocks.block[blockID].hitCount) return;
+                else takenHits = 0;
 
                 // Remove block
-                if (selector.currentChunk.blocks[pos.x, pos.y, pos.z] == 12)
+                if (blockID == 12)
                 {
                     GameObject[] chestBlocks = GameObject.FindGameObjectsWithTag("Chest block");
                     foreach (GameObject chestBlock in chestBlocks)
@@ -61,11 +74,18 @@ public class BlockBreaking : MonoBehaviour
                         }
                     }
                 }
-
+                
                 selector.currentChunk.blocks[pos.x, pos.y, pos.z] = -1;
+                
+                if (type.dropItem != null && playerInventory != null)
+                {
+                    playerInventory.AddItem(type.dropItem);
+                }
 
                 selector.currentChunk.UpdateChunk();
                 selector.currentChunk.UpdateNeighborChunks(pos.x, pos.z);
+
+
             }
         }
     }

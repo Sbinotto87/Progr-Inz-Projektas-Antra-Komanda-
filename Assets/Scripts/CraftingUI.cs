@@ -27,31 +27,22 @@ public class CraftingUI : MonoBehaviour
     void Update()
     {
         if (playerInput.actions["Inventory"].WasPressedThisFrame())
-        {
             ToggleCraftingList();
-        }
     }
 
     public void ToggleCraftingList()
     {
-        // 1. Flip the true/false switch
         isOpen = !isOpen;
-
-        // 2. Show or hide the actual UI panel
         craftingPanel.SetActive(isOpen);
 
         if (isOpen)
-        {
             RefreshCraftingUI();
-        }
     }
     
     public void RefreshCraftingUI()
     {
         foreach (Transform child in listParent)
-        {
             Destroy(child.gameObject);
-        }
         
         bool isItemValid;
         foreach (CraftingItem craftingitem in craftingitemsClass.craftingItems)

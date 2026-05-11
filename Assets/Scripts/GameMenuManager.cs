@@ -38,6 +38,8 @@ public class GameMenuManager : MonoBehaviour
     InputAction pauseAction;
     void Start()
     {
+        UIelements.SetActive(false);
+        UIelements.SetActive(true);
         volume = volumeObject.GetComponent<Volume>();
         Debug.Log(volume.profile.TryGet(out dof)); 
         volume.profile.TryGet(out colorAdjustments);

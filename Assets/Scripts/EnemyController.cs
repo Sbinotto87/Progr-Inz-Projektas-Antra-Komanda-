@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts;
 
@@ -11,11 +12,13 @@ public class EnemyController : MonoBehaviour
     public float gravity = -20f;
     public float height = 1.8f;
 
-    public int maxHealth = 100;
+    public float maxHealth = 100f;
 
-    private int health;
+    private float health;
 
     private Transform player;
+    private Inventory inventory;
+    private Player Player;
     private World world;
 
     private float verticalVelocity;
@@ -25,11 +28,15 @@ public class EnemyController : MonoBehaviour
     private float gruntTimer;
     public float hearingDistance = 10f;
 
+    private KeyValuePair<Item, float>[] dropItems;
+
     void Start()
     {
         health = maxHealth;
-
+        InitializeDropItems();
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        Player = player.GetComponent<Player>();
+        inventory = GameObject.FindGameObjectWithTag("Player").GetComponent<Inventory>();
         world = FindFirstObjectByType<World>();
 
         ResetGruntTimer();
@@ -165,20 +172,36 @@ public class EnemyController : MonoBehaviour
         return world.GetVoxel(p) != -1;
     }
 
+    private void InitializeDropItems()
+    {
+        CreatedItems createdItems = GameObject.Find("CreatedItems").GetComponent<CreatedItems>();
+        Item[] items = createdItems.items;
+        
+        dropItems = new KeyValuePair<Item, float>[5];
+        dropItems[0] = new KeyValuePair<Item, float>(items[10], 0.4f);
+        dropItems[1] = new KeyValuePair<Item, float>(items[11], 0.3f);
+        dropItems[2] = new KeyValuePair<Item, float>(items[12], 0.85f);
+        dropItems[3] = new KeyValuePair<Item, float>(items[7], 0.1f);
+        dropItems[4] = new KeyValuePair<Item, float>(items[6], 0.05f);
+    }
+
     void TryAttack()
     {
         if (Time.time < nextAttackTime) return;
 
         nextAttackTime = Time.time + attackCooldown;
-
-        Player p = player.GetComponent<Player>();
-        if (p != null)
-            p.TakeDamage(20);
+        
+        if (Player != null)
+            Player.TakeDamage(20);
     }
 
-    public void TakeDamage(int amount)
+    public void TakeDamage(float amount)
     {
-        health -= amount;
+        float weaponEfectiveness = 1;
+        if (Player.HasEquippedTool && Player.currentEquippedTool.category == ItemCategory.Weapon)
+            weaponEfectiveness = Player.currentEquippedTool.toolEffectiveness;
+        
+        health -= amount * weaponEfectiveness;
 
         if (health <= 0)
             Die();
@@ -186,6 +209,12 @@ public class EnemyController : MonoBehaviour
 
     void Die()
     {
+        foreach (KeyValuePair<Item, float> dropitem in dropItems)
+        {
+            float rand = Random.value;
+            if (rand < dropitem.Value)
+                inventory.AddItem(dropitem.Key);
+        }
         Destroy(gameObject);
     }
 }
