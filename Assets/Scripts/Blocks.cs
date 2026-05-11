@@ -17,6 +17,10 @@ public class Blocks : MonoBehaviour
     public AudioClip grassBreakSound;
     public AudioClip woodBreakSound;
     public AudioClip leafBreakSound;
+    public AudioClip glassBreakSound;
+    public AudioClip metalBreakSound;
+    public AudioClip brickBreakSound;
+
 
 
     public Item stoneItem;
@@ -125,7 +129,8 @@ public class Blocks : MonoBehaviour
             tool = "Axe",
             hitCount = 2,
             faces = new byte[] { 5, 5, 5, 5, 5, 5 },
-            dropItem = grassItem
+            dropItem = grassItem,
+            breakSound = glassBreakSound
         };
         
         block[6] = new BlockType
@@ -137,7 +142,8 @@ public class Blocks : MonoBehaviour
             tool = "Pickaxe",
             hitCount = 3,
             faces = new byte[] { 6, 6, 6, 6, 6, 6 },
-            dropItem = defaultItem
+            dropItem = defaultItem,
+            breakSound = brickBreakSound
         };
         
         block[7] = new BlockType
@@ -149,7 +155,8 @@ public class Blocks : MonoBehaviour
             tool = "Pickaxe",
             hitCount = 3,
             faces = new byte[] { 7, 7, 7, 7, 7, 7 },
-            dropItem = defaultItem
+            dropItem = defaultItem,
+            breakSound = metalBreakSound
         };
         
         block[8] = new BlockType
@@ -161,7 +168,8 @@ public class Blocks : MonoBehaviour
             tool = "pickaxe",
             hitCount = 3,
             faces = new byte[] { 8, 8, 8, 8, 8, 8 },
-            dropItem = defaultItem
+            dropItem = defaultItem,
+            breakSound = metalBreakSound
         };
     }
 
