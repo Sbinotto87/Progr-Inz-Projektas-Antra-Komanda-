@@ -158,10 +158,8 @@ public class Blocks : MonoBehaviour
             tool = ToolCategory.NA,
             hitCount = 2,
             faces = new byte[] { 5, 5, 5, 5, 5, 5 },
-            dropItem = grassItem,
-            breakSound = glassBreakSound
-            faces = new byte[] { 2, 2, 2, 2, 2, 2 },
             dropItem = defaultItem,
+            breakSound = glassBreakSound,
             mesh = MeshType.Full
         };
         
@@ -178,7 +176,7 @@ public class Blocks : MonoBehaviour
             hitCount = 3,
             faces = new byte[] { 6, 6, 6, 6, 6, 6 },
             dropItem = defaultItem,
-            breakSound = brickBreakSound
+            breakSound = brickBreakSound,
             mesh = MeshType.Full
         };
         
@@ -195,7 +193,7 @@ public class Blocks : MonoBehaviour
             hitCount = 3,
             faces = new byte[] { 7, 7, 7, 7, 7, 7 },
             dropItem = defaultItem,
-            breakSound = metalBreakSound
+            breakSound = metalBreakSound,
             mesh = MeshType.Full
         };
         
@@ -212,6 +210,7 @@ public class Blocks : MonoBehaviour
             hitCount = 3,
             faces = new byte[] { 8, 8, 8, 8, 8, 8 },
             dropItem = defaultItem,
+            breakSound = metalBreakSound,
             mesh = MeshType.Full
         };
         block[9] = new BlockType
@@ -242,8 +241,7 @@ public class Blocks : MonoBehaviour
             hitCount = 3,
             faces = new byte[] { 8, 8, 8, 8, 8, 8 },
             dropItem = defaultItem,
-            breakSound = metalBreakSound
-            dropItem = items[8],
+            breakSound = metalBreakSound,
             mesh = MeshType.Full
         };
         
