@@ -1,4 +1,5 @@
 using Assets.Scripts;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -564,7 +565,8 @@ public class Player : MonoBehaviour
         if (blockID != -1)
         {
             swimSpeed = chunk.MyBlocks.block[blockID].swimSlowdown;
-            if (chunk.blocks[localX, (int)(blockY + HalfHeight - SkinWidth), localZ] == 11) // effect
+            int id = chunk.blocks[localX, (int)(blockY + HalfHeight - SkinWidth), localZ];
+            if (id == 11 || (id >= 13 && id <= 19)) // effect
             return chunk.MyBlocks.block[blockID].isSwimable;
         }
         return false;
