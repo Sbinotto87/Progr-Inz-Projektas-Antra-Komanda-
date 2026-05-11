@@ -173,6 +173,9 @@ MonoBehaviour:
   health: 1000
   hunger: 100
   thirst: 100
+  minimumFallVelocity: -8
+  fallDamageMultiplier: 20
+  invincibilityDuration: 1
   stamina: 100
   staminaDrainRate: 15
   staminaRegenRate: 10
@@ -182,6 +185,9 @@ MonoBehaviour:
   waterDrag: 0.9
   isSubmerged: 0
   isInRadiation: 0
+  HasOpenedInventory: 0
+  HasOpenedChest: 0
+  currentOpenedChest: {fileID: 0}
 --- !u!114 &368639874964193589
 MonoBehaviour:
   m_ObjectHideFlags: 0

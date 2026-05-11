@@ -12,7 +12,7 @@ public class FlashlightController : MonoBehaviour
     public float maxBattery = 100f;
     public float drainRate = 10f;      // per second when ON
     public float rechargeRate = 5f;    // per second when OFF
-    public float restartDelay = 3f;    // cooldown after battery hits 0
+    public float restartDelay = 5f;    // cooldown after battery hits 0
 
     [Header("UI")]
     public Slider batteryBar;
@@ -21,6 +21,13 @@ public class FlashlightController : MonoBehaviour
     private bool isOn = false;
     private bool isBroken = false;
     private bool canUse = true;
+
+    [Header("Low Battery Effects")]
+    public float lowBatteryThreshold = 15f;
+    public float normalIntensity = 2f;
+    public float dimIntensity = 0.5f;
+
+    private Coroutine flickerRoutine;
 
     void Start()
     {
@@ -49,7 +56,15 @@ public class FlashlightController : MonoBehaviour
             isOn = !isOn;
 
             if (flashlight != null)
+            {
                 flashlight.enabled = isOn;
+
+                if (!isOn && flickerRoutine != null)
+                {
+                    StopCoroutine(flickerRoutine);
+                    flickerRoutine = null;
+                }
+            }
         }
     }
 
@@ -58,6 +73,38 @@ public class FlashlightController : MonoBehaviour
         if (isOn)
         {
             currentBattery -= drainRate * Time.deltaTime;
+
+            if (currentBattery <= lowBatteryThreshold)
+            {
+                float t = currentBattery / lowBatteryThreshold;
+
+                if (flashlight != null)
+                {
+                    flashlight.intensity =
+                        Mathf.Lerp(dimIntensity, normalIntensity, t);
+
+                    if (flickerRoutine == null)
+                    {
+                        flickerRoutine = StartCoroutine(FlickerEffect());
+                    }
+                }
+            }
+            else
+            {
+                if (flashlight != null)
+                {
+                    flashlight.intensity = normalIntensity;
+                }
+
+                if (flickerRoutine != null)
+                {
+                    StopCoroutine(flickerRoutine);
+                    flickerRoutine = null;
+
+                    if (flashlight != null)
+                        flashlight.enabled = true;
+                }
+            }
 
             if (currentBattery <= 0f)
             {
@@ -87,6 +134,12 @@ public class FlashlightController : MonoBehaviour
         {
             StartCoroutine(RestartCooldown());
         }
+
+        if (flickerRoutine != null)
+        {
+            StopCoroutine(flickerRoutine);
+            flickerRoutine = null;
+        }
     }
 
     IEnumerator RestartCooldown()
@@ -107,6 +160,18 @@ public class FlashlightController : MonoBehaviour
             batteryBar.value = currentBattery / maxBattery;
 
             batteryBar.gameObject.SetActive(isOn || currentBattery < maxBattery);
+        }
+    }
+
+    IEnumerator FlickerEffect()
+    {
+        while (true)
+        {
+            flashlight.enabled = Random.value > 0.2f;
+
+            yield return new WaitForSeconds(
+                Random.Range(0.05f, 0.15f)
+            );
         }
     }
 }
