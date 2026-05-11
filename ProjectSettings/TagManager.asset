@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 3
   tags:
   - UI
+  - Chest block
+  - TextureOverlay
   layers:
   - Default
   - TransparentFX

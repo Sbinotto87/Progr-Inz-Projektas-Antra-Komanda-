@@ -30,10 +30,11 @@ public class EnemyController : MonoBehaviour
         health = maxHealth;
 
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
-        world = FindObjectOfType<World>();
+        world = FindFirstObjectByType<World>();
 
         ResetGruntTimer();
     }
+    
 
     void Update()
     {
@@ -172,7 +173,7 @@ public class EnemyController : MonoBehaviour
 
         Player p = player.GetComponent<Player>();
         if (p != null)
-            p.health -= 20;
+            p.TakeDamage(20);
     }
 
     public void TakeDamage(int amount)

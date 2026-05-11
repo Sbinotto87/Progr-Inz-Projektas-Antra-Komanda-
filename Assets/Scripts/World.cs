@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace Assets.Scripts
@@ -37,6 +38,7 @@ namespace Assets.Scripts
         /// no clu, pavogiau koda
         /// </summary>
         public Material material;
+        public Material transparentMaterial;
         /// <summary>
         /// world time
         /// </summary>
@@ -73,6 +75,7 @@ namespace Assets.Scripts
         /// </summary>
         private Transform playerTransform;
         Queue<ChunkCoord> chunksToRender;
+        public bool IsInRadiation;
 
         private void Awake()
         {
@@ -83,6 +86,7 @@ namespace Assets.Scripts
         }
         private void Start()
         {
+            IsInRadiation = false;
             MyBlocks = GameObject.Find("Block").GetComponent<Blocks>();
             UnityEngine.Random.InitState((int)System.DateTime.Now.Ticks);
             Seed = UnityEngine.Random.Range(0, 10000);
@@ -90,7 +94,7 @@ namespace Assets.Scripts
             UnityEngine.Debug.Log(Seed.ToString());
             offsetX = (float)(Seed % 10000);
             offsetZ = (float)((Seed / 100) % 10000);
-            DayTime = 0;
+            DayTime = 500;
             CurrentDay = 0;
             Tick = 0;
             viewDistance = 8;
@@ -107,19 +111,25 @@ namespace Assets.Scripts
         {
             playerChunkCoord = GetChunkCoordFromVector3(playerTransform.position);
 
-            Stopwatch sw = Stopwatch.StartNew();
+            //Stopwatch sw = Stopwatch.StartNew();
             if (!playerChunkCoord.Equals(playerLastChunkCoord)) //if player moved from chunk, update 
             {
                 CheckViewDistance();
                 playerLastChunkCoord = playerChunkCoord;
-                UnityEngine.Debug.Log(sw.Elapsed);
+                //UnityEngine.Debug.Log(sw.Elapsed);
             }
             if(chunksToRender.Count>0)
             {
                 ChunkCoord coord = chunksToRender.Dequeue();
-                CreateChunk(new ChunkCoord(coord.x, coord.z));
-                chunks[coord.x, coord.z].CreateMeshData();
-                chunks[coord.x, coord.z].CreateChunkMesh();
+
+                if (Mathf.Abs(playerChunkCoord.x - coord.x) <= viewDistance &&
+                    Mathf.Abs(playerChunkCoord.z - coord.z) <= viewDistance)
+                {
+                    if (chunks[coord.x, coord.z] == null)
+                    {
+                        CreateChunk(coord);
+                    }
+                }
             }
         }
         /// <summary>
@@ -179,6 +189,7 @@ namespace Assets.Scripts
                 {
                     Structures.GenerateGrass(chunks[x, z]);
                     Structures.GenerateTrees(chunks[x, z]);
+                    Structures.GenerateOres(chunks[x, z], 10);
                     
                     chunks[x, z].CreateMeshData();
                     chunks[x, z].CreateChunkMesh();
@@ -200,6 +211,7 @@ namespace Assets.Scripts
             //Generate structures
             Structures.GenerateGrass(chunks[coord.x, coord.z]);
             Structures.GenerateTrees(chunks[coord.x, coord.z]);
+            Structures.GenerateOres(chunks[coord.x, coord.z], 10);
 
             chunks[coord.x, coord.z].CreateMeshData();
             chunks[coord.x, coord.z].CreateChunkMesh();
@@ -291,20 +303,21 @@ namespace Assets.Scripts
             if (y == 0)
                 return 0;
 
+
             int terrainHeight =
                 Mathf.FloorToInt(biome.terrainHeight *
                 PerlinNoise.Get2DPerlinNoise(new Vector2(x, z), 0, biome.terrainScale, this.offsetX, this.offsetZ))
                 + biome.solidGroundHeight;
+
             if (y > terrainHeight)
-                return -1;
-
-            if (y == terrainHeight)
-                return 1;
-
-            if (y < terrainHeight && y > terrainHeight - 20)
-                return 1;
-
-            return 0;
+                if (y < 61)
+                    return 13;
+                else 
+                return -1; // Air
+            else if (y == terrainHeight || (y < terrainHeight && y > terrainHeight - 4))
+                return 1; // dirt
+            else
+                return 0; // Stone
         }
         /// <summary>
         /// gets chunk coord from world coord
@@ -324,42 +337,49 @@ namespace Assets.Scripts
         void CheckViewDistance()
         {
             ChunkCoord coord = GetChunkCoordFromVector3(playerTransform.position);
-            List<ChunkCoord> PreviouslyActiveChunks = new List<ChunkCoord>(activeChunks);
 
-            //loop through chunks in view distance
+            // 1. Mark all currently active chunks for potential deactivation
+            List<ChunkCoord> toRemove = new List<ChunkCoord>();
+
+            // 2. Loop through the desired view area
             for (int x = coord.x - viewDistance; x < coord.x + viewDistance; x++)
             {
                 for (int z = coord.z - viewDistance; z < coord.z + viewDistance; z++)
                 {
-                    //if not active
-                    if(ChunkIsInWorld(new ChunkCoord(x, z)))
+                    ChunkCoord currentCoord = new ChunkCoord(x, z);
+                    if (ChunkIsInWorld(currentCoord))
                     {
-                        //create if doesnt exist
-                        if (chunks[x,z] == null)
+                        if (chunks[x, z] == null)
                         {
-                            chunksToRender.Enqueue(new ChunkCoord(x, z));
+                            // Not created yet, add to queue
+                            chunksToRender.Enqueue(currentCoord);
                         }
-                        //activate
                         else if (!chunks[x, z].isActive)
                         {
+                            // Exists but hidden, wake it up
                             chunks[x, z].isActive = true;
-                            activeChunks.Add(new ChunkCoord(x, z));
+                            activeChunks.Add(currentCoord);
                         }
-                    }
-                    //remove chunk from previously active list
-                    for (int i = 0; i < PreviouslyActiveChunks.Count; i++)
-                    {
-
-                        if (PreviouslyActiveChunks[i].Equals(new ChunkCoord(x, z)))
-                            PreviouslyActiveChunks.RemoveAt(i);
-
                     }
                 }
             }
-            //deactivate chunks that were previously active
-            foreach (ChunkCoord c in PreviouslyActiveChunks)
-                chunks[c.x, c.z].isActive = false;
 
+            // 3. Clean up activeChunks: Remove those that are now out of range
+            // We iterate backwards to avoid the "shifting index" bug
+            for (int i = activeChunks.Count - 1; i >= 0; i--)
+            {
+                ChunkCoord c = activeChunks[i];
+                bool outOfRange = Mathf.Abs(coord.x - c.x) >= viewDistance ||
+                                  Mathf.Abs(coord.z - c.z) >= viewDistance;
+
+                if (outOfRange)
+                {
+                    if (chunks[c.x, c.z] != null)
+                        chunks[c.x, c.z].isActive = false;
+
+                    activeChunks.RemoveAt(i);
+                }
+            }
         }
         /// <summary>
         /// used for checking view distance

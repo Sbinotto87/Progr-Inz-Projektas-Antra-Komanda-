@@ -1,3 +1,5 @@
+using System.Linq;
+using Assets.Scripts;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -5,11 +7,13 @@ public class BlockPlacer : MonoBehaviour
 {
     public BlockSelector selector;       // assign in inspector
     private Inventory playerInventory;
+    private Player player;
 
     private void Start()
     {
         // Find the player inventory
         GameObject player = GameObject.FindGameObjectWithTag("Player");
+        this.player = player.GetComponent<Player>();
         if (player != null)
             playerInventory = player.GetComponent<Inventory>();
     }
@@ -18,16 +22,39 @@ public class BlockPlacer : MonoBehaviour
     {
         // Right click places a block
         if (Mouse.current.rightButton.wasPressedThisFrame)
-            PlaceBlock();
+        {
+            if (selector != null && selector.hasBlockSelected && selector.currentChunk != null)
+            {
+                var pos = selector.currentLocalPosition;
+                int blockID = selector.currentChunk.blocks[pos.x, pos.y, pos.z];
+                if (blockID == 12)
+                {
+                    GameObject[] chestBlocks = GameObject.FindGameObjectsWithTag("Chest block");
+                    foreach (GameObject chestBlock in chestBlocks)
+                    {
+                        if (chestBlock.transform.position.Equals(new Vector3(pos.x, pos.y, pos.z)))
+                        {
+                            chestBlock.GetComponent<ChestBlock>().OpenChest();
+                            if (player.HasOpenedChest)
+                                player.currentOpenedChest = chestBlock;
+                            else player.currentOpenedChest = null;
+                            
+                            break;
+                        }
+                    }
+                }
+                else if (!player.HasOpenedChest && !player.HasOpenedInventory) PlaceBlock();
+            }
+        }
     }
 
     private void PlaceBlock()
     {
         if (selector == null || !selector.hasBlockSelected) return;
-        if (playerInventory == null || playerInventory.items.Count == 0) return;
+        if (playerInventory == null || playerInventory.slots.Count == 0) return;
 
         // Use first item in inventory (later can select specific slot)
-        Item itemToPlace = playerInventory.items[0];
+        Item itemToPlace = playerInventory.slots[0].itemData;
         if (itemToPlace == null) return;
 
         Chunk chunk = selector.currentChunk;
@@ -50,5 +77,18 @@ public class BlockPlacer : MonoBehaviour
 
         // Remove item from inventory and update UI
         playerInventory.RemoveItem(itemToPlace);
+        
+        if (itemToPlace.blockIndex == 12)
+        {
+            GameObject chest = Instantiate(GameObject.Find("Chest block"), new Vector3(x, y, z), Quaternion.identity);
+            //GameObject chest = new GameObject("Chest block");
+            //chest.AddComponent<ChestBlock>();
+            //chest.transform.position = new Vector3(x, y, z);
+        }
+    }
+
+    private void OpenChest()
+    {
+
     }
 }

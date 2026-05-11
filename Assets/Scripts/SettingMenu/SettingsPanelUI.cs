@@ -14,6 +14,7 @@ public class SettingsPanelUI : MonoBehaviour
     [SerializeField] private Slider mouseSensitivitySlider;
     [SerializeField] private Slider masterVolumeSlider;
     [SerializeField] private Slider renderDistanceSlider;
+    [SerializeField] private Slider sfxVolumeSlider;
 
     [Header("Optional Toggle")]
     [SerializeField] private bool pauseTimeWhenOpen;
@@ -39,6 +40,8 @@ public class SettingsPanelUI : MonoBehaviour
             settingsPanel.SetActive(false);
         }
 
+        if (sfxVolumeSlider == null)
+        sfxVolumeSlider = GameObject.Find("SfxSlider")?.GetComponent<Slider>();
         RegisterSliderListeners();
         SyncSlidersFromSettings();
     }
@@ -150,6 +153,15 @@ public class SettingsPanelUI : MonoBehaviour
             masterVolumeSlider.SetValueWithoutNotify(manager.MasterVolume);
         if (renderDistanceSlider != null)
             renderDistanceSlider.SetValueWithoutNotify(manager.RenderDistance);
+        if (sfxVolumeSlider != null)
+            sfxVolumeSlider.SetValueWithoutNotify(manager.SfxVolume);
+    }
+
+    public void OnSfxVolumeChanged(float value)
+    {
+        SettingsManager manager = EnsureManager();
+        if (manager == null) return;
+        manager.SetSfxVolume(value);
     }
 
     private SettingsManager EnsureManager()
@@ -184,6 +196,8 @@ public class SettingsPanelUI : MonoBehaviour
             masterVolumeSlider.onValueChanged.AddListener(OnMasterVolumeChanged);
         if (renderDistanceSlider != null)
             renderDistanceSlider.onValueChanged.AddListener(OnRenderDistanceChanged);
+        if (sfxVolumeSlider != null)
+        sfxVolumeSlider.onValueChanged.AddListener(OnSfxVolumeChanged);
 
         listenersRegistered = true;
     }
@@ -203,6 +217,8 @@ public class SettingsPanelUI : MonoBehaviour
             masterVolumeSlider.onValueChanged.RemoveListener(OnMasterVolumeChanged);
         if (renderDistanceSlider != null)
             renderDistanceSlider.onValueChanged.RemoveListener(OnRenderDistanceChanged);
+        if (sfxVolumeSlider != null)
+        sfxVolumeSlider.onValueChanged.RemoveListener(OnSfxVolumeChanged);
 
         listenersRegistered = false;
     }

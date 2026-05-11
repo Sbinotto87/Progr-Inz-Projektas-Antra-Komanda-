@@ -11,6 +11,7 @@ public class Blocks : MonoBehaviour
     public Material blockMaterial;
 
     public BlockType[] block;
+    private Item[] items;
 
     [Header("Break Sounds")] 
     public AudioClip stoneBreakSound;
@@ -47,7 +48,12 @@ public class Blocks : MonoBehaviour
 
     private void Awake()
     {
-        block = new BlockType[9];
+        block = new BlockType[20];
+        GameObject createdItems = GameObject.Find("CreatedItems");
+        if (createdItems == null)
+            createdItems = new GameObject("CreatedItems", typeof(CreatedItems));
+        CreatedItems createdItems1 = createdItems.GetComponent<CreatedItems>();
+        items = createdItems1.items;
         
         //Stone
         block[0] = new BlockType
@@ -56,11 +62,15 @@ public class Blocks : MonoBehaviour
             isSolid = true,
             isTransparent = false,
             isBreakable = true,
-            tool = "Pickaxe",
+            isCutout = false,
+            isSwimable = false,
+            swimSlowdown = 1.0f,
+            tool = ToolCategory.Pickaxe,
             hitCount = 1,
             faces = new byte[] { 1, 1, 1, 1, 1, 1 },
-            dropItem = stoneItem,
-            breakSound = stoneBreakSound
+            dropItem = items[0],
+            breakSound = stoneBreakSound,
+            mesh = MeshType.Full
         };
 
         //Grass (block)
@@ -70,11 +80,15 @@ public class Blocks : MonoBehaviour
             isSolid = true,
             isTransparent = false,
             isBreakable = true,
-            tool = "Shovel",
+            isCutout = false,
+            isSwimable = false,
+            swimSlowdown = 1.0f,
+            tool = ToolCategory.Shovel,
             hitCount = 1,
             faces = new byte[] { 0, 0, 0, 0, 2, 0 },
-            dropItem = grassBlockItem,
-            breakSound = grassBreakSound
+            dropItem = items[1],
+            breakSound = grassBreakSound,
+            mesh = MeshType.Full
         };
 
         //Wood
@@ -84,11 +98,15 @@ public class Blocks : MonoBehaviour
             isSolid = true,
             isTransparent = false,
             isBreakable = true,
-            tool = "Axe",
+            isCutout = false,
+            isSwimable = false,
+            swimSlowdown = 1.0f,
+            tool = ToolCategory.Axe,
             hitCount = 2,
             faces = new byte[] { 3, 3, 3, 3, 3, 3 },
-            dropItem = woodItem,
-            breakSound = woodBreakSound
+            dropItem = items[2],
+            breakSound = woodBreakSound,
+            mesh = MeshType.Full
         };
 
         //Leaves
@@ -98,11 +116,15 @@ public class Blocks : MonoBehaviour
             isSolid = true,
             isTransparent = false,
             isBreakable = true,
-            tool = "Axe",
+            isCutout = false,
+            isSwimable = false,
+            swimSlowdown = 1.0f,
+            tool = ToolCategory.Axe,
             hitCount = 1,
             faces = new byte[] { 2, 2, 2, 2, 2, 2 },
-            dropItem = leafItem,
-            breakSound = leafBreakSound
+            dropItem = items[3],
+            breakSound = leafBreakSound,
+            mesh = MeshType.Full
         };
         
         //Grass
@@ -110,13 +132,17 @@ public class Blocks : MonoBehaviour
         {
             name = "Grass",
             isSolid = false,
-            isTransparent = true,
+            isTransparent = false,
             isBreakable = true,
-            tool = "Axe",
+            isCutout = true,
+            isSwimable = false,
+            swimSlowdown = 1.0f,
+            tool = ToolCategory.Shovel,
             hitCount = 1,
             faces = new byte[] { 4, 4, 4, 4, 15, 15 },
-            dropItem = grassItem,
-            breakSound = grassBreakSound
+            dropItem = items[4],
+            breakSound = grassBreakSound,
+            mesh = MeshType.Grass
         };
         
         //Glass
@@ -126,11 +152,17 @@ public class Blocks : MonoBehaviour
             isSolid = true,
             isTransparent = true,
             isBreakable = true,
-            tool = "Axe",
+            isCutout = false,
+            isSwimable = false,
+            swimSlowdown = 1.0f,
+            tool = ToolCategory.NA,
             hitCount = 2,
             faces = new byte[] { 5, 5, 5, 5, 5, 5 },
             dropItem = grassItem,
             breakSound = glassBreakSound
+            faces = new byte[] { 2, 2, 2, 2, 2, 2 },
+            dropItem = defaultItem,
+            mesh = MeshType.Full
         };
         
         block[6] = new BlockType
@@ -139,11 +171,15 @@ public class Blocks : MonoBehaviour
             isSolid = true,
             isTransparent = false,
             isBreakable = true,
-            tool = "Pickaxe",
+            isCutout = false,
+            isSwimable = false,
+            swimSlowdown = 1.0f,
+            tool = ToolCategory.Pickaxe,
             hitCount = 3,
             faces = new byte[] { 6, 6, 6, 6, 6, 6 },
             dropItem = defaultItem,
             breakSound = brickBreakSound
+            mesh = MeshType.Full
         };
         
         block[7] = new BlockType
@@ -152,11 +188,15 @@ public class Blocks : MonoBehaviour
             isSolid = true,
             isTransparent = false,
             isBreakable = true,
-            tool = "Pickaxe",
+            isCutout = false,
+            isSwimable = false,
+            swimSlowdown = 1.0f,
+            tool = ToolCategory.Pickaxe,
             hitCount = 3,
             faces = new byte[] { 7, 7, 7, 7, 7, 7 },
             dropItem = defaultItem,
             breakSound = metalBreakSound
+            mesh = MeshType.Full
         };
         
         block[8] = new BlockType
@@ -165,52 +205,185 @@ public class Blocks : MonoBehaviour
             isSolid = true,
             isTransparent = false,
             isBreakable = true,
-            tool = "pickaxe",
+            isCutout = false,
+            isSwimable = false,
+            swimSlowdown = 1.0f,
+            tool = ToolCategory.Pickaxe,
+            hitCount = 3,
+            faces = new byte[] { 8, 8, 8, 8, 8, 8 },
+            dropItem = defaultItem,
+            mesh = MeshType.Full
+        };
+        block[9] = new BlockType
+        {
+            name = "Water",
+            isSolid = false,
+            isTransparent = true,
+            isBreakable = false,
+            isCutout = false,
+            isSwimable = true,
+            swimSlowdown = 2.0f,
+            tool = ToolCategory.NA,
+            hitCount = 99,
+            faces = new byte[] { 0, 0, 0, 0, 0, 0 },
+            dropItem = defaultItem,
+            mesh = MeshType.Full
+        };
+        
+        block[10] = new BlockType
+        {
+            name = "Iron ore",
+            isSolid = true,
+            isTransparent = false,
+            isBreakable = true,
+            isCutout = false,
+            isSwimable = false,
+            tool = ToolCategory.Pickaxe,
             hitCount = 3,
             faces = new byte[] { 8, 8, 8, 8, 8, 8 },
             dropItem = defaultItem,
             breakSound = metalBreakSound
+            dropItem = items[8],
+            mesh = MeshType.Full
+        };
+        
+        block[11] = new BlockType
+        {
+            name = "Oil",
+            isSolid = false,
+            isTransparent = true,
+            isBreakable = false,
+            isCutout = false,
+            isSwimable = true,
+            swimSlowdown = 1.0f,
+            tool = ToolCategory.NA,
+            hitCount = 99,
+            faces = new byte[] { 1, 1, 1, 1, 1, 1 },
+            dropItem = null,
+            mesh = MeshType.Full
+        };
+        
+        block[12] = new BlockType
+        {
+            name = "Chest block",
+            isSolid = true,
+            isTransparent = false,
+            isBreakable = true,
+            isCutout = false,
+            isSwimable = false,
+            tool = ToolCategory.Axe,
+            hitCount = 4,
+            faces = new byte[] { 1, 1, 1, 1, 1, 1 },
+            dropItem = items[9],
+            mesh = MeshType.Full
+        };
+        block[13] = new BlockType
+        {
+            name = "Oil0875",
+            isSolid = false,
+            isTransparent = true,
+            isBreakable = false,
+            isCutout = false,
+            isSwimable = true,
+            swimSlowdown = 1.0f,
+            tool = ToolCategory.NA,
+            hitCount = 99,
+            faces = new byte[] { 1, 1, 1, 1, 1, 1 },
+            dropItem = defaultItem,
+            mesh = MeshType.Nf0875
+        };
+        block[14] = new BlockType
+        {
+            name = "Oil075",
+            isSolid = false,
+            isTransparent = true,
+            isBreakable = false,
+            isCutout = false,
+            isSwimable = true,
+            swimSlowdown = 1.0f,
+            tool = ToolCategory.NA,
+            hitCount = 99,
+            faces = new byte[] { 1, 1, 1, 1, 1, 1 },
+            dropItem = defaultItem,
+            mesh = MeshType.Nf075
+        };
+        block[15] = new BlockType
+        {
+            name = "Oil0625",
+            isSolid = false,
+            isTransparent = true,
+            isBreakable = false,
+            isCutout = false,
+            isSwimable = true,
+            swimSlowdown = 1.0f,
+            tool = ToolCategory.NA,
+            hitCount = 99,
+            faces = new byte[] { 1, 1, 1, 1, 1, 1 },
+            dropItem = defaultItem,
+            mesh = MeshType.Nf0625
+        };
+        block[16] = new BlockType
+        {
+            name = "Oil05",
+            isSolid = false,
+            isTransparent = true,
+            isBreakable = false,
+            isCutout = false,
+            isSwimable = true,
+            swimSlowdown = 1.0f,
+            tool = ToolCategory.NA,
+            hitCount = 99,
+            faces = new byte[] { 1, 1, 1, 1, 1, 1 },
+            dropItem = defaultItem,
+            mesh = MeshType.Nf05
+        };
+        block[17] = new BlockType
+        {
+            name = "Oil0375",
+            isSolid = false,
+            isTransparent = true,
+            isBreakable = false,
+            isCutout = false,
+            isSwimable = true,
+            swimSlowdown = 1.0f,
+            tool = ToolCategory.NA,
+            hitCount = 99,
+            faces = new byte[] { 1, 1, 1, 1, 1, 1 },
+            dropItem = defaultItem,
+            mesh = MeshType.Nf0375
+        };
+        block[18] = new BlockType
+        {
+            name = "Oil025",
+            isSolid = false,
+            isTransparent = true,
+            isBreakable = false,
+            isCutout = false,
+            isSwimable = true,
+            swimSlowdown = 1.0f,
+            tool = ToolCategory.NA,
+            hitCount = 99,
+            faces = new byte[] { 1, 1, 1, 1, 1, 1 },
+            dropItem = defaultItem,
+            mesh = MeshType.Nf025
+        };
+        block[19] = new BlockType
+        {
+            name = "Oil0125",
+            isSolid = false,
+            isTransparent = true,
+            isBreakable = false,
+            isCutout = false,
+            isSwimable = true,
+            swimSlowdown = 1.0f,
+            tool = ToolCategory.NA,
+            hitCount = 99,
+            faces = new byte[] { 1, 1, 1, 1, 1, 1 },
+            dropItem = defaultItem,
+            mesh = MeshType.Nf0125
         };
     }
-
-        //private void Start()
-    //{
-        //Mesh combinedMesh = new Mesh();
-        //CombineInstance[] combine = new CombineInstance[block.Length];
-
-        //for (int i = 0; i < block.Length; i++)
-        //{
-        //    Mesh m = Cube.GenerateMesh(new Vector3(i * 1.2f, 0, 0), i);
-        //    combine[i].mesh = m;
-        //    combine[i].transform = Matrix4x4.identity;
-        //}
-
-        //combinedMesh.CombineMeshes(combine, true, false);
-
-        //meshFilter.mesh = combinedMesh;
-        //meshRenderer.material = blockMaterial;
-        /*
-         //meshFilter.mesh = Cube.GenerateMesh(new Vector3(0, 0, 1), 0);
-         //for testing
-         //creates 3 blocks and combines them together into a single mesh
-         Mesh block1 = Cube.GenerateMesh(new Vector3(10, 7, 1), 0);
-         Mesh block2 = Cube.GenerateMesh(new Vector3(10, 8, 2), 0);
-         Mesh block3 = Cube.GenerateMesh(new Vector3(10, 7, 2), 0);
-         Mesh combinedMesh = new Mesh();
-         combinedMesh.CombineMeshes(new CombineInstance[] {
-             new() {
-             mesh = block1,
-             transform = meshFilter.transform.localToWorldMatrix },
-             new() {
-             mesh = block2,
-             transform = meshFilter.transform.localToWorldMatrix },
-             new() {
-             mesh = block3,
-             transform = meshFilter.transform.localToWorldMatrix }
-         });
-         meshFilter.mesh = combinedMesh;
-        */
-    //}
+    
 }
 
 /// <summary>
@@ -221,13 +394,42 @@ public class BlockType
     public string name;
     public bool isSolid;
     public bool isTransparent;
+    public bool isCutout; //for non see-through like grass
+    public bool isSwimable;
+    public float swimSlowdown;
     public bool isBreakable;
-    public string tool;
+    public ToolCategory tool;
     public int hitCount;
-    
+    public MeshType mesh;
+
     //always set 6 faces
     public byte[] faces;    //front, back, right, left, top, bottom
     public Item dropItem;
 
     public AudioClip breakSound; // for breaking sounds
+    public MeshType GetMeshType(int id)
+    {
+        return this.mesh;
+    }
+}
+
+public enum MeshType
+{
+    Full,
+    Grass,
+    Nf0875,//Not full and % of how much not full from top, ie Nf05 is half a block tall, like a slab
+    Nf075,
+    Nf0625,
+    Nf05,
+    Nf0375,
+    Nf025,
+    Nf0125
+}
+
+public enum ToolCategory
+{
+    Pickaxe,
+    Axe,
+    Shovel,
+    NA
 }

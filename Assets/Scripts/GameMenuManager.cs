@@ -1,3 +1,4 @@
+using Assets.Scripts;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
@@ -32,7 +33,7 @@ public class GameMenuManager : MonoBehaviour
 
 
     Player player;
-
+    World world;
 
     InputAction pauseAction;
     void Start()
@@ -42,6 +43,15 @@ public class GameMenuManager : MonoBehaviour
         volume.profile.TryGet(out colorAdjustments);
 
         player = GameObject.FindWithTag("Player").GetComponent<Player>();
+
+        if (world == null)
+        {
+            GameObject worldObject = GameObject.Find("World");
+            if (worldObject != null)
+            {
+                world = worldObject.GetComponent<World>();
+            }
+        }
 
         colorAdjustments.postExposure.value = -0.5f;
         colorAdjustments.contrast.value = 30f;
@@ -81,11 +91,15 @@ public class GameMenuManager : MonoBehaviour
 
     public void Update()
     {
+        if(world.IsInRadiation)
+            EnableRadiation();
+        else if(!world.IsInRadiation)
+            DisableRadiation();
         if (player.health <= 0)
         {
             Death();
         }
-
+        
     }
 
 
@@ -128,11 +142,6 @@ public class GameMenuManager : MonoBehaviour
             Cursor.visible = false;
         }
     }
-
-
-
-
-
     public void Death()
     {
 
@@ -152,5 +161,17 @@ public class GameMenuManager : MonoBehaviour
             
 
         Debug.Log("Player died.");
+    }
+    public void EnableRadiation()
+    {
+        colorAdjustments.colorFilter.value = new Color(0.77f, 1f, 0f, 0.125f);
+        colorAdjustments.active = true;
+        player.isInRadiation = true;
+    }
+    public void DisableRadiation()
+    {
+        colorAdjustments.colorFilter.value = new Color(0f, 0f, 0f, 0f);
+        colorAdjustments.active = false;
+        player.isInRadiation = false;
     }
 }

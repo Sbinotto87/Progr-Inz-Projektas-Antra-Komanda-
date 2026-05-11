@@ -14,7 +14,9 @@ public class StatBarUI : MonoBehaviour
     public Slider HealthBar;
     public Slider HungerBar;
     public Slider ThirstBar;
+    public Slider Staminabar; 
 
+    private float radMultiplier = 1f;
 
 
     public float depletionRate = 5f; 
@@ -31,10 +33,17 @@ public class StatBarUI : MonoBehaviour
         {
             player.health -= (depletionRate / 2) * Time.deltaTime;
         }
+        if(player.isInRadiation)
+        {
+            player.health -= radMultiplier * Time.deltaTime;
+        }
 
         // 3. Update the visual bars 
         HungerBar.value = Mathf.Lerp(HungerBar.value, player.hunger / 100f, Time.deltaTime * 5f);
         ThirstBar.value = Mathf.Lerp(ThirstBar.value, player.thirst / 100f, Time.deltaTime * 5f);
         HealthBar.value = Mathf.Lerp(HealthBar.value, player.health / 100f, Time.deltaTime * 5f);
+
+        // Update the stamina bar based on the player's stamina
+        Staminabar.value = Mathf.Lerp(Staminabar.value, player.stamina / 100f, Time.deltaTime * 10f);
     }
 }

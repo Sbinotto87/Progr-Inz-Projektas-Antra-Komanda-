@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 725314d888894f78a729ad52b3e4a108
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - craftingPanel: {fileID: 6597919764571836453, guid: 956273af0ba681673b6a32baaf3e1862, type: 3}
+  - slot: {fileID: 77291697358499316, guid: 28b633b74e620229bb7da572eda98024, type: 3}
+  - listParent: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

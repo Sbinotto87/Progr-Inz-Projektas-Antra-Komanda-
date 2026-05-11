@@ -13,6 +13,7 @@ public class InventoryUI : MonoBehaviour
     public TextMeshProUGUI weightText;
 
     private PlayerInput playerInput;
+    private GameObject player;
 
     private Inventory playerInventory;
     private bool isOpen = false;
@@ -20,7 +21,7 @@ public class InventoryUI : MonoBehaviour
     {
         // Start with the menu hidden
         inventoryPanel.SetActive(false);
-
+        GameObject.Find("UI elements").transform.Find("tool").gameObject.SetActive(false);
         FindPlayer();
     }
 
@@ -51,7 +52,7 @@ public class InventoryUI : MonoBehaviour
 
     private void FindPlayer()
     {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        player = GameObject.FindGameObjectWithTag("Player");
 
         if (player != null)
         {
@@ -69,6 +70,7 @@ public class InventoryUI : MonoBehaviour
     {
         // 1. Flip the true/false switch
         isOpen = !isOpen;
+        player.GetComponent<Player>().HasOpenedInventory = isOpen;
 
         // 2. Show or hide the actual UI panel
         inventoryPanel.SetActive(isOpen);
@@ -105,20 +107,22 @@ public class InventoryUI : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        foreach (Item item in playerInventory.items)
+        foreach (InventorySlot slot in playerInventory.slots)
         {
             GameObject newSlot = Instantiate(slotPrefab, listParent);
 
-            // Finds text inside button prefab
-            //newSlot.GetComponentInChildren<TextMeshProUGUI>().text = $"{item.itemName} ({item.weight} kg)";
             var text = newSlot.GetComponentInChildren<TextMeshProUGUI>();
-            text.text = $"{item.itemName} ({item.weight} kg)";
+            if (text != null)
+            {
+                // FIXED: Added count display (x5)
+                string countText = slot.itemData.isStackable ? $" x{slot.count}" : "";
+                text.text = $"{slot.itemData.itemName}{countText} ({slot.itemData.weight * slot.count} kg)";
+            }
 
-            // Link data to drag script
             DraggableItem dragScript = newSlot.GetComponent<DraggableItem>();
             if (dragScript != null)
             {
-                dragScript.itemData = item;
+                dragScript.itemData = slot.itemData;
             }
         }
 
