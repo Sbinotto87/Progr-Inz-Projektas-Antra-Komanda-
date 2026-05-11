@@ -1,3 +1,4 @@
+using Assets.Scripts;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,11 +7,13 @@ public class BlockBreaking : MonoBehaviour
     public BlockSelector selector;
     private Inventory playerInventory;
     private AudioSource audioSource; // for block breaking sounds
+    private Player player;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         GameObject player = GameObject.FindGameObjectWithTag("Player");
+        this.player = player.GetComponent<Player>();
         playerInventory = player.GetComponent<Inventory>();
         audioSource = GetComponent<AudioSource>();
     }
@@ -19,7 +22,7 @@ public class BlockBreaking : MonoBehaviour
 
     void Update()
     {
-        if (Mouse.current.leftButton.wasPressedThisFrame)
+        if (Mouse.current.leftButton.wasPressedThisFrame && !player.HasOpenedInventory && !player.HasOpenedChest)
         {
             if (selector.hasBlockSelected && selector.currentChunk != null)
             {
@@ -46,6 +49,19 @@ public class BlockBreaking : MonoBehaviour
                 }
 
                 // Remove block
+                if (selector.currentChunk.blocks[pos.x, pos.y, pos.z] == 12)
+                {
+                    GameObject[] chestBlocks = GameObject.FindGameObjectsWithTag("Chest block");
+                    foreach (GameObject chestBlock in chestBlocks)
+                    {
+                        if (chestBlock.transform.position.Equals(new Vector3(pos.x, pos.y, pos.z)))
+                        {
+                            Destroy(chestBlock);
+                            break;
+                        }
+                    }
+                }
+
                 selector.currentChunk.blocks[pos.x, pos.y, pos.z] = -1;
 
                 selector.currentChunk.UpdateChunk();
