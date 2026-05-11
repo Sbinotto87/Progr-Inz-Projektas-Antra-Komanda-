@@ -1,11 +1,13 @@
 ﻿using Assets.Scripts;
 using System;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
+using Unity.VisualScripting;
 
 public class Chunk
 {
@@ -103,13 +105,14 @@ public class Chunk
         handle.Complete();
 
         // Copy to your managed array
-        for (int i = 0; i < totalBlocks; i++)
+        Parallel.For(0, totalBlocks, i =>
         {
             int x = i % Width;
             int y = (i / Width) % Height;
             int z = i / (Width * Height);
+
             blocks[x, y, z] = jobResult[i];
-        }
+        });
         isRadioactive = radioactivity[0];
         if(radioactivity[0]) UnityEngine.Debug.Log("generatedRadioactivChunk");
         jobResult.Dispose();
@@ -174,6 +177,7 @@ public class Chunk
     {
         int blockID = blocks[(int)pos.x, (int)pos.y, (int)pos.z];
         bool isBlockTransparent = MyBlocks.block[blockID].isTransparent;
+        MeshType mesh = MyBlocks.block[blockID].mesh;
 
         for (int i = 0; i < 6; i++)
         {
@@ -186,19 +190,78 @@ public class Chunk
                 List<Vector3> nList = isBlockTransparent ? transparentNormals : normals;
                 int tIndex = isBlockTransparent ? transparentTriangleIndex : triangleIndex;
 
-                if (blockID == 4) //zaza
+    //            Full,
+    //Grass,
+    //Nf0875,//Not full and % of how much not full from top, ie Nf05 is half a block tall, like a slab
+    //Nf075,
+    //Nf0625,
+    //Nf05,
+    //Nf0375,
+    //Nf025,
+    //Nf0125
+
+                switch (mesh)
                 {
-                    vList.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 0]]);
-                    vList.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 1]]);
-                    vList.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 2]]);
-                    vList.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 3]]);
-                }
-                else
-                {
-                    vList.Add(pos + Voxel.Vertices[Voxel.Faces[i, 0]]);
-                    vList.Add(pos + Voxel.Vertices[Voxel.Faces[i, 1]]);
-                    vList.Add(pos + Voxel.Vertices[Voxel.Faces[i, 2]]);
-                    vList.Add(pos + Voxel.Vertices[Voxel.Faces[i, 3]]);
+                    case MeshType.Full:
+                        vList.Add(pos + Voxel.Vertices[Voxel.Faces[i, 0]]);
+                        vList.Add(pos + Voxel.Vertices[Voxel.Faces[i, 1]]);
+                        vList.Add(pos + Voxel.Vertices[Voxel.Faces[i, 2]]);
+                        vList.Add(pos + Voxel.Vertices[Voxel.Faces[i, 3]]);
+                        break;
+                    case MeshType.Grass:
+                        vList.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 0]]);
+                        vList.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 1]]);
+                        vList.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 2]]);
+                        vList.Add(pos + Voxel.Vertices[Voxel.GrassFaces[i, 3]]);
+                        break;
+                    case MeshType.Nf0875:
+                        vList.Add(pos + Voxel.Vertices0875[Voxel.Faces[i, 0]]);
+                        vList.Add(pos + Voxel.Vertices0875[Voxel.Faces[i, 1]]);
+                        vList.Add(pos + Voxel.Vertices0875[Voxel.Faces[i, 2]]);
+                        vList.Add(pos + Voxel.Vertices0875[Voxel.Faces[i, 3]]);
+                        break;
+                    case MeshType.Nf075:
+                        vList.Add(pos + Voxel.Vertices075[Voxel.Faces[i, 0]]);
+                        vList.Add(pos + Voxel.Vertices075[Voxel.Faces[i, 1]]);
+                        vList.Add(pos + Voxel.Vertices075[Voxel.Faces[i, 2]]);
+                        vList.Add(pos + Voxel.Vertices075[Voxel.Faces[i, 3]]);
+                        break;
+                    case MeshType.Nf0625:
+                        vList.Add(pos + Voxel.Vertices0625[Voxel.Faces[i, 0]]);
+                        vList.Add(pos + Voxel.Vertices0625[Voxel.Faces[i, 1]]);
+                        vList.Add(pos + Voxel.Vertices0625[Voxel.Faces[i, 2]]);
+                        vList.Add(pos + Voxel.Vertices0625[Voxel.Faces[i, 3]]);
+                        break;
+                    case MeshType.Nf05:
+                        vList.Add(pos + Voxel.Vertices05[Voxel.Faces[i, 0]]);
+                        vList.Add(pos + Voxel.Vertices05[Voxel.Faces[i, 1]]);
+                        vList.Add(pos + Voxel.Vertices05[Voxel.Faces[i, 2]]);
+                        vList.Add(pos + Voxel.Vertices05[Voxel.Faces[i, 3]]);
+                        break;
+                    case MeshType.Nf0375:
+                        vList.Add(pos + Voxel.Vertices0375[Voxel.Faces[i, 0]]);
+                        vList.Add(pos + Voxel.Vertices0375[Voxel.Faces[i, 1]]);
+                        vList.Add(pos + Voxel.Vertices0375[Voxel.Faces[i, 2]]);
+                        vList.Add(pos + Voxel.Vertices0375[Voxel.Faces[i, 3]]);
+                        break;
+                    case MeshType.Nf025:
+                        vList.Add(pos + Voxel.Vertices0875[Voxel.Faces[i, 0]]);
+                        vList.Add(pos + Voxel.Vertices0875[Voxel.Faces[i, 1]]);
+                        vList.Add(pos + Voxel.Vertices0875[Voxel.Faces[i, 2]]);
+                        vList.Add(pos + Voxel.Vertices0875[Voxel.Faces[i, 3]]);
+                        break;
+                    case MeshType.Nf0125:
+                        vList.Add(pos + Voxel.Vertices0125[Voxel.Faces[i, 0]]);
+                        vList.Add(pos + Voxel.Vertices0125[Voxel.Faces[i, 1]]);
+                        vList.Add(pos + Voxel.Vertices0125[Voxel.Faces[i, 2]]);
+                        vList.Add(pos + Voxel.Vertices0125[Voxel.Faces[i, 3]]);
+                        break;
+                    default:
+                        vList.Add(pos + Voxel.Vertices[Voxel.Faces[i, 0]]);
+                        vList.Add(pos + Voxel.Vertices[Voxel.Faces[i, 1]]);
+                        vList.Add(pos + Voxel.Vertices[Voxel.Faces[i, 2]]);
+                        vList.Add(pos + Voxel.Vertices[Voxel.Faces[i, 3]]);
+                        break;
                 }
 
                 Vector3 normal = Voxel.faceChecks[i];
@@ -408,7 +471,7 @@ public class Chunk
             else if (y > calculatedHeight)
                 if (y < 61)
                 {
-                    ResultBlocks[index] = 11; // oil
+                    ResultBlocks[index] = 13; // oil
                     if (!isRadioactive[0])
                         isRadioactive[0] = true;
                 }

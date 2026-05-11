@@ -44,7 +44,7 @@ public class Blocks : MonoBehaviour
 
     private void Awake()
     {
-        block = new BlockType[13];
+        block = new BlockType[20];
         GameObject createdItems = GameObject.Find("CreatedItems");
         if (createdItems == null)
             createdItems = new GameObject("CreatedItems", typeof(CreatedItems));
@@ -65,7 +65,8 @@ public class Blocks : MonoBehaviour
             hitCount = 1,
             faces = new byte[] { 1, 1, 1, 1, 1, 1 },
             dropItem = items[0],
-            breakSound = stoneBreakSound
+            breakSound = stoneBreakSound,
+            mesh = MeshType.Full
         };
 
         //Grass (block)
@@ -82,7 +83,8 @@ public class Blocks : MonoBehaviour
             hitCount = 1,
             faces = new byte[] { 0, 0, 0, 0, 2, 0 },
             dropItem = items[1],
-            breakSound = grassBreakSound
+            breakSound = grassBreakSound,
+            mesh = MeshType.Full
         };
 
         //Wood
@@ -99,7 +101,8 @@ public class Blocks : MonoBehaviour
             hitCount = 2,
             faces = new byte[] { 3, 3, 3, 3, 3, 3 },
             dropItem = items[2],
-            breakSound = woodBreakSound
+            breakSound = woodBreakSound,
+            mesh = MeshType.Full
         };
 
         //Leaves
@@ -116,7 +119,8 @@ public class Blocks : MonoBehaviour
             hitCount = 1,
             faces = new byte[] { 2, 2, 2, 2, 2, 2 },
             dropItem = items[3],
-            breakSound = leafBreakSound
+            breakSound = leafBreakSound,
+            mesh = MeshType.Full
         };
         
         //Grass
@@ -133,7 +137,8 @@ public class Blocks : MonoBehaviour
             hitCount = 1,
             faces = new byte[] { 4, 4, 4, 4, 15, 15 },
             dropItem = items[4],
-            breakSound = grassBreakSound
+            breakSound = grassBreakSound,
+            mesh = MeshType.Grass
         };
         
         //Glass
@@ -150,6 +155,7 @@ public class Blocks : MonoBehaviour
             hitCount = 2,
             faces = new byte[] { 2, 2, 2, 2, 2, 2 },
             dropItem = defaultItem,
+            mesh = MeshType.Full
         };
         
         block[6] = new BlockType
@@ -164,7 +170,8 @@ public class Blocks : MonoBehaviour
             tool = ToolCategory.Pickaxe,
             hitCount = 3,
             faces = new byte[] { 6, 6, 6, 6, 6, 6 },
-            dropItem = defaultItem
+            dropItem = defaultItem,
+            mesh = MeshType.Full
         };
         
         block[7] = new BlockType
@@ -179,7 +186,8 @@ public class Blocks : MonoBehaviour
             tool = ToolCategory.Pickaxe,
             hitCount = 3,
             faces = new byte[] { 7, 7, 7, 7, 7, 7 },
-            dropItem = defaultItem
+            dropItem = defaultItem,
+            mesh = MeshType.Full
         };
         
         block[8] = new BlockType
@@ -194,7 +202,8 @@ public class Blocks : MonoBehaviour
             tool = ToolCategory.Pickaxe,
             hitCount = 3,
             faces = new byte[] { 8, 8, 8, 8, 8, 8 },
-            dropItem = defaultItem
+            dropItem = defaultItem,
+            mesh = MeshType.Full
         };
         block[9] = new BlockType
         {
@@ -208,7 +217,8 @@ public class Blocks : MonoBehaviour
             tool = ToolCategory.NA,
             hitCount = 99,
             faces = new byte[] { 0, 0, 0, 0, 0, 0 },
-            dropItem = defaultItem
+            dropItem = defaultItem,
+            mesh = MeshType.Full
         };
         
         block[10] = new BlockType
@@ -222,7 +232,8 @@ public class Blocks : MonoBehaviour
             tool = ToolCategory.Pickaxe,
             hitCount = 3,
             faces = new byte[] { 8, 8, 8, 8, 8, 8 },
-            dropItem = items[8]
+            dropItem = items[8],
+            mesh = MeshType.Full
         };
         
         block[11] = new BlockType
@@ -237,7 +248,8 @@ public class Blocks : MonoBehaviour
             tool = ToolCategory.NA,
             hitCount = 99,
             faces = new byte[] { 1, 1, 1, 1, 1, 1 },
-            dropItem = null
+            dropItem = null,
+            mesh = MeshType.Full
         };
         
         block[12] = new BlockType
@@ -251,7 +263,113 @@ public class Blocks : MonoBehaviour
             tool = ToolCategory.Axe,
             hitCount = 4,
             faces = new byte[] { 1, 1, 1, 1, 1, 1 },
-            dropItem = items[9]
+            dropItem = items[9],
+            mesh = MeshType.Full
+        };
+        block[13] = new BlockType
+        {
+            name = "Water0875",
+            isSolid = false,
+            isTransparent = true,
+            isBreakable = false,
+            isCutout = false,
+            isSwimable = true,
+            swimSlowdown = 2.0f,
+            tool = ToolCategory.NA,
+            hitCount = 99,
+            faces = new byte[] { 0, 0, 0, 0, 0, 0 },
+            dropItem = defaultItem,
+            mesh = MeshType.Nf0875
+        };
+        block[14] = new BlockType
+        {
+            name = "Water075",
+            isSolid = false,
+            isTransparent = true,
+            isBreakable = false,
+            isCutout = false,
+            isSwimable = true,
+            swimSlowdown = 2.0f,
+            tool = ToolCategory.NA,
+            hitCount = 99,
+            faces = new byte[] { 0, 0, 0, 0, 0, 0 },
+            dropItem = defaultItem,
+            mesh = MeshType.Nf075
+        };
+        block[15] = new BlockType
+        {
+            name = "Water0625",
+            isSolid = false,
+            isTransparent = true,
+            isBreakable = false,
+            isCutout = false,
+            isSwimable = true,
+            swimSlowdown = 2.0f,
+            tool = ToolCategory.NA,
+            hitCount = 99,
+            faces = new byte[] { 0, 0, 0, 0, 0, 0 },
+            dropItem = defaultItem,
+            mesh = MeshType.Nf0625
+        };
+        block[16] = new BlockType
+        {
+            name = "Water05",
+            isSolid = false,
+            isTransparent = true,
+            isBreakable = false,
+            isCutout = false,
+            isSwimable = true,
+            swimSlowdown = 2.0f,
+            tool = ToolCategory.NA,
+            hitCount = 99,
+            faces = new byte[] { 0, 0, 0, 0, 0, 0 },
+            dropItem = defaultItem,
+            mesh = MeshType.Nf05
+        };
+        block[17] = new BlockType
+        {
+            name = "Water0375",
+            isSolid = false,
+            isTransparent = true,
+            isBreakable = false,
+            isCutout = false,
+            isSwimable = true,
+            swimSlowdown = 2.0f,
+            tool = ToolCategory.NA,
+            hitCount = 99,
+            faces = new byte[] { 0, 0, 0, 0, 0, 0 },
+            dropItem = defaultItem,
+            mesh = MeshType.Nf0375
+        };
+        block[18] = new BlockType
+        {
+            name = "Water025",
+            isSolid = false,
+            isTransparent = true,
+            isBreakable = false,
+            isCutout = false,
+            isSwimable = true,
+            swimSlowdown = 2.0f,
+            tool = ToolCategory.NA,
+            hitCount = 99,
+            faces = new byte[] { 0, 0, 0, 0, 0, 0 },
+            dropItem = defaultItem,
+            mesh = MeshType.Nf025
+        };
+        block[19] = new BlockType
+        {
+            name = "Water0125",
+            isSolid = false,
+            isTransparent = true,
+            isBreakable = false,
+            isCutout = false,
+            isSwimable = true,
+            swimSlowdown = 2.0f,
+            tool = ToolCategory.NA,
+            hitCount = 99,
+            faces = new byte[] { 0, 0, 0, 0, 0, 0 },
+            dropItem = defaultItem,
+            mesh = MeshType.Nf0125
         };
     }
     
@@ -271,12 +389,30 @@ public class BlockType
     public bool isBreakable;
     public ToolCategory tool;
     public int hitCount;
-    
+    public MeshType mesh;
+
     //always set 6 faces
     public byte[] faces;    //front, back, right, left, top, bottom
     public Item dropItem;
 
     public AudioClip breakSound; // for breaking sounds
+    public MeshType GetMeshType(int id)
+    {
+        return this.mesh;
+    }
+}
+
+public enum MeshType
+{
+    Full,
+    Grass,
+    Nf0875,//Not full and % of how much not full from top, ie Nf05 is half a block tall, like a slab
+    Nf075,
+    Nf0625,
+    Nf05,
+    Nf0375,
+    Nf025,
+    Nf0125
 }
 
 public enum ToolCategory

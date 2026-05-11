@@ -315,7 +315,7 @@ namespace Assets.Scripts
 
             if (y > terrainHeight)
                 if (y < 61)
-                    return 11;
+                    return 13;
                 else 
                 return -1; // Air
             else if (y == terrainHeight || (y < terrainHeight && y > terrainHeight - 4))
