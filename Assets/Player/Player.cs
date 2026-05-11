@@ -1,4 +1,5 @@
 using Assets.Scripts;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -85,6 +86,9 @@ public class Player : MonoBehaviour
 
     private float xRotation = 0f;
 
+    public OverlayEffects overlayEffects;
+    public Texture2D overlayTexture;
+
     void Start()
     {
         playerInput = GetComponent<PlayerInput>();
@@ -145,6 +149,8 @@ public class Player : MonoBehaviour
             enabled = false;
             return;
         }
+        overlayEffects = GameObject.FindGameObjectWithTag("TextureOverlay").GetComponent<OverlayEffects>();
+        overlayTexture = Resources.Load("OilOverlay") as Texture2D;
 
         highestYWhileGrounded = transform.position.y;
 
@@ -165,6 +171,9 @@ public class Player : MonoBehaviour
         }
 
         inWater = CheckWater(transform.position.x, transform.position.y - HalfHeight + SkinWidth, transform.position.z);
+        isSubmerged = false;
+        if (inWater)
+            isSubmerged = CheckWater(transform.position.x, transform.position.y + HalfHeight - SkinWidth, transform.position.z);
 
         Vector3 positionBeforeMove = transform.position;
         //bool sprintingInput = sprintAction.IsPressed();
@@ -179,6 +188,10 @@ public class Player : MonoBehaviour
         //UpdateDynamicFov(positionBeforeMove, transform.position, sprintingInput);
         ApplyGravity();
         transform.Translate(verticalVelocity * Time.deltaTime * Vector3.up, Space.World);
+
+        if (isSubmerged) overlayEffects.ShowOverlay(overlayTexture, 0.5f);
+
+        else overlayEffects.HideOverlay();
 
         if (inWater)
         {
@@ -554,7 +567,8 @@ public class Player : MonoBehaviour
         if (blockID != -1)
         {
             swimSpeed = chunk.MyBlocks.block[blockID].swimSlowdown;
-            if (chunk.blocks[localX, (int)(blockY + HalfHeight - SkinWidth), localZ] == 11) // effect
+            int id = chunk.blocks[localX, (int)(blockY + HalfHeight - SkinWidth), localZ];
+            if (id == 11 || (id >= 13 && id <= 19)) // effect
             return chunk.MyBlocks.block[blockID].isSwimable;
         }
         return false;

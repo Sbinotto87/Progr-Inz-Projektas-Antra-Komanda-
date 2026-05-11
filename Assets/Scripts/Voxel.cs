@@ -10,14 +10,14 @@ public static class Voxel
 
     public static readonly Vector3[] Vertices =     //vertice coordinates of a block
     {
-        new (1.0f, 0.0f, 0.0f),  //1
-        new (1.0f, 1.0f, 0.0f),  //2
-        new (1.0f, 1.0f, 1.0f),  //3
-        new (1.0f, 0.0f, 1.0f),  //4
-        new (0.0f, 0.0f, 0.0f),  //5
-        new (0.0f, 1.0f, 0.0f),  //6
-        new (0.0f, 1.0f, 1.0f),  //7
-        new (0.0f, 0.0f, 1.0f)   //8
+        new (1.0f, 0.0f, 0.0f),  //0
+        new (1.0f, 1.0f, 0.0f),  //1
+        new (1.0f, 1.0f, 1.0f),  //2
+        new (1.0f, 0.0f, 1.0f),  //3
+        new (0.0f, 0.0f, 0.0f),  //4
+        new (0.0f, 1.0f, 0.0f),  //5
+        new (0.0f, 1.0f, 1.0f),  //6
+        new (0.0f, 0.0f, 1.0f)   //7
     };
 
     public static readonly int[,] Faces =           //faces of a block
@@ -49,5 +49,82 @@ public static class Voxel
         {3, 2, 5, 4},     //back
         {7, 7, 7, 7},     
         {7, 7, 7, 7}      
+    };
+    public static readonly Vector3[] Vertices0875 =     //vertice coordinates of a block
+    {
+        new (1.0f, 0.0f, 0.0f),  //0
+        new (1.0f, 0.875f, 0.0f),  //1/
+        new (1.0f, 0.875f, 1.0f),  //2/
+        new (1.0f, 0.0f, 1.0f),  //3
+        new (0.0f, 0.0f, 0.0f),  //4
+        new (0.0f, 0.875f, 0.0f),  //5/
+        new (0.0f, 0.875f, 1.0f),  //6/
+        new (0.0f, 0.0f, 1.0f)   //7
+    };
+    public static readonly Vector3[] Vertices075 =     //vertice coordinates of a block
+    {
+        new (1.0f, 0.0f, 0.0f),  //0
+        new (1.0f, 0.75f, 0.0f),  //1/
+        new (1.0f, 0.75f, 1.0f),  //2/
+        new (1.0f, 0.0f, 1.0f),  //3
+        new (0.0f, 0.0f, 0.0f),  //4
+        new (0.0f, 0.75f, 0.0f),  //5/
+        new (0.0f, 0.75f, 1.0f),  //6/
+        new (0.0f, 0.0f, 1.0f)   //7
+    };
+    public static readonly Vector3[] Vertices0625 =     //vertice coordinates of a block
+    {
+        new (1.0f, 0.0f, 0.0f),  //0
+        new (1.0f, 0.625f, 0.0f),  //1/
+        new (1.0f, 0.625f, 1.0f),  //2/
+        new (1.0f, 0.0f, 1.0f),  //3
+        new (0.0f, 0.0f, 0.0f),  //4
+        new (0.0f, 0.625f, 0.0f),  //5/
+        new (0.0f, 0.625f, 1.0f),  //6/
+        new (0.0f, 0.0f, 1.0f)   //7
+    };
+    public static readonly Vector3[] Vertices05 =     //vertice coordinates of a block
+    {
+        new (1.0f, 0.0f, 0.0f),  //0
+        new (1.0f, 0.5f, 0.0f),  //1/
+        new (1.0f, 0.5f, 1.0f),  //2/
+        new (1.0f, 0.0f, 1.0f),  //3
+        new (0.0f, 0.0f, 0.0f),  //4
+        new (0.0f, 0.5f, 0.0f),  //5/
+        new (0.0f, 0.5f, 1.0f),  //6/
+        new (0.0f, 0.0f, 1.0f)   //7
+    };
+    public static readonly Vector3[] Vertices0375 =     //vertice coordinates of a block
+    {
+        new (1.0f, 0.0f, 0.0f),  //0
+        new (1.0f, 0.375f, 0.0f),  //1/
+        new (1.0f, 0.375f, 1.0f),  //2/
+        new (1.0f, 0.0f, 1.0f),  //3
+        new (0.0f, 0.0f, 0.0f),  //4
+        new (0.0f, 0.375f, 0.0f),  //5/
+        new (0.0f, 0.375f, 1.0f),  //6/
+        new (0.0f, 0.0f, 1.0f)   //7
+    };
+    public static readonly Vector3[] Vertices025 =     //vertice coordinates of a block
+    {
+        new (1.0f, 0.0f, 0.0f),  //0
+        new (1.0f, 0.25f, 0.0f),  //1/
+        new (1.0f, 0.25f, 1.0f),  //2/
+        new (1.0f, 0.0f, 1.0f),  //3
+        new (0.0f, 0.0f, 0.0f),  //4
+        new (0.0f, 0.25f, 0.0f),  //5/
+        new (0.0f, 0.25f, 1.0f),  //6/
+        new (0.0f, 0.0f, 1.0f)   //7
+    };
+    public static readonly Vector3[] Vertices0125 =     //vertice coordinates of a block
+    {
+        new (1.0f, 0.0f, 0.0f),  //0
+        new (1.0f, 0.125f, 0.0f),  //1/
+        new (1.0f, 0.125f, 1.0f),  //2/
+        new (1.0f, 0.0f, 1.0f),  //3
+        new (0.0f, 0.0f, 0.0f),  //4
+        new (0.0f, 0.125f, 0.0f),  //5/
+        new (0.0f, 0.125f, 1.0f),  //6/
+        new (0.0f, 0.0f, 1.0f)   //7
     };
 }
