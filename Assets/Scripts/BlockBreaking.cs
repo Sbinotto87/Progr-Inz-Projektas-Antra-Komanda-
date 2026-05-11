@@ -62,10 +62,12 @@ public class BlockBreaking : MonoBehaviour
                     }
                 }
 
-                selector.currentChunk.blocks[pos.x, pos.y, pos.z] = -1;
+                //selector.currentChunk.blocks[pos.x, pos.y, pos.z] = -1;
 
-                selector.currentChunk.UpdateChunk();
-                selector.currentChunk.UpdateNeighborChunks(pos.x, pos.z);
+                //selector.currentChunk.UpdateChunk();
+                //selector.currentChunk.UpdateNeighborChunks(pos.x, pos.z);
+                Vector3 worldPos = selector.currentBlockPosition;
+                selector.world.SetVoxel(worldPos, -1);
             }
         }
     }

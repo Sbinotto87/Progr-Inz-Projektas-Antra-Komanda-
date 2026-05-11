@@ -48,6 +48,7 @@ namespace Assets.Scripts
 
         Blocks MyBlocks = null;
 
+
         /// <summary>
         /// signed 32bit int for seed
         /// </summary>
@@ -76,6 +77,10 @@ namespace Assets.Scripts
         private Transform playerTransform;
         Queue<ChunkCoord> chunksToRender;
         public bool IsInRadiation;
+
+        public readonly int[] OilLevels = { -1, 19, 18, 17, 16, 15, 14, 13 }; // water phys block states
+        private Queue<Vector3> fluidUpdateQueue = new Queue<Vector3>();
+        private HashSet<Vector3> fluidUpdateSet = new HashSet<Vector3>();
 
         private void Awake()
         {
@@ -138,6 +143,8 @@ namespace Assets.Scripts
         private void FixedUpdate()
         {
             TickDayTime();
+            if(Tick %5 == 0)
+                ProcessFluids();
         }
         /// <summary>
         /// updates the ingame time (in seconds) every 20 tics
@@ -404,6 +411,152 @@ namespace Assets.Scripts
                 return true;
             else
                 return false;
+        }
+        /// <summary>
+        /// adds fluid update to queue
+        /// </summary>
+        /// <param name="pos">block pos for update</param>
+        public void ScheduleFluidUpdate(Vector3 pos)
+        {
+            if (!fluidUpdateSet.Contains(pos))
+            {
+                fluidUpdateQueue.Enqueue(pos);
+                fluidUpdateSet.Add(pos);
+            }
+        }
+        public int GetFluidLevel(int blockID)
+        {
+            // Treat falling oil (11) as a max-level source block for flow calculations
+            if (blockID == 11) return OilLevels.Length - 1;
+
+            for (int i = 0; i < OilLevels.Length; i++)
+            {
+                if (OilLevels[i] == blockID) return i;
+            }
+            return 0; // Not a fluid
+        }
+        public bool CanFlowInto(int blockID)
+        {
+            // -1 is air, 4 is grass
+            return blockID == -1 || blockID == 4;
+        }
+        public void SetVoxel(Vector3 pos, int blockID)
+        {
+            if (!IsVoxelInWorld(pos)) return;
+
+            int x = Mathf.FloorToInt(pos.x);
+            int y = Mathf.FloorToInt(pos.y);
+            int z = Mathf.FloorToInt(pos.z);
+
+            int chunkX = x / Chunk.Width;
+            int chunkZ = z / Chunk.Width;
+
+            if (chunks[chunkX, chunkZ] != null)
+            {
+                int localX = x - (chunkX * Chunk.Width);
+                int localZ = z - (chunkZ * Chunk.Width);
+
+                chunks[chunkX, chunkZ].blocks[localX, y, localZ] = blockID;
+                chunks[chunkX, chunkZ].UpdateChunk();
+                chunks[chunkX, chunkZ].UpdateNeighborChunks(localX, localZ);
+                TriggerNeighborFluids(pos);
+            }
+        }
+        public void TriggerNeighborFluids(Vector3 pos)
+        {
+        Vector3[] neighbors = {
+        Vector3.up, Vector3.down,
+        Vector3.forward, Vector3.back,
+        Vector3.left, Vector3.right
+        };
+
+            foreach (Vector3 dir in neighbors)
+            {
+                Vector3 neighborPos = pos + dir;
+                if (GetFluidLevel(GetVoxel(neighborPos)) > 0)
+                {
+                    ScheduleFluidUpdate(neighborPos);
+                }
+            }
+        }
+        private void ProcessFluids()
+        {
+            int updatesThisTick = Mathf.Min(fluidUpdateQueue.Count, 200);
+            int maxLevel = OilLevels.Length - 1;
+
+            for (int i = 0; i < updatesThisTick; i++)
+            {
+                Vector3 pos = fluidUpdateQueue.Dequeue();
+                fluidUpdateSet.Remove(pos);
+
+                int currentID = GetVoxel(pos);
+                int currentLevel = GetFluidLevel(currentID);
+
+                if (currentLevel <= 0) continue;
+
+                // Drainage
+                bool isFallingBlock = (currentID == 11);
+
+                if (currentLevel < maxLevel || isFallingBlock)
+                {
+                    int maxNeighborLevel = 0;
+                    Vector3[] sideDirs = { Vector3.forward, Vector3.back, Vector3.left, Vector3.right };
+                    foreach (Vector3 dir in sideDirs)
+                    {
+                        maxNeighborLevel = Mathf.Max(maxNeighborLevel, GetFluidLevel(GetVoxel(pos + dir)));
+                    }
+
+                    int upLevel = GetFluidLevel(GetVoxel(pos + Vector3.up));
+
+                    bool shouldDryUp = false;
+
+                    if (isFallingBlock)
+                    {
+                        if (upLevel == 0) shouldDryUp = true;
+                    }
+                    else
+                    {
+                        if (upLevel == 0 && maxNeighborLevel <= currentLevel) shouldDryUp = true;
+                    }
+
+                    if (shouldDryUp)
+                    {
+                        SetVoxel(pos, -1);
+                        ScheduleFluidUpdate(pos + Vector3.down);
+                        foreach (Vector3 dir in sideDirs) ScheduleFluidUpdate(pos + dir);
+                        continue;
+                    }
+                }
+
+                // Flow down
+                Vector3 downPos = pos + Vector3.down;
+                int downID = GetVoxel(downPos);
+
+                if (CanFlowInto(downID) || (GetFluidLevel(downID) > 0 && GetFluidLevel(downID) < maxLevel))
+                {
+                    SetVoxel(downPos, 11);
+                    ScheduleFluidUpdate(downPos);
+                    continue;
+                }
+
+                // Flow side
+                if (currentLevel > 1)
+                {
+                    Vector3[] sideDirs = { Vector3.forward, Vector3.back, Vector3.left, Vector3.right };
+                    foreach (Vector3 dir in sideDirs)
+                    {
+                        Vector3 neighborPos = pos + dir;
+                        int neighborID = GetVoxel(neighborPos);
+                        int neighborLevel = GetFluidLevel(neighborID);
+
+                        if (CanFlowInto(neighborID) || (neighborLevel > 0 && neighborLevel < currentLevel - 1))
+                        {
+                            SetVoxel(neighborPos, OilLevels[currentLevel - 1]);
+                            ScheduleFluidUpdate(neighborPos);
+                        }
+                    }
+                }
+            }
         }
     }
     /// <summary>

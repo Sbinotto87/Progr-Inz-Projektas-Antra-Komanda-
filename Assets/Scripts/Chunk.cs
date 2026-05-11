@@ -15,7 +15,6 @@ public class Chunk
     public MeshFilter transparentMeshFilter;
     GameObject transparentObject;
 
-
     public MeshRenderer meshRenderer;
     public MeshFilter meshFilter;
     GameObject chunkObject;
@@ -183,23 +182,13 @@ public class Chunk
         for (int i = 0; i < 6; i++)
         {
 
-            if (CheckIfBlockIsSolid(pos + Voxel.faceChecks[i], blockID))
+            if (CheckIfBlockIsSolid(pos + Voxel.faceChecks[i], blockID, i))
             {
                 List<Vector3> vList = isBlockTransparent ? transparentVertices : vertices;
                 List<int> tList = isBlockTransparent ? transparentTriangles : triangles;
                 List<Vector2> uList = isBlockTransparent ? transparentUvs : uvs;
                 List<Vector3> nList = isBlockTransparent ? transparentNormals : normals;
                 int tIndex = isBlockTransparent ? transparentTriangleIndex : triangleIndex;
-
-    //            Full,
-    //Grass,
-    //Nf0875,//Not full and % of how much not full from top, ie Nf05 is half a block tall, like a slab
-    //Nf075,
-    //Nf0625,
-    //Nf05,
-    //Nf0375,
-    //Nf025,
-    //Nf0125
 
                 switch (mesh)
                 {
@@ -246,10 +235,10 @@ public class Chunk
                         vList.Add(pos + Voxel.Vertices0375[Voxel.Faces[i, 3]]);
                         break;
                     case MeshType.Nf025:
-                        vList.Add(pos + Voxel.Vertices0875[Voxel.Faces[i, 0]]);
-                        vList.Add(pos + Voxel.Vertices0875[Voxel.Faces[i, 1]]);
-                        vList.Add(pos + Voxel.Vertices0875[Voxel.Faces[i, 2]]);
-                        vList.Add(pos + Voxel.Vertices0875[Voxel.Faces[i, 3]]);
+                        vList.Add(pos + Voxel.Vertices025[Voxel.Faces[i, 0]]);
+                        vList.Add(pos + Voxel.Vertices025[Voxel.Faces[i, 1]]);
+                        vList.Add(pos + Voxel.Vertices025[Voxel.Faces[i, 2]]);
+                        vList.Add(pos + Voxel.Vertices025[Voxel.Faces[i, 3]]);
                         break;
                     case MeshType.Nf0125:
                         vList.Add(pos + Voxel.Vertices0125[Voxel.Faces[i, 0]]);
@@ -286,8 +275,9 @@ public class Chunk
     /// cheks if the block is solid(also does checks for blocks outside the chunk)
     /// </summary>
     /// <param name="pos">position in chunk</param>
+    /// <param name="faceIndex">Face to check for (liquid calculations)</param>
     /// <returns>true if block is solid, false otherwise</returns>
-    bool CheckIfBlockIsSolid(Vector3 pos, int currentBlockID)
+    bool CheckIfBlockIsSolid(Vector3 pos, int currentBlockID, int faceIndex) // <--- Added faceIndex
     {
         int x = Mathf.FloorToInt(pos.x);
         int y = Mathf.FloorToInt(pos.y);
@@ -306,10 +296,29 @@ public class Chunk
 
         if (neighborID == -1) return true;
 
+        //liquid (snake)
+
+        bool isCurrentFluid = world.GetFluidLevel(currentBlockID) > 0;
+        bool isNeighborFluid = world.GetFluidLevel(neighborID) > 0;
+
+        if (isCurrentFluid && faceIndex == 4)
+        {
+            if (isNeighborFluid) return false;
+
+            if (currentBlockID != 11) return true;
+        }
+
+        if (isCurrentFluid && isNeighborFluid)
+        {
+            return false;
+        }
+
+        //solid (snake)
         if (neighborID == currentBlockID && MyBlocks.block[currentBlockID].isTransparent)
         {
             return false;
         }
+
         return MyBlocks.block[neighborID].isTransparent || !MyBlocks.block[neighborID].isSolid;
     }
     /// <summary>

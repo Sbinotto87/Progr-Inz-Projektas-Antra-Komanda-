@@ -47,8 +47,33 @@ public class BlockPlacer : MonoBehaviour
             }
         }
     }
-
     private void PlaceBlock()
+    {
+        if (selector == null || !selector.hasBlockSelected) return;
+        if (playerInventory == null || playerInventory.slots.Count == 0) return;
+
+        // Use first item in inventory
+        Item itemToPlace = playerInventory.slots[0].itemData;
+        if (itemToPlace == null) return;
+
+        // Calculate the WORLD position of where the new block goes 
+        // by adding the face normal to the current block's world position
+        Vector3 worldPos = selector.currentBlockPosition + selector.hitNormal;
+
+        // Use the World's SetVoxel method. This handles chunk borders, 
+        // places the block, updates meshes, AND wakes up nearby fluids!
+        selector.world.SetVoxel(worldPos, itemToPlace.blockIndex);
+
+        // Remove item from inventory and update UI
+        playerInventory.RemoveItem(itemToPlace);
+
+        // Handle Chest placement
+        if (itemToPlace.blockIndex == 12)
+        {
+            GameObject chest = Instantiate(GameObject.Find("Chest block"), worldPos, Quaternion.identity);
+        }
+    }
+    private void PlaceBlockOld()
     {
         if (selector == null || !selector.hasBlockSelected) return;
         if (playerInventory == null || playerInventory.slots.Count == 0) return;
