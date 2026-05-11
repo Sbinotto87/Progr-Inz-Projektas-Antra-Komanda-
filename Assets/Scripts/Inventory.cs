@@ -98,7 +98,7 @@ public class Inventory : MonoBehaviour
 
     // TEMP TEST FOR FOOD ITEM YOU CAN DELETE IF NEEDED I DONT CARE ABOUT THIS METHOD I HATE THIS =============================
     [Header("Test Settings")]
-    public Item startingItem; // Drag your Grass or Wood item here in the Inspector
+    public Item startingItem;
     public int startingAmount = 5;
 
     private void Start()
@@ -117,8 +117,12 @@ public class Inventory : MonoBehaviour
 
     private void SpawnStartingItems()
     {
+        CreatedItems createdItems = GameObject.Find("CreatedItems").GetComponent<CreatedItems>();
+        startingItem = createdItems.items[11];
         if (startingItem != null)
         {
+            AddItem(createdItems.items[6]);
+            AddItem(createdItems.items[5]);
             // We loop based on the startingAmount
             for (int i = 0; i < startingAmount; i++)
             {

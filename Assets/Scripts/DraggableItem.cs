@@ -13,8 +13,6 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     private Inventory playerInventory;
     private CanvasGroup canvasGroup;
     private Transform originalParent;
-    public Item equippedItem;
-    private bool equipped;
     private GameObject player;
 
     private void Awake()
@@ -99,6 +97,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
             if (playerScript != null)
             {
+                playerScript.AddHealth(itemData.healthRestoreValue);
                 // Apply the restore value based on type
                 if (itemData.category == ItemCategory.Food)
                     playerScript.AddHunger(itemData.hungerRestoreValue);
@@ -191,19 +190,19 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     public void EquipItem()
     {
         Transform tool = GameObject.Find("UI elements").transform.Find("tool");
-        if (!equipped)
+        Player player = this.player.GetComponent<Player>();
+        if (!player.HasEquippedTool)
         {
             Image toolImage = tool.GetComponent<Image>();
             tool.gameObject.SetActive(true);
             toolImage.sprite = itemData.icon;
-            equippedItem = itemData;
-            equipped = !equipped;
+            player.currentEquippedTool = itemData;
         }
         else
         {
             tool.gameObject.SetActive(false);
-            equipped = !equipped;
+            player.currentEquippedTool = null;
         }
-        
+        player.HasEquippedTool = !player.HasEquippedTool;
     }
 }

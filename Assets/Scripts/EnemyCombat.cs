@@ -5,7 +5,7 @@ public class PlayerCombat : MonoBehaviour
 {
     public Camera cam;
     public float range = 3f;
-    public int damage = 25;
+    public float damage = 25f;
 
     void Update()
     {

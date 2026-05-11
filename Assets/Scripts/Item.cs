@@ -16,16 +16,19 @@ public class Item : ScriptableObject, IEquatable<Item>
 {
     [Header("Categorization")]
     public ItemCategory category;
+    public ToolCategory toolcategory;
 
     public string itemName;
     public float weight;
     public Sprite icon;
     public bool isStackable;
     public int blockIndex;
+    public float toolEffectiveness;
 
     [Header("Consumable Stats")]
     public float hungerRestoreValue;
     public float thirstRestoreValue;
+    public float healthRestoreValue;
     
     public bool Equals(Item other) => itemName.Equals(other.itemName);
 }
@@ -36,12 +39,12 @@ public class CreatedItems : MonoBehaviour
 
     public void Awake()
     {
-        items = new Item[12];
+        items = new Item[17];
         
         Item stone = ScriptableObject.CreateInstance<Item>();
         stone.category = ItemCategory.Block;
         stone.itemName = "Stone block";
-        stone.weight = 10;
+        stone.weight = 5;
         stone.blockIndex = 0;
         stone.isStackable = true;
         items[0] = stone;
@@ -49,7 +52,7 @@ public class CreatedItems : MonoBehaviour
         Item grassBlock = ScriptableObject.CreateInstance<Item>();
         grassBlock.category = ItemCategory.Block;
         grassBlock.itemName = "Grass block";
-        grassBlock.weight = 10;
+        grassBlock.weight = 3;
         grassBlock.blockIndex = 1;
         grassBlock.isStackable = true;
         items[1] = grassBlock;
@@ -57,7 +60,7 @@ public class CreatedItems : MonoBehaviour
         Item wood = ScriptableObject.CreateInstance<Item>();
         wood.category = ItemCategory.Block;
         wood.itemName = "Wood block";
-        wood.weight = 10;
+        wood.weight = 1;
         wood.blockIndex = 2;
         wood.isStackable = true;
         items[2] = wood;
@@ -65,7 +68,7 @@ public class CreatedItems : MonoBehaviour
         Item leaf = ScriptableObject.CreateInstance<Item>();
         leaf.category = ItemCategory.Block;
         leaf.itemName = "Leaf block";
-        leaf.weight = 10;
+        leaf.weight = 1;
         leaf.blockIndex = 3;
         leaf.isStackable = true;
         items[3] = leaf;
@@ -73,36 +76,41 @@ public class CreatedItems : MonoBehaviour
         Item grass = ScriptableObject.CreateInstance<Item>();
         grass.category = ItemCategory.Block;
         grass.itemName = "Grass";
-        grass.weight = 10;
+        grass.weight = 1;
         grass.blockIndex = 4;
         grass.isStackable = true;
         items[4] = grass;
         
         Item IronPickaxe = ScriptableObject.CreateInstance<Item>();
         IronPickaxe.category = ItemCategory.Tool;
+        IronPickaxe.toolcategory = ToolCategory.Pickaxe;
         IronPickaxe.itemName = "Iron pickaxe";
         IronPickaxe.weight = 10;
-        IronPickaxe.icon = Resources.Load("Iron_pickaxe", typeof(Sprite)) as Sprite;
+        IronPickaxe.toolEffectiveness = 4.0f;
+        IronPickaxe.icon = Resources.Load("iron_pickaxe", typeof(Sprite)) as Sprite;
         items[5] = IronPickaxe;
         
         Item sword = ScriptableObject.CreateInstance<Item>();
         sword.category = ItemCategory.Weapon;
         sword.itemName = "Sword";
         sword.weight = 10;
-        sword.icon = Resources.Load("diamond_sword", typeof(Sprite)) as Sprite;
+        sword.toolEffectiveness = 2.0f;
+        sword.icon = Resources.Load("iron_sword", typeof(Sprite)) as Sprite;
         items[6] = sword;
         
         Item stonePickaxe = ScriptableObject.CreateInstance<Item>();
         stonePickaxe.category = ItemCategory.Tool;
         stonePickaxe.itemName = "Stone pickaxe";
+        stonePickaxe.toolcategory = ToolCategory.Pickaxe;
         stonePickaxe.weight = 10;
-        stonePickaxe.icon = Resources.Load("Iron_pickaxe", typeof(Sprite)) as Sprite;
+        stonePickaxe.toolEffectiveness = 2.5f;
+        stonePickaxe.icon = Resources.Load("stone_pickaxe", typeof(Sprite)) as Sprite;
         items[7] = stonePickaxe;
         
         Item IronOre = ScriptableObject.CreateInstance<Item>();
         IronOre.category = ItemCategory.Block;
         IronOre.itemName = "Iron Ore";
-        IronOre.weight = 2;
+        IronOre.weight = 1;
         IronOre.isStackable = true;
         IronOre.blockIndex = 9;
         items[8] = IronOre;
@@ -118,18 +126,64 @@ public class CreatedItems : MonoBehaviour
         Item beer = ScriptableObject.CreateInstance<Item>();
         beer.category = ItemCategory.Drink;
         beer.itemName = "Beer";
-        beer.weight = 5;
+        beer.weight = 2;
         beer.isStackable = true;
         beer.hungerRestoreValue = 5;
         beer.thirstRestoreValue = 40;
+        beer.healthRestoreValue = 50;
         items[10] = beer;
         
         Item bread = ScriptableObject.CreateInstance<Item>();
         bread.category = ItemCategory.Food;
         bread.itemName = "Bread";
-        bread.weight = 5;
+        bread.weight = 2;
         bread.isStackable = true;
         bread.hungerRestoreValue = 40;
-        items[11] = bread;
+        bread.healthRestoreValue = 100;
+        items[11] = bread;        
+        
+        Item Oil = ScriptableObject.CreateInstance<Item>();
+        Oil.category = ItemCategory.Block;
+        Oil.itemName = "Oil";
+        Oil.weight = 2;
+        Oil.isStackable = true;
+        Oil.blockIndex = 11;
+        items[12] = Oil;
+        
+        Item stoneShovel = ScriptableObject.CreateInstance<Item>();
+        stoneShovel.category = ItemCategory.Tool;
+        stoneShovel.itemName = "Stone shovel";
+        stoneShovel.toolcategory = ToolCategory.Shovel;
+        stoneShovel.weight = 10;
+        stoneShovel.toolEffectiveness = 2.5f;
+        stoneShovel.icon = Resources.Load("stone_shovel", typeof(Sprite)) as Sprite;
+        items[13] = stoneShovel;
+        
+        Item IronShovel = ScriptableObject.CreateInstance<Item>();
+        IronShovel.category = ItemCategory.Tool;
+        IronShovel.itemName = "Iron shovel";
+        IronShovel.toolcategory = ToolCategory.Shovel;
+        IronShovel.weight = 10;
+        IronShovel.toolEffectiveness = 4f;
+        IronShovel.icon = Resources.Load("iron_shovel", typeof(Sprite)) as Sprite;
+        items[14] = IronShovel;
+        
+        Item stoneAxe = ScriptableObject.CreateInstance<Item>();
+        stoneAxe.category = ItemCategory.Tool;
+        stoneAxe.itemName = "Stone axe";
+        stoneAxe.toolcategory = ToolCategory.Axe;
+        stoneAxe.weight = 10;
+        stoneAxe.toolEffectiveness = 2.5f;
+        stoneAxe.icon = Resources.Load("stone_axe", typeof(Sprite)) as Sprite;
+        items[15] = stoneAxe;
+        
+        Item IronAxe = ScriptableObject.CreateInstance<Item>();
+        IronAxe.category = ItemCategory.Tool;
+        IronAxe.itemName = "Iron axe";
+        IronAxe.toolcategory = ToolCategory.Axe;
+        IronAxe.weight = 10;
+        IronAxe.toolEffectiveness = 4f;
+        IronAxe.icon = Resources.Load("iron_axe", typeof(Sprite)) as Sprite;
+        items[16] = IronAxe;
     }
 }

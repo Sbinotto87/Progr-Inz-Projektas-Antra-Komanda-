@@ -15,14 +15,15 @@ public class CraftingItems : MonoBehaviour
     
     private void Awake()
     {
-        craftingItems = new CraftingItem[4];
+        craftingItems = new CraftingItem[8];
+        
         GameObject createdItems = GameObject.Find("CreatedItems");
         if (createdItems == null)
             createdItems = new GameObject("CreatedItems", typeof(CreatedItems));
         CreatedItems createdItems1 = createdItems.GetComponent<CreatedItems>();
         items = createdItems1.items;
 
-        craftingItems[0] = new CraftingItem()
+        craftingItems[0] = new CraftingItem()   //Stone pickaxe
         {
             recipe = new()
             {
@@ -32,7 +33,7 @@ public class CraftingItems : MonoBehaviour
             result = items[7]
         };
 
-        craftingItems[1] = new CraftingItem()
+        craftingItems[1] = new CraftingItem()   //Iron pickaxe
         {
             recipe = new()
             {
@@ -42,7 +43,7 @@ public class CraftingItems : MonoBehaviour
             result = items[5]
         };
         
-        craftingItems[2] = new CraftingItem()
+        craftingItems[2] = new CraftingItem()   //Sword
         {
             recipe = new()
             {
@@ -52,13 +53,53 @@ public class CraftingItems : MonoBehaviour
             result = items[6]
         };
                 
-        craftingItems[3] = new CraftingItem()
+        craftingItems[3] = new CraftingItem()   //Chest block
         {
             recipe = new()
             {
                 new KeyValuePair<Item, int>(items[2], 3)
             },
             result = items[9]
+        };
+        
+        craftingItems[4] = new CraftingItem()   //Stone shovel
+        {
+            recipe = new()
+            {
+                new KeyValuePair<Item, int>(items[2], 2),
+                new KeyValuePair<Item, int>(items[0], 1)
+            },
+            result = items[13]
+        };
+        
+        craftingItems[5] = new CraftingItem()   //Iron shovel
+        {
+            recipe = new()
+            {
+                new KeyValuePair<Item, int>(items[8], 1),
+                new KeyValuePair<Item, int>(items[2], 2)
+            },
+            result = items[14]
+        };
+        
+        craftingItems[6] = new CraftingItem()   //Stone axe
+        {
+            recipe = new()
+            {
+                new KeyValuePair<Item, int>(items[2], 2),
+                new KeyValuePair<Item, int>(items[0], 3)
+            },
+            result = items[15]
+        };
+        
+        craftingItems[7] = new CraftingItem()   //Iron axe
+        {
+            recipe = new()
+            {
+                new KeyValuePair<Item, int>(items[8], 3),
+                new KeyValuePair<Item, int>(items[2], 2)
+            },
+            result = items[16]
         };
     }
 }
