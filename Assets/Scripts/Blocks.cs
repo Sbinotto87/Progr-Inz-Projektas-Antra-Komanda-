@@ -18,14 +18,10 @@ public class Blocks : MonoBehaviour
     public AudioClip grassBreakSound;
     public AudioClip woodBreakSound;
     public AudioClip leafBreakSound;
-
-
-    public Item stoneItem;
-    public Item grassBlockItem;
-    public Item woodItem;
-    public Item leafItem;
-    public Item grassItem;
-    public Item glassItem;
+    public AudioClip glassBreakSound;
+    public AudioClip metalBreakSound;
+    public AudioClip brickBreakSound;
+    
     public Item defaultItem;
 
     [Header("Current block")]
@@ -62,7 +58,7 @@ public class Blocks : MonoBehaviour
             isSwimable = false,
             swimSlowdown = 1.0f,
             tool = ToolCategory.Pickaxe,
-            hitCount = 1,
+            hitCount = 15,
             faces = new byte[] { 1, 1, 1, 1, 1, 1 },
             dropItem = items[0],
             breakSound = stoneBreakSound,
@@ -80,7 +76,7 @@ public class Blocks : MonoBehaviour
             isSwimable = false,
             swimSlowdown = 1.0f,
             tool = ToolCategory.Shovel,
-            hitCount = 1,
+            hitCount = 4,
             faces = new byte[] { 0, 0, 0, 0, 2, 0 },
             dropItem = items[1],
             breakSound = grassBreakSound,
@@ -98,7 +94,7 @@ public class Blocks : MonoBehaviour
             isSwimable = false,
             swimSlowdown = 1.0f,
             tool = ToolCategory.Axe,
-            hitCount = 2,
+            hitCount = 5,
             faces = new byte[] { 3, 3, 3, 3, 3, 3 },
             dropItem = items[2],
             breakSound = woodBreakSound,
@@ -153,8 +149,9 @@ public class Blocks : MonoBehaviour
             swimSlowdown = 1.0f,
             tool = ToolCategory.NA,
             hitCount = 2,
-            faces = new byte[] { 2, 2, 2, 2, 2, 2 },
+            faces = new byte[] { 5, 5, 5, 5, 5, 5 },
             dropItem = defaultItem,
+            breakSound = glassBreakSound,
             mesh = MeshType.Full
         };
         
@@ -168,9 +165,10 @@ public class Blocks : MonoBehaviour
             isSwimable = false,
             swimSlowdown = 1.0f,
             tool = ToolCategory.Pickaxe,
-            hitCount = 3,
+            hitCount = 15,
             faces = new byte[] { 6, 6, 6, 6, 6, 6 },
             dropItem = defaultItem,
+            breakSound = brickBreakSound,
             mesh = MeshType.Full
         };
         
@@ -184,9 +182,10 @@ public class Blocks : MonoBehaviour
             isSwimable = false,
             swimSlowdown = 1.0f,
             tool = ToolCategory.Pickaxe,
-            hitCount = 3,
+            hitCount = 15,
             faces = new byte[] { 7, 7, 7, 7, 7, 7 },
             dropItem = defaultItem,
+            breakSound = metalBreakSound,
             mesh = MeshType.Full
         };
         
@@ -200,11 +199,13 @@ public class Blocks : MonoBehaviour
             isSwimable = false,
             swimSlowdown = 1.0f,
             tool = ToolCategory.Pickaxe,
-            hitCount = 3,
+            hitCount = 15,
             faces = new byte[] { 8, 8, 8, 8, 8, 8 },
             dropItem = defaultItem,
+            breakSound = metalBreakSound,
             mesh = MeshType.Full
         };
+        
         block[9] = new BlockType
         {
             name = "Water",
@@ -230,9 +231,10 @@ public class Blocks : MonoBehaviour
             isCutout = false,
             isSwimable = false,
             tool = ToolCategory.Pickaxe,
-            hitCount = 3,
+            hitCount = 15,
             faces = new byte[] { 8, 8, 8, 8, 8, 8 },
-            dropItem = items[8],
+            dropItem = defaultItem,
+            breakSound = metalBreakSound,
             mesh = MeshType.Full
         };
         
@@ -261,7 +263,7 @@ public class Blocks : MonoBehaviour
             isCutout = false,
             isSwimable = false,
             tool = ToolCategory.Axe,
-            hitCount = 4,
+            hitCount = 5,
             faces = new byte[] { 1, 1, 1, 1, 1, 1 },
             dropItem = items[9],
             mesh = MeshType.Full

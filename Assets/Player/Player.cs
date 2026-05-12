@@ -38,7 +38,7 @@ public class Player : MonoBehaviour
     [SerializeField] private float speedForMaxFov = 7f;
     [SerializeField] private float sneakEdgeTolerance = 0.22f;
 
-    public float health = 100f;
+    public float health = 1000f;
     public float hunger = 100f;
     public float thirst = 100f;
 
@@ -80,7 +80,9 @@ public class Player : MonoBehaviour
 
     public bool HasOpenedInventory = false;
     public bool HasOpenedChest = false;
+    public bool HasEquippedTool = false;
     public GameObject currentOpenedChest;
+    public Item currentEquippedTool;
 
     private float xRotation = 0f;
 
@@ -589,6 +591,13 @@ public class Player : MonoBehaviour
         thirst = Mathf.Min(thirst + amount, 100f);
         Debug.Log($"Drank water! Thirst is now: {thirst}");
     }
+    
+    public void AddHealth(float amount)
+    {
+        health = Mathf.Min(health + amount, 1000f);
+        Debug.Log($"Healed! Health is now: {health}");
+    }
+    
     public void SetRenderDistance(int distance)
     {
         world.viewDistance = Mathf.Clamp(distance, 1, 100);
