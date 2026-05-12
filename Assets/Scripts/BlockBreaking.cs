@@ -82,16 +82,10 @@ public class BlockBreaking : MonoBehaviour
                 Vector3 worldPos = selector.currentBlockPosition;
                 selector.world.SetVoxel(worldPos, -1);
                 
-                selector.currentChunk.blocks[pos.x, pos.y, pos.z] = -1;
-                
                 if (type.dropItem != null && playerInventory != null)
                 {
                     playerInventory.AddItem(type.dropItem);
                 }
-
-                selector.currentChunk.UpdateChunk();
-                selector.currentChunk.UpdateNeighborChunks(pos.x, pos.z);
-
 
             }
         }
