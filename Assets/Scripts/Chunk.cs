@@ -277,7 +277,7 @@ public class Chunk
     /// <param name="pos">position in chunk</param>
     /// <param name="faceIndex">Face to check for (liquid calculations)</param>
     /// <returns>true if block is solid, false otherwise</returns>
-    bool CheckIfBlockIsSolid(Vector3 pos, int currentBlockID, int faceIndex) // <--- Added faceIndex
+    bool CheckIfBlockIsSolid(Vector3 pos, int currentBlockID, int faceIndex)
     {
         int x = Mathf.FloorToInt(pos.x);
         int y = Mathf.FloorToInt(pos.y);
@@ -296,20 +296,37 @@ public class Chunk
 
         if (neighborID == -1) return true;
 
-        //liquid (snake)
-
         bool isCurrentFluid = world.GetFluidLevel(currentBlockID) > 0;
         bool isNeighborFluid = world.GetFluidLevel(neighborID) > 0;
 
+        //del virsutinio 
         if (isCurrentFluid && faceIndex == 4)
         {
             if (isNeighborFluid) return false;
-
             if (currentBlockID != 11) return true;
         }
 
+        //liquid(snake)
         if (isCurrentFluid && isNeighborFluid)
         {
+            //only cull sides
+            if (faceIndex < 4)
+            {
+                int currentLevel = world.GetFluidLevel(currentBlockID);
+                int neighborLevel = world.GetFluidLevel(neighborID);
+
+                //dont cull if taller than neibhour fluid
+                if (currentLevel > neighborLevel)
+                {
+                    return true;
+                }
+                //neigbhour level cull
+                else
+                {
+                    return false;
+                }
+            }
+            //top bottom fluid cull
             return false;
         }
 
