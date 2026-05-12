@@ -119,6 +119,13 @@ public class InventoryUI : MonoBehaviour
                 text.text = $"{slot.itemData.itemName}{countText} ({slot.itemData.weight * slot.count} kg)";
             }
 
+            var image = newSlot.transform.Find("Icon")?.GetComponent<Image>(); // for item icons
+            if (image != null && slot.itemData.icon != null)
+            {
+                image.sprite = slot.itemData.icon;
+            }
+
+
             DraggableItem dragScript = newSlot.GetComponent<DraggableItem>();
             if (dragScript != null)
             {

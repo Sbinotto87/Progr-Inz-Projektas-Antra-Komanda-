@@ -47,6 +47,7 @@ public class CreatedItems : MonoBehaviour
         stone.weight = 5;
         stone.blockIndex = 0;
         stone.isStackable = true;
+        stone.icon = Resources.Load("icons/stone_icon", typeof(Sprite)) as Sprite;
         items[0] = stone;
         
         Item grassBlock = ScriptableObject.CreateInstance<Item>();
@@ -55,6 +56,7 @@ public class CreatedItems : MonoBehaviour
         grassBlock.weight = 3;
         grassBlock.blockIndex = 1;
         grassBlock.isStackable = true;
+        grassBlock.icon = Resources.Load("icons/grass_icon", typeof(Sprite)) as Sprite;
         items[1] = grassBlock;
         
         Item wood = ScriptableObject.CreateInstance<Item>();
@@ -63,6 +65,7 @@ public class CreatedItems : MonoBehaviour
         wood.weight = 1;
         wood.blockIndex = 2;
         wood.isStackable = true;
+        wood.icon = Resources.Load("icons/wood_icon", typeof(Sprite)) as Sprite;
         items[2] = wood;
         
         Item leaf = ScriptableObject.CreateInstance<Item>();
@@ -71,6 +74,7 @@ public class CreatedItems : MonoBehaviour
         leaf.weight = 1;
         leaf.blockIndex = 3;
         leaf.isStackable = true;
+        leaf.icon = Resources.Load("icons/leaf_icon", typeof(Sprite)) as Sprite;
         items[3] = leaf;
         
         Item grass = ScriptableObject.CreateInstance<Item>();
@@ -79,6 +83,7 @@ public class CreatedItems : MonoBehaviour
         grass.weight = 1;
         grass.blockIndex = 4;
         grass.isStackable = true;
+        grass.icon = Resources.Load("icons/random_grass_icon", typeof(Sprite)) as Sprite;
         items[4] = grass;
         
         Item IronPickaxe = ScriptableObject.CreateInstance<Item>();
@@ -113,6 +118,7 @@ public class CreatedItems : MonoBehaviour
         IronOre.weight = 1;
         IronOre.isStackable = true;
         IronOre.blockIndex = 9;
+        IronOre.icon = Resources.Load("icons/iron_icon", typeof(Sprite)) as Sprite;
         items[8] = IronOre;
                 
         Item chestblock = ScriptableObject.CreateInstance<Item>();
@@ -121,6 +127,7 @@ public class CreatedItems : MonoBehaviour
         chestblock.weight = 5;
         chestblock.isStackable = true;
         chestblock.blockIndex = 12;
+        chestblock.icon = Resources.Load("icons/chest_icon", typeof(Sprite)) as Sprite;
         items[9] = chestblock;
         
         Item beer = ScriptableObject.CreateInstance<Item>();
@@ -131,6 +138,7 @@ public class CreatedItems : MonoBehaviour
         beer.hungerRestoreValue = 5;
         beer.thirstRestoreValue = 40;
         beer.healthRestoreValue = 50;
+        beer.icon = Resources.Load("icons/beer_icon", typeof(Sprite)) as Sprite;
         items[10] = beer;
         
         Item bread = ScriptableObject.CreateInstance<Item>();
@@ -140,6 +148,7 @@ public class CreatedItems : MonoBehaviour
         bread.isStackable = true;
         bread.hungerRestoreValue = 40;
         bread.healthRestoreValue = 100;
+        bread.icon = Resources.Load("icons/bread_icon", typeof(Sprite)) as Sprite;
         items[11] = bread;        
         
         Item Oil = ScriptableObject.CreateInstance<Item>();
@@ -148,6 +157,7 @@ public class CreatedItems : MonoBehaviour
         Oil.weight = 2;
         Oil.isStackable = true;
         Oil.blockIndex = 11;
+        Oil.icon = Resources.Load("icons/oil_icon", typeof(Sprite)) as Sprite;
         items[12] = Oil;
         
         Item stoneShovel = ScriptableObject.CreateInstance<Item>();
