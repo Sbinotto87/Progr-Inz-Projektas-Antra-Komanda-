@@ -35,7 +35,7 @@ public class BossController : MonoBehaviour
 
     [Header("Physics")]
     public float gravity = -20f;
-    public float height = 3.6f;       // taller than a normal enemy
+    public float height = 22f;       // taller than a normal enemy
     public float jumpForce = 6f;
     public float hearingDistance = 30f;
 
