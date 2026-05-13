@@ -115,6 +115,8 @@ namespace Assets.Scripts
         private void Update()
         {
             playerChunkCoord = GetChunkCoordFromVector3(playerTransform.position);
+            if (chunks[playerChunkCoord.x, playerChunkCoord.z].isRadioactive) IsInRadiation = true;
+            else IsInRadiation = false;
 
             //Stopwatch sw = Stopwatch.StartNew();
             if (!playerChunkCoord.Equals(playerLastChunkCoord)) //if player moved from chunk, update 
