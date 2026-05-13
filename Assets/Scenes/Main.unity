@@ -6382,7 +6382,7 @@ MonoBehaviour:
   heightMultiplier: 2.5
   bossDayInterval: 5
   nextBossDay: 5
-  bossPrefab: {fileID: 5510936920288449997, guid: 02db8c511bb3e6c4bb13dd9ec8bd2891, type: 3}
+  bossPrefab: {fileID: 1194739554336390574, guid: ed70b8a3691ae4a4f8dcc0db302a37a3, type: 3}
   scaleMultiplier: 1
   bossMaxHealth: 800
   minSpawnDistance: 12
@@ -13729,7 +13729,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2101319119}
   - component: {fileID: 2101319118}
-  - component: {fileID: 2101319117}
   - component: {fileID: 2101319116}
   m_Layer: 0
   m_Name: Camera
@@ -13782,14 +13781,6 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
---- !u!81 &2101319117
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2101319115}
-  m_Enabled: 1
 --- !u!20 &2101319118
 Camera:
   m_ObjectHideFlags: 0
@@ -15020,7 +15011,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2071933917031314639, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.00004228169
+      value: 0.00003306516
       objectReference: {fileID: 0}
     - target: {fileID: 2073816678423694532, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
       propertyPath: m_IsActive
@@ -15148,7 +15139,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5366081349319424579, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.000006147769
+      value: 0.00003306516
       objectReference: {fileID: 0}
     - target: {fileID: 5902209128367832950, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
       propertyPath: m_AnchorMax.x
@@ -15164,7 +15155,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6500045466043841965, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.00004228169
+      value: 0.00003306516
       objectReference: {fileID: 0}
     - target: {fileID: 6528138059679858062, guid: a4324344eb807b242a11e3be35ae66a3, type: 3}
       propertyPath: m_AnchorMax.x

@@ -35,7 +35,7 @@ public class BossController : MonoBehaviour
 
     [Header("Physics")]
     public float gravity = -20f;
-    public float height = 3.6f;       // taller than a normal enemy
+    public float height = 22f;       // taller than a normal enemy
     public float jumpForce = 6f;
     public float hearingDistance = 30f;
 
@@ -96,7 +96,7 @@ public class BossController : MonoBehaviour
             transform.position += horizDir * phase.moveSpeed * Time.deltaTime;
             // face the player on Y axis
             if (horizDir.sqrMagnitude > 0.001f)
-                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(horizDir), 8f * Time.deltaTime);
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(horizDir)* Quaternion.Euler(0, 90, 0), 8f * Time.deltaTime);
         }
         else
         {
