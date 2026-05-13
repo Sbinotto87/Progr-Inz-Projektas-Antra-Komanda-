@@ -1,3 +1,5 @@
+using Assets.Scripts;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,6 +17,16 @@ public class SettingsPanelUI : MonoBehaviour
     [SerializeField] private Slider masterVolumeSlider;
     [SerializeField] private Slider renderDistanceSlider;
     [SerializeField] private Slider sfxVolumeSlider;
+    [SerializeField] private TMP_Dropdown graphicsDropdown;
+
+    [Header("To change shaders:")]
+    [SerializeField] private Material lowMat;
+    [SerializeField] private Material highMat;
+    [SerializeField] private Renderer Worldrenderer;
+    [SerializeField] private Renderer BlockRenderer;
+    [SerializeField] private World world;
+
+    [SerializeField] private Material usedMaterial;
 
     [Header("Optional Toggle")]
     [SerializeField] private bool pauseTimeWhenOpen;
@@ -35,6 +47,7 @@ public class SettingsPanelUI : MonoBehaviour
 
     private void Start()
     {
+       // usedMaterial = Worldrenderer.material;
         if (settingsPanel != null)
         {
             settingsPanel.SetActive(false);
@@ -102,6 +115,8 @@ public class SettingsPanelUI : MonoBehaviour
             maxFovSlider.SetValueWithoutNotify(manager.MinFov);
         }
     }
+
+
 
     public void OnMouseSensitivityChanged(float value)
     {
@@ -198,8 +213,55 @@ public class SettingsPanelUI : MonoBehaviour
             renderDistanceSlider.onValueChanged.AddListener(OnRenderDistanceChanged);
         if (sfxVolumeSlider != null)
         sfxVolumeSlider.onValueChanged.AddListener(OnSfxVolumeChanged);
+        if (graphicsDropdown != null)
+        graphicsDropdown.onValueChanged.AddListener(SetGraphics);
 
         listenersRegistered = true;
+    }
+
+    public void SetGraphics(int index)
+    {
+        switch (index)
+        {
+            case 0:
+                //World.sharedMaterial = new Material(highMat);
+                usedMaterial = new Material(highMat);
+                BlockRenderer.material = usedMaterial;
+                Worldrenderer.material = usedMaterial;
+                world.material = usedMaterial;
+
+
+                foreach (Transform child in world.transform)
+                {
+                    MeshRenderer renderer = child.GetComponent<MeshRenderer>();
+
+                    if (renderer != null)
+                    {
+                        renderer.material = usedMaterial;
+                    }
+                }
+                break;
+
+            case 1:
+                //World.sharedMaterial = new Material(lowMat);
+                usedMaterial = new Material(lowMat);
+                Worldrenderer.material = usedMaterial;
+                BlockRenderer.material = usedMaterial;
+                world.material = usedMaterial;
+
+                foreach (Transform child in world.transform)
+                {
+                    MeshRenderer renderer = child.GetComponent<MeshRenderer>();
+
+                    if (renderer != null)
+                    {
+                        renderer.material = usedMaterial;
+                    }
+                }
+
+                break;
+
+        }
     }
 
     private void UnregisterSliderListeners()
@@ -219,6 +281,8 @@ public class SettingsPanelUI : MonoBehaviour
             renderDistanceSlider.onValueChanged.RemoveListener(OnRenderDistanceChanged);
         if (sfxVolumeSlider != null)
         sfxVolumeSlider.onValueChanged.RemoveListener(OnSfxVolumeChanged);
+        if (graphicsDropdown != null)
+            graphicsDropdown.onValueChanged.RemoveListener(SetGraphics);
 
         listenersRegistered = false;
     }

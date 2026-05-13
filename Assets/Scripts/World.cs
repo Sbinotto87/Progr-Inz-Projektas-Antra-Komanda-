@@ -33,7 +33,7 @@ namespace Assets.Scripts
         /// <summary>
         /// List of chunks in the players vision
         /// </summary>
-        List<ChunkCoord> activeChunks = new List<ChunkCoord>();
+        public List<ChunkCoord> activeChunks = new List<ChunkCoord>();
         /// <summary>
         /// no clu, pavogiau koda
         /// </summary>
