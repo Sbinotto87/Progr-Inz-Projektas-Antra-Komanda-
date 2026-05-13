@@ -15,6 +15,9 @@ public class GameMenuManager : MonoBehaviour
     GameObject pauseMenuUI;
 
     [SerializeField]
+    GameObject SettingsUI;
+
+    [SerializeField]
     GameObject deathMenuUI;
 
     [SerializeField]
@@ -137,6 +140,7 @@ public class GameMenuManager : MonoBehaviour
             dof.active = false;
             colorAdjustments.active = false;
 
+            SettingsUI.SetActive(false);
             pauseMenuUI.SetActive(false);
             Time.timeScale = 1;
             Debug.Log("Game unpaused.");
