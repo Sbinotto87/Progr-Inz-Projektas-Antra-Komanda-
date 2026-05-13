@@ -89,6 +89,9 @@ public class Player : MonoBehaviour
     public OverlayEffects overlayEffects;
     public Texture2D overlayTexture;
 
+    public int sprintLockCount = 0;
+    public int jumpLockCount = 0;
+
     void Start()
     {
         playerInput = GetComponent<PlayerInput>();
@@ -207,7 +210,7 @@ public class Player : MonoBehaviour
                 verticalVelocity = -(swimUpStrength * buoyancyMultiplier);
             }
         }
-        else if (jumpAction.IsPressed() && grounded && verticalVelocity <= 0f)
+        else if (jumpAction.IsPressed() && grounded && verticalVelocity <= 0f && jumpLockCount == 0)
         {
             Jump();
         }
@@ -259,7 +262,7 @@ public class Player : MonoBehaviour
         if (stamina <= 0.01f) wasOutOfStamina = true;
         if (wasOutOfStamina && stamina >= staminaRecoveryThreshold) wasOutOfStamina = false;
 
-        bool canSprint = wantsToSprint && !wasOutOfStamina && stamina > 0.02f;
+        bool canSprint = wantsToSprint && !wasOutOfStamina && stamina > 0.02f && sprintLockCount == 0 && HasSprintResources();
 
         if (canSprint)
             stamina = Mathf.Max(0, stamina - staminaDrainRate * Time.deltaTime);
@@ -632,10 +635,28 @@ public class Player : MonoBehaviour
             float impactVelocity = verticalVelocity;
             if (impactVelocity < minimumFallVelocity)
             {
+                GetComponent<StatusEffectManager>()?.AddEffect(
+                    duration: 10f,
+                    onApply: p =>
+                    {
+                        p.sprintLockCount++;
+                        p.jumpLockCount++;
+                    },
+                    onRemove: p =>
+                    {
+                        p.sprintLockCount--;
+                        p.jumpLockCount--;
+                    }
+                );
                 float damage = Mathf.Abs(impactVelocity - minimumFallVelocity) * fallDamageMultiplier;
 
                 TakeDamage(damage);
             }
         }
+    }
+
+    private bool HasSprintResources()
+    {
+        return hunger > 0f && thirst > 0f;
     }
 }

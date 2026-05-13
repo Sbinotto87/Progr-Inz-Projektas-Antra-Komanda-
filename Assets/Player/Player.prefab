@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 8431021486827176244}
   - component: {fileID: 3338419884394238376}
   - component: {fileID: 368639874964193589}
+  - component: {fileID: 938497697525192872}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -192,6 +193,7 @@ MonoBehaviour:
   currentEquippedTool: {fileID: 0}
   overlayEffects: {fileID: 0}
   overlayTexture: {fileID: 0}
+  sprintLockCount: 0
 --- !u!114 &368639874964193589
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -207,6 +209,18 @@ MonoBehaviour:
   jumpDustEffect: {fileID: 1639189507240715119}
   runDustEffect: {fileID: 6865161742285646844}
   flashDuration: 0
+--- !u!114 &938497697525192872
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2423794018375915265}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60b76cd84d367a642a54e0406d6277eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StatusEffectManager
 --- !u!1 &5767180715029285365
 GameObject:
   m_ObjectHideFlags: 0
