@@ -187,7 +187,11 @@ MonoBehaviour:
   isInRadiation: 0
   HasOpenedInventory: 0
   HasOpenedChest: 0
+  HasEquippedTool: 0
   currentOpenedChest: {fileID: 0}
+  currentEquippedTool: {fileID: 0}
+  overlayEffects: {fileID: 0}
+  overlayTexture: {fileID: 0}
 --- !u!114 &368639874964193589
 MonoBehaviour:
   m_ObjectHideFlags: 0
