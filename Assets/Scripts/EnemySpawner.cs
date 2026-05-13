@@ -38,10 +38,8 @@ public class EnemySpawner : MonoBehaviour
             DespawnAll();
             return;
         }
-
-        if (Time.time < nextSpawnTime) return;
-
-        nextSpawnTime = Time.time + spawnInterval;
+        if(world.DayTime%20 != 0)
+            return;
 
         TrySpawn();
     }
@@ -51,7 +49,7 @@ public class EnemySpawner : MonoBehaviour
         if (time < spawnStopTime || time >= spawnStartTime)
             return true;
 
-        return true; //?
+        return false; //?
     }
 
     void TrySpawn()
@@ -73,7 +71,7 @@ public class EnemySpawner : MonoBehaviour
 
             int blockBelowId = world.GetVoxel(new Vector3(x, groundY - 1, z));
 
-            if (blockBelowId != 11)
+            if (blockBelowId != 13)
                 continue;
 
             Vector3 spawnPos = new Vector3(x + 0.5f, groundY + 0.1f, z + 0.5f);
