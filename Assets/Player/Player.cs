@@ -31,6 +31,16 @@ public class Player : MonoBehaviour
     public float sneakSpeed = 1.6f;
     public float gravity = -23f;
     public float jumpStrength = 7.25f;
+
+    // FLIGHT 
+    [Header("Flight (cheat)")]
+    public float flightSpeed = 12f;
+    public float flightFastMultiplier = 3f;
+    public float doubleTapWindow = 0.3f;
+    private bool isFlying = false;
+    private float lastJumpPressTime = -10f;
+    //
+
     public float mouseSensitivity = 0.45f;
     [SerializeField] private float minFov = 70f;
     [SerializeField] private float maxFov = 80f;
@@ -164,6 +174,17 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        // Sync flight state with cheats menu toggle
+        var cheatsMgr = CheatsManager.Instance;
+        if (cheatsMgr != null && cheatsMgr.CheatsEnabled)
+        {
+            if (cheatsMgr.Flight && !isFlying) { isFlying = true; verticalVelocity = 0f; grounded = false; }
+            if (!cheatsMgr.Flight && isFlying) { isFlying = false; verticalVelocity = 0f; }
+        }
+
+        // Push current flight state back so the menu reflects double-tap toggles too
+        if (cheatsMgr != null) cheatsMgr.Flight = isFlying;
+
         if (isInvincible)
         {
             invincibilityTimer -= Time.deltaTime;
@@ -197,7 +218,7 @@ public class Player : MonoBehaviour
 
         else overlayEffects.HideOverlay();
 
-        if (inWater)
+        if (!isFlying && inWater)
         {
             float buoyancyMultiplier = swimSpeed / walkSpeed;
 
@@ -210,10 +231,38 @@ public class Player : MonoBehaviour
                 verticalVelocity = -(swimUpStrength * buoyancyMultiplier);
             }
         }
-        else if (jumpAction.IsPressed() && grounded && verticalVelocity <= 0f && jumpLockCount == 0)
+        //else if (jumpAction.IsPressed() && grounded && verticalVelocity <= 0f && jumpLockCount == 0)
+        //{
+        //    Jump();
+        //}
+
+
+        // Double-tap space to toggle flight (only when cheats master is on) ============================== FLIGHT
+        if (jumpAction.WasPressedThisFrame())
+        {
+            var c = CheatsManager.Instance;
+            bool cheatsOn = c != null && c.CheatsEnabled;
+            if (cheatsOn && Time.time - lastJumpPressTime < doubleTapWindow)
+            {
+                isFlying = !isFlying;
+                verticalVelocity = 0f; // critical: prevents fall damage when re-enabling gravity
+                if (isFlying) grounded = false;
+            }
+            lastJumpPressTime = Time.time;
+        }
+
+        // If flight got disabled externally (e.g. cheats turned off in menu), exit cleanly
+        if (isFlying)
+        {
+            var c = CheatsManager.Instance;
+            if (c == null || !c.CheatsEnabled) { isFlying = false; verticalVelocity = 0f; }
+        }
+
+        if (!isFlying && jumpAction.IsPressed() && grounded && verticalVelocity <= 0f && jumpLockCount == 0)
         {
             Jump();
         }
+        // ========================================================================================================
 
         HandleFallDamage();
         ResolveGround();
@@ -271,7 +320,11 @@ public class Player : MonoBehaviour
 
         // 2. Final Speed Calculation (Priority Order: Water > Sneak > Sprint > Walk)
         float speed;
-        if (inWater)
+        if (isFlying)
+        {
+            speed = flightSpeed * (sprintAction.IsPressed() ? flightFastMultiplier : 1f);
+        }
+        else if (inWater)
         {
             speed = swimSpeed; // Uses the slowdown value from CheckWater()
         }
@@ -420,6 +473,18 @@ public class Player : MonoBehaviour
     /// <remarks>If player is not grounded, apply gravity to vertical velocity.</remarks>
     void ApplyGravity()
     {
+        if (isFlying)
+        {
+            // No gravity in flight; vertical movement is driven by space/ctrl below.
+            float upDown = 0f;
+            if (jumpAction.IsPressed()) upDown += 1f;
+            if (sneakAction != null && sneakAction.IsPressed()) upDown -= 1f;
+
+            float fSpeed = flightSpeed * (sprintAction.IsPressed() ? flightFastMultiplier : 1f);
+            verticalVelocity = upDown * fSpeed;
+            return;
+        }
+
         if (inWater)
         {
             // 1. Calculate a multiplier based on how much the liquid slows the player down
@@ -514,6 +579,12 @@ public class Player : MonoBehaviour
     /// floor.</remarks>
     void ResolveGround()
     {
+        if (isFlying)
+        {
+            grounded = false;
+            return;
+        }
+
         if (IsGrounded(transform.position) && verticalVelocity < 0)
         {
             grounded = true;
@@ -624,6 +695,14 @@ public class Player : MonoBehaviour
 
     private void HandleFallDamage()
     {
+        // Skip fall damage when flight cheat is on or while invincibility window is active
+        var c = CheatsManager.Instance;
+        if (c != null && c.CheatsEnabled && (c.Flight || c.InfiniteHealth))
+        {
+            highestYWhileGrounded = transform.position.y;
+            return;
+        }
+
         if (grounded)
         {
             highestYWhileGrounded = transform.position.y;

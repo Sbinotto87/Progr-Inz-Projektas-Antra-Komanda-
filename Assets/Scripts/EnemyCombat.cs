@@ -21,6 +21,21 @@ public class PlayerCombat : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hit, range))
         {
+            // Try boss first
+            BossController boss = hit.collider.GetComponentInParent<BossController>();
+            if (boss != null)
+            {
+                float dmg = damage;
+                var c = CheatsManager.Instance;
+                if (c != null && c.CheatsEnabled)
+                {
+                    if (c.OneShotKill) dmg = boss.maxHealth + 1f;
+                    else dmg *= c.DamageMultiplier;
+                }
+                boss.TakeDamage(dmg);
+                return;
+            }
+
             EnemyController enemy = hit.collider.GetComponentInParent<EnemyController>();
 
             if (enemy != null)

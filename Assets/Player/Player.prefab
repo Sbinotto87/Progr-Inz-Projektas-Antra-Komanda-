@@ -194,6 +194,7 @@ MonoBehaviour:
   overlayEffects: {fileID: 0}
   overlayTexture: {fileID: 0}
   sprintLockCount: 0
+  jumpLockCount: 0
 --- !u!114 &368639874964193589
 MonoBehaviour:
   m_ObjectHideFlags: 0
