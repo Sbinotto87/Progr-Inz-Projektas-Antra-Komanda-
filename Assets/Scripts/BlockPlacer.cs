@@ -32,7 +32,7 @@ public class BlockPlacer : MonoBehaviour
                     GameObject[] chestBlocks = GameObject.FindGameObjectsWithTag("Chest block");
                     foreach (GameObject chestBlock in chestBlocks)
                     {
-                        if (chestBlock.transform.position.Equals(new Vector3(pos.x, pos.y, pos.z)))
+                        if (chestBlock.transform.position.Equals(selector.currentBlockPosition))
                         {
                             chestBlock.GetComponent<ChestBlock>().OpenChest();
                             if (player.HasOpenedChest)
