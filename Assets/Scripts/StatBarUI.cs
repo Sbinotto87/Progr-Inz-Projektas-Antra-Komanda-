@@ -24,19 +24,35 @@ public class StatBarUI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Pull cheat flags. Null-safe: if no CheatsManager in scene, all flags read false
+        // and behavior is identical to your original.
+        var c = CheatsManager.Instance;
+        bool master = c != null && c.CheatsEnabled;
+        bool infHealth = master && c.InfiniteHealth;
+        bool infHunger = master && c.InfiniteHunger;
+        bool infThirst = master && c.InfiniteThirst;
+        bool infStamina = master && c.InfiniteStamina;
+        bool noRad = master && c.NoRadiationDamage;
+
         // 1. Reduce hunger and thirst over time
-        if (player.hunger > 0) player.hunger -= depletionRate * Time.deltaTime;
-        if (player.thirst > 0) player.thirst -= depletionRate * Time.deltaTime;
+        if (infHunger) player.hunger = 100f;
+        else if (player.hunger > 0) player.hunger -= depletionRate * Time.deltaTime;
+
+        if (infThirst) player.thirst = 100f;
+        else if (player.thirst > 0) player.thirst -= depletionRate * Time.deltaTime;
 
         // 2. If hunger or thirst is 0, drain health
-        if (player.hunger <= 0 || player.thirst <= 0)
+        if (!infHealth && (player.hunger <= 0 || player.thirst <= 0))
         {
             player.health -= (depletionRate / 2) * Time.deltaTime;
         }
-        if(player.isInRadiation)
+        if (player.isInRadiation && !noRad && !infHealth)
         {
             player.health -= radMultiplier * Time.deltaTime;
         }
+
+        if (infHealth) player.health = 1000f;
+        if (infStamina) player.stamina = 100f;
 
         // 3. Update the visual bars 
         HungerBar.value = Mathf.Lerp(HungerBar.value, player.hunger / 100f, Time.deltaTime * 5f);
