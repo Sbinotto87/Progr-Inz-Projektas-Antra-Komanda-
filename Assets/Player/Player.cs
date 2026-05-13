@@ -92,6 +92,7 @@ public class Player : MonoBehaviour
     void Start()
     {
         playerInput = GetComponent<PlayerInput>();
+
         if (playerInput == null)
         {
             Debug.LogError("PlayerInput component is missing on Player.");
