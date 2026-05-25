@@ -8,6 +8,7 @@ public class BlockPlacer : MonoBehaviour
     public BlockSelector selector;       // assign in inspector
     private Inventory playerInventory;
     private Player player;
+    private ToolBarUI toolBar;
 
     private void Start()
     {
@@ -16,6 +17,7 @@ public class BlockPlacer : MonoBehaviour
         this.player = player.GetComponent<Player>();
         if (player != null)
             playerInventory = player.GetComponent<Inventory>();
+        toolBar = Object.FindFirstObjectByType<ToolBarUI>();
     }
 
     private void Update()
@@ -50,11 +52,16 @@ public class BlockPlacer : MonoBehaviour
     private void PlaceBlock()
     {
         if (selector == null || !selector.hasBlockSelected) return;
-        if (playerInventory == null || playerInventory.slots.Count == 0) return;
+        if (playerInventory == null || toolBar == null) return;
 
-        // Use first item in inventory
-        Item itemToPlace = playerInventory.slots[0].itemData;
-        if (itemToPlace == null) return;
+        // Use selected toolBar slot item
+        Item itemToPlace = toolBar.GetSelectedItem();
+        if (itemToPlace == null) return; // empty slot
+        if (itemToPlace.category != ItemCategory.Block) return; // if tool or item selected does nothing here
+
+        // Confirm it's actually in the inventory before consuming.
+        bool inInventory = playerInventory.slots.Exists(s => s.itemData.Equals(itemToPlace));
+        if (!inInventory) return;
 
         // Calculate the WORLD position of where the new block goes 
         // by adding the face normal to the current block's world position
