@@ -10,6 +10,7 @@ using Object = UnityEngine.Object;
 public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
     [HideInInspector] public Item itemData;
+    [HideInInspector] public bool droppedOnToolbar = false;
     private Inventory playerInventory;
     private CanvasGroup canvasGroup;
     private Transform originalParent;
@@ -25,6 +26,7 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        droppedOnToolbar = false;
         originalParent = transform.parent;
 
         // 1. Find the actual Canvas component in your scene
@@ -80,8 +82,8 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         {
             if (itemData.category == ItemCategory.Food || itemData.category == ItemCategory.Drink)
                 ConsumeItem();
-            if (itemData.category == ItemCategory.Weapon || itemData.category == ItemCategory.Tool)
-                EquipItem();
+            //if (itemData.category == ItemCategory.Weapon || itemData.category == ItemCategory.Tool)
+            //    EquipItem();
         }
     }
 
@@ -123,24 +125,35 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         canvasGroup.alpha = 1f;
         canvasGroup.blocksRaycasts = true;
 
+        if (droppedOnToolbar)
+        {
+            droppedOnToolbar = false;
+            transform.SetParent(originalParent);
+            transform.localPosition = Vector3.zero;
+            return;
+        }
+
         // Check if we dropped it OUTSIDE the UI
         if (!EventSystem.current.IsPointerOverGameObject())
         {
-            // If it's food/drink, call our unified Consume method
-            if (itemData.category == ItemCategory.Food || itemData.category == ItemCategory.Drink)
-            {
-                ConsumeItem();
-            }
-            else
-            {
-                // If it's not food, just discard the stack
-                playerInventory.RemoveFullStack(itemData);
-                InventoryUI ui = Object.FindFirstObjectByType<InventoryUI>();
-                if (ui != null) ui.RefreshUI();
-            }
+            //// If it's food/drink, call our unified Consume method
+            //if (itemData.category == ItemCategory.Food || itemData.category == ItemCategory.Drink)
+            //{
+            //    ConsumeItem();
+            //}
+            //else
+            //{
+            //    // If it's not food, just discard the stack
+            //    playerInventory.RemoveFullStack(itemData);
+            //    InventoryUI ui = Object.FindFirstObjectByType<InventoryUI>();
+            //    if (ui != null) ui.RefreshUI();
+            //}
 
-            // The button itself needs to be destroyed since it was "dragged out"
-            Destroy(gameObject);
+            //// The button itself needs to be destroyed since it was "dragged out"
+            //Destroy(gameObject);
+
+            transform.SetParent(originalParent);
+            transform.localPosition = Vector3.zero;
         }
         else
         {
@@ -187,22 +200,22 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
     }
     
-    public void EquipItem()
-    {
-        Transform tool = GameObject.Find("UI elements").transform.Find("tool");
-        Player player = this.player.GetComponent<Player>();
-        if (!player.HasEquippedTool)
-        {
-            Image toolImage = tool.GetComponent<Image>();
-            tool.gameObject.SetActive(true);
-            toolImage.sprite = itemData.icon;
-            player.currentEquippedTool = itemData;
-        }
-        else
-        {
-            tool.gameObject.SetActive(false);
-            player.currentEquippedTool = null;
-        }
-        player.HasEquippedTool = !player.HasEquippedTool;
-    }
+    //public void EquipItem()
+    //{
+    //    Transform tool = GameObject.Find("UI elements").transform.Find("tool");
+    //    Player player = this.player.GetComponent<Player>();
+    //    if (!player.HasEquippedTool)
+    //    {
+    //        Image toolImage = tool.GetComponent<Image>();
+    //        tool.gameObject.SetActive(true);
+    //        toolImage.sprite = itemData.icon;
+    //        player.currentEquippedTool = itemData;
+    //    }
+    //    else
+    //    {
+    //        tool.gameObject.SetActive(false);
+    //        player.currentEquippedTool = null;
+    //    }
+    //    player.HasEquippedTool = !player.HasEquippedTool;
+    //}
 }
