@@ -136,21 +136,21 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         // Check if we dropped it OUTSIDE the UI
         if (!EventSystem.current.IsPointerOverGameObject())
         {
-            //// If it's food/drink, call our unified Consume method
-            //if (itemData.category == ItemCategory.Food || itemData.category == ItemCategory.Drink)
-            //{
-            //    ConsumeItem();
-            //}
-            //else
-            //{
-            //    // If it's not food, just discard the stack
-            //    playerInventory.RemoveFullStack(itemData);
-            //    InventoryUI ui = Object.FindFirstObjectByType<InventoryUI>();
-            //    if (ui != null) ui.RefreshUI();
-            //}
+            // If it's food/drink, call our unified Consume method
+            if (itemData.category == ItemCategory.Food || itemData.category == ItemCategory.Drink)
+            {
+                ConsumeItem();
+            }
+            else
+            {
+                // If it's not food, just discard the stack
+                playerInventory.RemoveFullStack(itemData);
+                InventoryUI ui = Object.FindFirstObjectByType<InventoryUI>();
+                if (ui != null) ui.RefreshUI();
+            }
 
-            //// The button itself needs to be destroyed since it was "dragged out"
-            //Destroy(gameObject);
+            // The button itself needs to be destroyed since it was "dragged out"
+            Destroy(gameObject);
 
             transform.SetParent(originalParent);
             transform.localPosition = Vector3.zero;
