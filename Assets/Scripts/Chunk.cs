@@ -474,6 +474,7 @@ public class Chunk
         [ReadOnly] public float TerrainHeight;
         [ReadOnly] public float TerrainScale;
         [ReadOnly] public int SolidGroundHeight;
+        [ReadOnly] public bool isFlat;
 
         public void Execute(int index)
         {
@@ -490,13 +491,17 @@ public class Chunk
             //perlinis garsas
             float2 noiseInput = new float2(worldX + 0.1f + offsetX, worldZ + 0.1f + offsetZ) * (TerrainScale / Width);
             float noiseValue = (noise.snoise(noiseInput) + 1f) * 0.5f; //normalize noise for 0 - 1
-            int calculatedHeight = (int)(TerrainHeight * noiseValue) + SolidGroundHeight;
+            int calculatedHeight = (int)(5 * noiseValue) + SolidGroundHeight + 6;
+            int hills = (int)(TerrainHeight * noiseValue) + SolidGroundHeight - 20;
+            int water = (int)(TerrainHeight * noiseValue) + SolidGroundHeight;
+            calculatedHeight = Math.Max(calculatedHeight, hills);
+            calculatedHeight = Math.Min(calculatedHeight, water);
 
             //blocks
             if (y == 0)
                 ResultBlocks[index] = 0; // Bedrock
             else if (y > calculatedHeight)
-                if (y < 61)
+                if (y < 56)
                 {
                     ResultBlocks[index] = 13; // oil
                     if (!isRadioactive[0])

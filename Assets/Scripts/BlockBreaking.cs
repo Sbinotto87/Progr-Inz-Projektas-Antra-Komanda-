@@ -49,7 +49,8 @@ public class BlockBreaking : MonoBehaviour
                 if (!myBlocks.block[blockID].isBreakable) return;
 
                 float toolEffectiveness = 1;
-                if (player.HasEquippedTool && player.currentEquippedTool.toolcategory == myBlocks.block[blockID].tool)
+                if (player.HasEquippedTool && player.currentEquippedTool.category != ItemCategory.Weapon && 
+                    player.currentEquippedTool.toolcategory == myBlocks.block[blockID].tool)
                     toolEffectiveness = player.currentEquippedTool.toolEffectiveness;
                 
                 if (pos == currentPos) takenHits++;

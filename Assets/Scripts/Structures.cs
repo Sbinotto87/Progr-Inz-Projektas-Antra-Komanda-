@@ -8,7 +8,7 @@ public class Structures
 {
     private static readonly double TreeDensity = 0.01;
     private static readonly double GrassDensity = 0.05;
-    private static readonly double BuildingsDensity = 0.01;
+    private static readonly double BuildingsDensity = 0.007;
     private static readonly int mallX = 50, mallY = 8, mallZ = 25, mallOffset = 0;  //Do not change values without consulting
 
     
@@ -36,21 +36,33 @@ public class Structures
     /// </summary>
     /// <param name="world">World object</param>
     /// <param name="position">Position of the mall</param>
-    public static void GenerateMall(World world, Vector3 position)
+    public static void GenerateMall(World world, Vector3 position, int xOffset, int zOffset)
     {
         int[,,] mall = GenerateCuboid(mallX, mallY, mallZ, mallOffset, 8);
         int[,,] entrance = GenerateStructureFromFile("Assets/Scripts/Structures/MallEntrance.txt");
         mall = MergeArrays(mall, entrance, new Vector3(mallX / 2 + mallOffset, 0, 0));
         int[,,] eiffel = GenerateStructureFromFile("Assets/Scripts/Structures/Eiffel.txt");
-        
-        position.y = GetYcoord(world, position, mallX + mallOffset, mallZ + mallOffset);
-        if ((int)position.y != -1)
+
+        int x = 0, y = -1, z = 0, iterations = 0;
+        bool stopsignal = false;
+        while (y == -1)
         {
-            PlaceStructure(mall, world, position);
-            position.y = GetYcoord(world, position + new Vector3(13 - mallOffset, 0, -20 + mallOffset), eiffel.GetLength(0), eiffel.GetLength(2), (int)position.y + 10);
-            if ((int)position.y != -1)
-                PlaceStructure(eiffel, world, position + new Vector3(13 - mallOffset, 0, -20 + mallOffset));
+            iterations++;
+            if (iterations == 50000)
+            {
+                stopsignal = true;
+                break;
+            }
+            x = Random.Range((int)position.x - xOffset + mallX, (int)position.x + xOffset - mallX);
+            z = Random.Range((int)position.z - zOffset + mallZ, (int)position.z + zOffset) - mallZ;
+
+            y = GetYcoord(world, new Vector3(x, 0, z), mallX + mallOffset, mallZ + mallOffset, world.biome.solidGroundHeight + 15);
         }
+        if (stopsignal) return;
+        
+        PlaceStructure(mall, world, new Vector3(x, y, z));
+        
+        PlaceStructure(eiffel, world, new Vector3(x, y + 1, z) + new Vector3(13 - mallOffset, 0, -20 + mallOffset));
     }
 
     public static void GenerateBuildings(World world, Vector3 position, int xOffset, int zOffset)
@@ -85,14 +97,23 @@ public class Structures
             
             building = MergeArrays(building, entrance, new Vector3(entranceX, 0, entranceZ));
             
-            int y = -1, x = 0, z = 0;
+            int y = -1, x = 0, z = 0, iterations = 0;
+            bool stopsignal = false;
             while (y == -1)
             {
+                iterations++;
+                if (iterations == 10000)
+                {
+                    stopsignal = true;
+                    break;
+                }
                 x = Random.Range((int)position.x - xOffset, (int)position.x + xOffset);
                 z = Random.Range((int)position.z - zOffset, (int)position.z + zOffset);
                 
-                y = GetYcoord(world, new Vector3(x, 0, z), buildingLength + 10, buildingWidth + 10);
+                y = GetYcoord(world, new Vector3(x, 0, z), buildingLength + 10, buildingWidth + 10, world.biome.solidGroundHeight + 15);
             }
+
+            if (stopsignal) continue;
             
             PlaceStructure(building, world, new Vector3(x, y, z));
         }
@@ -260,6 +281,11 @@ public class Structures
                 arr[i, j, k] = blockType;
             else
                 arr[i, j, k] = -1;
+        
+        for (int i = 0; i < x + 2 * offset; i++)
+            for (int k = 0; k < z + 2 * offset; k++)
+                if (arr[i, 0, k] == -1)
+                    arr[i, 0, k] = 1;
         return arr;
     }
     
@@ -283,10 +309,6 @@ public class Structures
                 {
                     world.chunks[currentChunkX, currentChunkZ].blocks[chunkX, o, chunkZ] = arr[i - (int)position.x, o - (int)position.y, j - (int)position.z];
                 }
-                for (int o = (int)position.y + arr.GetLength(1); o < (int)position.y + arr.GetLength(1) + 10; o++)
-                {
-                    world.chunks[currentChunkX, currentChunkZ].blocks[chunkX, o, chunkZ] = -1;
-                }
             }
         }
     }
@@ -302,31 +324,30 @@ public class Structures
     private static int GetYcoord(World world, Vector3 position, int X, int Z, int from = 224)
     {
         int currentChunkX, currentChunkZ, chunkX, chunkZ;
-        bool found;
+        bool dirtfound, airfound;
 
-        for (int y = from; y >= 0; y--)
+        for (int y = from; y >= world.biome.solidGroundHeight + 6; y--)
         {
-            found = true;
+            dirtfound = false;
+            airfound = false;
             for (int i = (int)position.x; i < (int)position.x + X; i++)
             {
                 for (int j = (int)position.z; j < (int)position.z + Z; j++)
                 {
-                    if (i != (int)position.x && i != (int)position.x + X - 1 && j != (int)position.z &&
-                        j != (int)position.z + Z - 1) continue;
                     currentChunkX = i / Chunk.Width;
                     currentChunkZ = j / Chunk.Width;
                     chunkX = i % Chunk.Width;
                     chunkZ = j % Chunk.Width;
-                    if (world.chunks[currentChunkX, currentChunkZ].blocks[chunkX, y, chunkZ] > 1 && 
-                        world.chunks[currentChunkX, currentChunkZ].blocks[chunkX, y, chunkZ] != 4)
-                        return -1;
+                    if (world.chunks[currentChunkX, currentChunkZ].blocks[chunkX, y, chunkZ] != 1 &&
+                        world.chunks[currentChunkX, currentChunkZ].blocks[chunkX, y, chunkZ] != -1) return -1;
                     
-                    if (world.chunks[currentChunkX, currentChunkZ].blocks[chunkX, y, chunkZ] < 0)
-                        found = false;
+                    if (world.chunks[currentChunkX, currentChunkZ].blocks[chunkX, y, chunkZ] == -1) airfound = true;
+                    if (world.chunks[currentChunkX, currentChunkZ].blocks[chunkX, y, chunkZ] == 1) dirtfound = true;
+                    
+                    if (airfound && dirtfound) return -1;
                 }
             }
-
-            if (found) return y;
+            if (dirtfound) return y;
         }
 
         return -1;

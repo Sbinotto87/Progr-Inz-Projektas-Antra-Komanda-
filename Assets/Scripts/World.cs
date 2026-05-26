@@ -183,13 +183,11 @@ namespace Assets.Scripts
             {
                 for (int z = (WorldSize / 2) - viewDistance; z < (WorldSize / 2) + viewDistance; z++)
                 {
-                    //CreateChunk(new ChunkCoord(x, z));
                     chunks[x, z] = new Chunk(new ChunkCoord(x, z), this, MyBlocks);
-                    
                 }
             }
             
-            Structures.GenerateMall(this, spawnPosition);
+            Structures.GenerateMall(this, spawnPosition, (viewDistance - 2) * Chunk.Width, (viewDistance - 2) * Chunk.Width);
             Structures.GenerateBuildings(this, spawnPosition, (viewDistance - 2) * Chunk.Width, (viewDistance - 2) * Chunk.Width);
             
             for (int x = (WorldSize / 2) - viewDistance; x < (WorldSize / 2) + viewDistance; x++)
@@ -312,18 +310,20 @@ namespace Assets.Scripts
             if (y == 0)
                 return 0;
 
+            float noiseValue =
+                PerlinNoise.Get2DPerlinNoise(new Vector2(x, z), 0, biome.terrainScale, this.offsetX, this.offsetZ);
+            int calculatedHeight = (int)(5 * noiseValue) + biome.solidGroundHeight + 6;
+            int hills = (int)(biome.terrainHeight * noiseValue) + biome.solidGroundHeight - 20;
+            int water = (int)(biome.terrainHeight * noiseValue) + biome.solidGroundHeight;
+            calculatedHeight = Math.Max(calculatedHeight, hills);
+            calculatedHeight = Math.Min(calculatedHeight, water);
 
-            int terrainHeight =
-                Mathf.FloorToInt(biome.terrainHeight *
-                PerlinNoise.Get2DPerlinNoise(new Vector2(x, z), 0, biome.terrainScale, this.offsetX, this.offsetZ))
-                + biome.solidGroundHeight;
-
-            if (y > terrainHeight)
-                if (y < 61)
+            if (y > calculatedHeight)
+                if (y < 56)
                     return 13;
                 else 
                 return -1; // Air
-            else if (y == terrainHeight || (y < terrainHeight && y > terrainHeight - 4))
+            else if (y == calculatedHeight || (y < calculatedHeight && y > calculatedHeight - 4))
                 return 1; // dirt
             else
                 return 0; // Stone
