@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 namespace Assets.Scripts
 {
@@ -68,6 +69,13 @@ namespace Assets.Scripts
                 {
                     string countText = item.itemData.isStackable ? $" x{item.count}" : "";
                     text.text = $"{item.itemData.itemName}{countText} ({item.itemData.weight * item.count} kg)";
+                }
+
+                // icons chest blocke
+                var image = newSlot.transform.Find("Icon")?.GetComponent<Image>();
+                if (image != null && item.itemData.icon != null)
+                {
+                    image.sprite = item.itemData.icon;
                 }
 
                 DraggableItem dragScript = newSlot.GetComponent<DraggableItem>();
