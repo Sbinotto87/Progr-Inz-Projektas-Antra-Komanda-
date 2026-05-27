@@ -127,4 +127,27 @@ public static class Voxel
         new (0.0f, 0.125f, 1.0f),  //6/
         new (0.0f, 0.0f, 1.0f)   //7
     };
+    public static readonly Vector3[] DoorVerticesZ =
+{
+    new (1.0f, 0.0f, 0.0f),       // 0
+    new (1.0f, 1.0f, 0.0f),       // 1
+    new (1.0f, 1.0f, 0.125f),     // 2 (Thin depth on Z)
+    new (1.0f, 0.0f, 0.125f),     // 3
+    new (0.0f, 0.0f, 0.0f),       // 4
+    new (0.0f, 1.0f, 0.0f),       // 5
+    new (0.0f, 1.0f, 0.125f),     // 6
+    new (0.0f, 0.0f, 0.125f)      // 7
+};
+
+    public static readonly Vector3[] DoorVerticesX =
+    {
+    new (0.0f, 0.0f, 0.0f),       // 0
+    new (0.0f, 1.0f, 0.0f),       // 1
+    new (0.125f, 1.0f, 0.0f),     // 2 (Thin depth on X)
+    new (0.125f, 0.0f, 0.0f),     // 3
+    new (0.0f, 0.0f, 1.0f),       // 4
+    new (0.0f, 1.0f, 1.0f),       // 5
+    new (0.125f, 1.0f, 1.0f),     // 6
+    new (0.125f, 0.0f, 1.0f)      // 7
+};
 }

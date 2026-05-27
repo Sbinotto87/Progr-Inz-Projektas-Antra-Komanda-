@@ -43,7 +43,7 @@ public class CreatedItems : MonoBehaviour
 
     public void Awake()
     {
-        items = new Item[19];
+        items = new Item[20];
         
         Item stone = ScriptableObject.CreateInstance<Item>();
         stone.category = ItemCategory.Block;
@@ -215,5 +215,14 @@ public class CreatedItems : MonoBehaviour
         Gun.isStackable = false;
         Gun.icon = Resources.Load("gun_icon", typeof(Sprite)) as Sprite;
         items[18] = Gun;
+        
+        Item doorItem = ScriptableObject.CreateInstance<Item>();
+        doorItem.category = ItemCategory.Block;
+        doorItem.itemName = "Wooden Door";
+        doorItem.weight = 2; // Arbitrary weight value
+        doorItem.isStackable = true;
+        doorItem.blockIndex = 20; // Must match the door ID checked in BlockPlacer and BlockBreaking
+        doorItem.icon = Resources.Load("icons/door_icon", typeof(Sprite)) as Sprite;
+        items[19] = doorItem;
     }
 }

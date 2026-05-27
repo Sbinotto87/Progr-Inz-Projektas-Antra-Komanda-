@@ -62,25 +62,59 @@ public class BlockBreaking : MonoBehaviour
                 if (takenHits * toolEffectiveness < myBlocks.block[blockID].hitCount) return;
                 else takenHits = 0;
 
-                // Remove block
+                Vector3 worldPos = selector.currentBlockPosition;
+
+                // --- REMOVE CHEST ---
                 if (blockID == 12)
                 {
                     GameObject[] chestBlocks = GameObject.FindGameObjectsWithTag("Chest block");
                     foreach (GameObject chestBlock in chestBlocks)
                     {
-                        if (chestBlock.transform.position.Equals(selector.currentBlockPosition))
+                        if (chestBlock.transform.position.Equals(worldPos))
                         {
                             Destroy(chestBlock);
                             break;
                         }
                     }
+                    selector.world.SetVoxel(worldPos, -1);
+                }
+                // --- REMOVE DOOR ---
+                else if (blockID == 20)
+                {
+                    GameObject[] doors = GameObject.FindGameObjectsWithTag("Door block");
+                    foreach (GameObject door in doors)
+                    {
+                        DoorBlock doorScript = door.GetComponent<DoorBlock>();
+                        if (doorScript != null)
+                        {
+                            if (doorScript.hingePoint == worldPos || doorScript.hingePoint == worldPos + Vector3.down)
+                            {
+                                // Use the hingePoint to accurately clear the voxel hitboxes
+                                selector.world.SetVoxel(doorScript.hingePoint, -1);
+                                selector.world.SetVoxel(doorScript.hingePoint + Vector3.up, -1);
+
+                                Destroy(door);
+                                break;
+                            }
+                        }
+                    }
+                }
+                // --- REMOVE STANDARD BLOCK ---
+                else
+                {
+                    selector.world.SetVoxel(worldPos, -1);
+                }
+
+                if (type.dropItem != null && playerInventory != null)
+                {
+                    playerInventory.AddItem(type.dropItem);
                 }
 
                 //selector.currentChunk.blocks[pos.x, pos.y, pos.z] = -1;
 
                 //selector.currentChunk.UpdateChunk();
                 //selector.currentChunk.UpdateNeighborChunks(pos.x, pos.z);
-                Vector3 worldPos = selector.currentBlockPosition;
+                //Vector3 worldPos = selector.currentBlockPosition;
                 selector.world.SetVoxel(worldPos, -1);
                 
                 if (type.dropItem != null && playerInventory != null)

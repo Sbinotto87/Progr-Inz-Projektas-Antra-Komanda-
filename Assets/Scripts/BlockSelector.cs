@@ -35,6 +35,18 @@ public class BlockSelector : MonoBehaviour
             Vector3 voxelPoint = hit.point - hit.normal * 0.01f;
             Vector3Int worldPos = Vector3Int.FloorToInt(voxelPoint);
 
+            // --- NEW: REDIRECT ENTITY HITS TO THEIR ROOT VOXEL ---
+            if (hit.collider.CompareTag("Door block"))
+            {
+                DoorBlock doorScript = hit.collider.GetComponent<DoorBlock>();
+                if (doorScript != null)
+                {
+                    // Override the raycast coordinate with the door's saved anchor point
+                    worldPos = Vector3Int.FloorToInt(doorScript.hingePoint);
+                }
+            }
+            // -----------------------------------------------------
+
             int chunkX = worldPos.x / Chunk.Width;
             int chunkZ = worldPos.z / Chunk.Width;
 
