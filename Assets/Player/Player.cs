@@ -347,6 +347,7 @@ public class Player : MonoBehaviour
 
         // ---------- X AXIS ----------
         float newX = pos.x + move.x;
+        Vector3 targetPosX = new Vector3(newX, pos.y, pos.z);
 
         if (move.x > 0)
         {
@@ -356,7 +357,11 @@ public class Player : MonoBehaviour
                   CheckBlocks(newX + HalfWidth, pos.y + HalfHeight, pos.z - HalfWidth)) &&
                 (!sneaking || HasSneakSupport(new Vector3(newX, pos.y, pos.z))))
             {
-                pos.x = newX;
+                // NEW: Check if a GameObject is in the way
+                if (!IsPathBlockedByEntity(targetPosX))
+                {
+                    pos.x = newX;
+                }
             }
         }
         else if (move.x < 0)
@@ -367,12 +372,17 @@ public class Player : MonoBehaviour
                   CheckBlocks(newX - HalfWidth, pos.y + HalfHeight, pos.z - HalfWidth)) &&
                 (!sneaking || HasSneakSupport(new Vector3(newX, pos.y, pos.z))))
             {
-                pos.x = newX;
+                // NEW: Check if a GameObject is in the way
+                if (!IsPathBlockedByEntity(targetPosX))
+                {
+                    pos.x = newX;
+                }
             }
         }
 
         // ---------- Z AXIS ----------
         float newZ = pos.z + move.z;
+        Vector3 targetPosZ = new Vector3(pos.x, pos.y, newZ);
 
         if (move.z > 0)
         {
@@ -382,7 +392,11 @@ public class Player : MonoBehaviour
                   CheckBlocks(pos.x + HalfWidth, pos.y + HalfHeight, newZ + HalfWidth)) &&
                 (!sneaking || HasSneakSupport(new Vector3(pos.x, pos.y, newZ))))
             {
-                pos.z = newZ;
+                // NEW: Check if a GameObject is in the way
+                if (!IsPathBlockedByEntity(targetPosZ))
+                {
+                    pos.z = newZ;
+                }
             }
         }
         else if (move.z < 0)
@@ -393,7 +407,11 @@ public class Player : MonoBehaviour
                   CheckBlocks(pos.x + HalfWidth, pos.y + HalfHeight, newZ - HalfWidth)) &&
                 (!sneaking || HasSneakSupport(new Vector3(pos.x, pos.y, newZ))))
             {
-                pos.z = newZ;
+                // NEW: Check if a GameObject is in the way
+                if (!IsPathBlockedByEntity(targetPosZ))
+                {
+                    pos.z = newZ;
+                }
             }
         }
 
@@ -648,7 +666,27 @@ public class Player : MonoBehaviour
         }
         return false;
     }
+    private bool IsPathBlockedByEntity(Vector3 targetPosition)
+    {
+        // We shrink the box slightly (0.05f) so you don't get stuck scraping against walls
+        Vector3 halfExtents = new Vector3(HalfWidth - 0.05f, HalfHeight - 0.05f, HalfWidth - 0.05f);
 
+        // Check for any Unity colliders intersecting this space
+        Collider[] hits = Physics.OverlapBox(targetPosition, halfExtents, Quaternion.identity);
+
+        foreach (Collider hit in hits)
+        {
+            // Ignore our own player colliders (if you have any attached)
+            if (hit.transform.root == this.transform.root) continue;
+
+            // If the box hits a Door or Chest GameObject, block movement!
+            if (hit.CompareTag("Door block") || hit.CompareTag("Chest block"))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
     public void SetMouseSensitivity(float sensitivity)
     {
         mouseSensitivity = Mathf.Clamp(sensitivity, 0.05f, 5f);

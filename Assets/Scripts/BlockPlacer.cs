@@ -2,33 +2,39 @@ using System.Linq;
 using Assets.Scripts;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class BlockPlacer : MonoBehaviour
 {
-    public BlockSelector selector;       // assign in inspector
+    public BlockSelector selector;
     private Inventory playerInventory;
     private Player player;
     private ToolBarUI toolBar;
 
+    // IMPORTANT: Assign your Door prefab in the inspector, or ensure there is 
+    // a hidden one in the scene named "Door block" just like your chest setup.
+    public GameObject doorPrefab;
+
     private void Start()
     {
-        // Find the player inventory
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        this.player = player.GetComponent<Player>();
-        if (player != null)
-            playerInventory = player.GetComponent<Inventory>();
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        this.player = playerObj.GetComponent<Player>();
+        if (playerObj != null)
+            playerInventory = playerObj.GetComponent<Inventory>();
         toolBar = Object.FindFirstObjectByType<ToolBarUI>();
+        doorPrefab = GameObject.FindGameObjectWithTag("Door block");
     }
 
     private void Update()
     {
-        // Right click places a block
         if (Mouse.current.rightButton.wasPressedThisFrame)
         {
             if (selector != null && selector.hasBlockSelected && selector.currentChunk != null)
             {
                 var pos = selector.currentLocalPosition;
                 int blockID = selector.currentChunk.blocks[pos.x, pos.y, pos.z];
+
+                // --- CHEST INTERACTION ---
                 if (blockID == 12)
                 {
                     GameObject[] chestBlocks = GameObject.FindGameObjectsWithTag("Chest block");
@@ -37,90 +43,83 @@ public class BlockPlacer : MonoBehaviour
                         if (chestBlock.transform.position.Equals(selector.currentBlockPosition))
                         {
                             chestBlock.GetComponent<ChestBlock>().OpenChest();
-                            if (player.HasOpenedChest)
-                                player.currentOpenedChest = chestBlock;
-                            else player.currentOpenedChest = null;
-                            
+                            player.currentOpenedChest = player.HasOpenedChest ? chestBlock : null;
                             break;
                         }
                     }
                 }
-                else if (!player.HasOpenedChest && !player.HasOpenedInventory) PlaceBlock();
+                // --- DOOR INTERACTION (Assuming ID 20 is Door) ---
+                else if (blockID == 20)
+                {
+                    GameObject[] doors = GameObject.FindGameObjectsWithTag("Door block");
+                    foreach (GameObject door in doors)
+                    {
+                        DoorBlock doorScript = door.GetComponent<DoorBlock>();
+                        if (doorScript != null)
+                        {
+                            // Check against the saved hinge point, NOT the shifted transform
+                            if (doorScript.hingePoint == selector.currentBlockPosition ||
+                                doorScript.hingePoint == selector.currentBlockPosition + Vector3.down)
+                            {
+                                doorScript.ToggleDoor();
+                                break;
+                            }
+                        }
+                    }
+                }
+                // --- PLACEMENT ---
+                else if (!player.HasOpenedChest && !player.HasOpenedInventory)
+                {
+                    PlaceBlock();
+                }
             }
         }
     }
+
     private void PlaceBlock()
     {
         if (selector == null || !selector.hasBlockSelected) return;
         if (playerInventory == null || toolBar == null) return;
 
-        // Use selected toolBar slot item
         Item itemToPlace = toolBar.GetSelectedItem();
-        if (itemToPlace == null) return; // empty slot
-        if (itemToPlace.category != ItemCategory.Block) return; // if tool or item selected does nothing here
+        if (itemToPlace == null || itemToPlace.category != ItemCategory.Block) return;
 
-        // Confirm it's actually in the inventory before consuming.
         bool inInventory = playerInventory.slots.Exists(s => s.itemData.Equals(itemToPlace));
         if (!inInventory) return;
 
-        // Calculate the WORLD position of where the new block goes 
-        // by adding the face normal to the current block's world position
         Vector3 worldPos = selector.currentBlockPosition + selector.hitNormal;
 
-        // Use the World's SetVoxel method. This handles chunk borders, 
-        // places the block, updates meshes, AND wakes up nearby fluids!
-        selector.world.SetVoxel(worldPos, itemToPlace.blockIndex);
-
-        // Remove item from inventory and update UI
-        playerInventory.RemoveItem(itemToPlace);
-
-        // Handle Chest placement
-        if (itemToPlace.blockIndex == 12)
+        // --- DOOR PLACEMENT LOGIC ---
+        if (itemToPlace.blockIndex == 20)
         {
-            GameObject chest = Instantiate(GameObject.Find("Chest block"), worldPos, Quaternion.identity);
+            Vector3 topHalfPos = worldPos + Vector3.up;
+
+            // 1. Check if there is space for the top half of the door
+            if (selector.world.GetVoxel(topHalfPos) != -1) return; // Blocked!
+
+            // 2. Determine rotation based on player facing direction
+            // Snaps to 0, 90, 180, or 270 degrees
+            float yRotation = Mathf.Round(player.transform.eulerAngles.y / 90f) * 90f;
+
+            // 3. Place Voxel Hitboxes for bottom AND top
+            selector.world.SetVoxel(worldPos, itemToPlace.blockIndex);
+            selector.world.SetVoxel(topHalfPos, itemToPlace.blockIndex);
+
+            // 4. Instantiate visual rotating mesh
+            Instantiate(doorPrefab, worldPos, Quaternion.Euler(0, yRotation, 0));
         }
-    }
-    private void PlaceBlockOld()
-    {
-        if (selector == null || !selector.hasBlockSelected) return;
-        if (playerInventory == null || playerInventory.slots.Count == 0) return;
-
-        // Use first item in inventory (later can select specific slot)
-        Item itemToPlace = playerInventory.slots[0].itemData;
-        if (itemToPlace == null) return;
-
-        Chunk chunk = selector.currentChunk;
-        if (chunk == null) return;
-
-        // Place block above selected block
-        Vector3Int placeLocal = selector.currentLocalPosition + Vector3Int.RoundToInt(selector.hitNormal);
-        int x = placeLocal.x;
-        int y = placeLocal.y;
-        int z = placeLocal.z;
-
-        // Bounds check
-        if (x < 0 || x >= Chunk.Width || y < 0 || y >= Chunk.Height || z < 0 || z >= Chunk.Width)
-            return;
-
-        // Place the block
-        chunk.blocks[x, y, z] = itemToPlace.blockIndex;
-        chunk.UpdateChunk();
-        chunk.UpdateNeighborChunks(x, z);
-
-        // Remove item from inventory and update UI
-        playerInventory.RemoveItem(itemToPlace);
-        
-        if (itemToPlace.blockIndex == 12)
+        else
         {
-            GameObject chest = Instantiate(GameObject.Find("Chest block"), new Vector3(x, y, z), Quaternion.identity);
-            //GameObject chest = new GameObject("Chest block");
-            //chest.AddComponent<ChestBlock>();
-            //chest.transform.position = new Vector3(x, y, z);
+            // Standard block placement
+            selector.world.SetVoxel(worldPos, itemToPlace.blockIndex);
+
+            // Handle Chest placement
+            if (itemToPlace.blockIndex == 12)
+            {
+                Instantiate(GameObject.Find("Chest block"), worldPos, Quaternion.identity);
+            }
         }
-    }
 
-    private void OpenChest()
-    {
-
+        playerInventory.RemoveItem(itemToPlace);
     }
 }
