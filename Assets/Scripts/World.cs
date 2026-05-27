@@ -217,7 +217,7 @@ namespace Assets.Scripts
                 }
             }
 
-            Structures.GenerateMall(this, spawnPosition, viewDistance * Chunk.Width, viewDistance * Chunk.Width);
+            Structures.GenerateMall(this, spawnPosition, (viewDistance - 2) * Chunk.Width, (viewDistance - 2) * Chunk.Width);
             Structures.GenerateBuildings(this, spawnPosition, (viewDistance - 2) * Chunk.Width,
                 (viewDistance - 2) * Chunk.Width);
 

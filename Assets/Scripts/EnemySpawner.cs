@@ -38,9 +38,9 @@ public class EnemySpawner : MonoBehaviour
             DespawnAll();
             return;
         }
-        if(world.DayTime%20 != 0)
+        if(world.DayTime%5 != 0)
             return;
-
+        
         TrySpawn();
     }
 
@@ -58,7 +58,7 @@ public class EnemySpawner : MonoBehaviour
 
         if (activeEnemies.Count >= maxEnemies) return;
 
-        for (int attempt = 0; attempt < 10; attempt++)
+        for (int attempt = 0; attempt < 15; attempt++)
         {
             Vector2 offset = Random.insideUnitCircle.normalized * Random.Range(10f, spawnRadius);
 
@@ -71,6 +71,7 @@ public class EnemySpawner : MonoBehaviour
 
             int blockBelowId = world.GetVoxel(new Vector3(x, groundY - 1, z));
 
+            // RESTORED: Strict environmental constraint requiring Block ID 13 (Oil) underneath
             if (blockBelowId != 13)
                 continue;
 

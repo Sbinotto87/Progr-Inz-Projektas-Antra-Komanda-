@@ -486,7 +486,6 @@ public class Chunk
         [ReadOnly] public float TerrainHeight;
         [ReadOnly] public float TerrainScale;
         [ReadOnly] public int SolidGroundHeight;
-        [ReadOnly] public bool isFlat;
 
         public void Execute(int index)
         {

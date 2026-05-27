@@ -94,7 +94,7 @@ public class Gun : MonoBehaviour
 
         if (!HasAmmo())
         {
-            Debug.Log("No ammo");
+            //Debug.Log("No ammo");
             return;
         }
 
@@ -110,7 +110,7 @@ public class Gun : MonoBehaviour
         {
             endPoint = hit.point;
 
-            Debug.Log("Hit: " + hit.collider.name);
+            //Debug.Log("Hit: " + hit.collider.name);
 
             EnemyController enemy = hit.collider.GetComponent<EnemyController>();
 
