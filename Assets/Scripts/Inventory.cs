@@ -124,10 +124,14 @@ public class Inventory : MonoBehaviour
             AddItem(createdItems.items[6]);
             AddItem(createdItems.items[5]);
             AddItem(createdItems.items[9]);
+            AddItem(createdItems.items[18]);    
+
             // We loop based on the startingAmount
             for (int i = 0; i < startingAmount; i++)
             {
                 AddItem(startingItem);
+                AddItem(createdItems.items[17]);
+
             }
 
             Debug.Log($"Spawned {startingAmount} of {startingItem.itemName} for testing.");
