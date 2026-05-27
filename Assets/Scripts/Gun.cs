@@ -121,8 +121,8 @@ public class Gun : MonoBehaviour
             }
         }
 
-        Vector3 tracerStart = ray.origin + cam.transform.right * 0.4f + cam.transform.up * -0.1f;
-        //ray.direction * 0.5f
+  
+        Vector3 tracerStart = ray.origin + ray.direction * 0.5f + cam.transform.right * 0.4f + cam.transform.up * -0.1f;
         DrawTracer(tracerStart, endPoint);
     }
 
