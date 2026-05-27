@@ -8,7 +8,9 @@ public enum ItemCategory
     Food,
     Drink,
     Block,
-    Misc 
+    Misc,
+    Ammo,
+    Gun
 }
 
 [CreateAssetMenu(fileName = "Item", menuName = "Inventory/Item")]
@@ -31,6 +33,8 @@ public class Item : ScriptableObject, IEquatable<Item>
     public float healthRestoreValue;
     
     public bool Equals(Item other) => itemName.Equals(other.itemName);
+
+    
 }
 
 public class CreatedItems : MonoBehaviour
@@ -39,7 +43,7 @@ public class CreatedItems : MonoBehaviour
 
     public void Awake()
     {
-        items = new Item[17];
+        items = new Item[19];
         
         Item stone = ScriptableObject.CreateInstance<Item>();
         stone.category = ItemCategory.Block;
@@ -195,5 +199,21 @@ public class CreatedItems : MonoBehaviour
         IronAxe.toolEffectiveness = 4f;
         IronAxe.icon = Resources.Load("iron_axe", typeof(Sprite)) as Sprite;
         items[16] = IronAxe;
+
+        Item GunAmmo = ScriptableObject.CreateInstance<Item>();
+        GunAmmo.category = ItemCategory.Ammo;
+        GunAmmo.itemName = "Bullet";
+        GunAmmo.weight = 0.01f;
+        GunAmmo.isStackable = true;
+        GunAmmo.icon = Resources.Load("ammo_icon", typeof(Sprite)) as Sprite;
+        items[17] = GunAmmo;
+
+        Item Gun = ScriptableObject.CreateInstance<Item>();
+        Gun.category = ItemCategory.Gun;
+        Gun.itemName = "Gun";
+        Gun.weight = 5;
+        Gun.isStackable = false;
+        Gun.icon = Resources.Load("gun_icon", typeof(Sprite)) as Sprite;
+        items[18] = Gun;
     }
 }
