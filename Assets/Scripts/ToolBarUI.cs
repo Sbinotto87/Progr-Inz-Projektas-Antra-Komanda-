@@ -23,8 +23,11 @@ public class ToolBarUI : MonoBehaviour
     private Inventory playerInventory;
 
     private Transform toolCamera;
+    public Transform weaponCamera;
     private MeshRenderer toolRenderer;
     private MeshFilter toolMeshFilter;
+    private MeshRenderer weaponRenderer;
+    private MeshFilter weaponMeshFilter;
 
     // ─────────────────────────────────────────────
     // Lifecycle
@@ -36,6 +39,12 @@ public class ToolBarUI : MonoBehaviour
         toolCamera.gameObject.SetActive(false);
         toolRenderer = toolCamera.GetComponentInChildren<MeshRenderer>();
         toolMeshFilter = toolCamera.GetComponentInChildren<MeshFilter>();
+
+        if(weaponCamera == null )
+        weaponCamera = GameObject.Find("WeaponCamera").transform;
+        weaponCamera.gameObject.SetActive(false);
+        weaponRenderer = weaponCamera.GetComponentInChildren<MeshRenderer>();
+        weaponMeshFilter = weaponCamera.GetComponentInChildren<MeshFilter>();
     }
 
     private void OnDestroy()
@@ -188,11 +197,12 @@ public class ToolBarUI : MonoBehaviour
         Item item = GetSelectedItem();
         bool holdable = item != null &&
                         (item.category == ItemCategory.Tool || item.category == ItemCategory.Weapon);
-
+        bool isGun = item != null && item.category == ItemCategory.Gun;
         if (holdable)
         {
             if (toolCamera != null)
             {
+                if (weaponCamera != null) weaponCamera.gameObject.SetActive(false);
                 string[] itemName = item.itemName.Split(' ');
                 AssignMaterial(itemName[0], player);
                 AssignMesh(itemName.Length == 1 ? itemName[0] : itemName[1], player);
@@ -200,9 +210,22 @@ public class ToolBarUI : MonoBehaviour
             }
             if (player != null) { player.currentEquippedTool = item; player.HasEquippedTool = true; }
         }
+        else if(isGun)
+        {
+            if (weaponCamera != null)
+            {
+                if (toolCamera != null) toolCamera.gameObject.SetActive(false);
+                //string[] itemName = item.itemName.Split(' ');
+                //AssignMaterial(itemName[0], player);
+                //AssignMesh(itemName.Length == 1 ? itemName[0] : itemName[1], player);
+                weaponCamera.gameObject.SetActive(true);
+            }
+            if (player != null) { player.currentEquippedTool = item; player.HasEquippedTool = true; }
+        }
         else
         {
             if (toolCamera != null) toolCamera.gameObject.SetActive(false);
+            if (weaponCamera != null) weaponCamera.gameObject.SetActive(false);
             if (player != null) { player.currentEquippedTool = null; player.HasEquippedTool = false; }
         }
     }
