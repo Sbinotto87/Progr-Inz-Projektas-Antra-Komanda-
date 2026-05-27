@@ -382,7 +382,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.000022672031}
+  m_AnchoredPosition: {x: 0, y: 0.000035620113}
   m_SizeDelta: {x: 350, y: 500}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1073119112654584564
@@ -1159,7 +1159,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 3823683242504996272}
   m_Direction: 2
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.99985486
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1836,7 +1836,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 3168932434939828284}
   m_Direction: 2
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.99985486
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -4427,6 +4427,7 @@ MonoBehaviour:
   - {fileID: 6883456931656609228}
   - {fileID: 5425862075955188380}
   - {fileID: 3621045718523050085}
+  weaponCamera: {fileID: 0}
 --- !u!1 &4901600912606563303
 GameObject:
   m_ObjectHideFlags: 0
@@ -4748,7 +4749,7 @@ MonoBehaviour:
   HungerBar: {fileID: 5111208447111743122}
   ThirstBar: {fileID: 7936293668984473680}
   Staminabar: {fileID: 7081425305256871277}
-  depletionRate: 4
+  depletionRate: 2
 --- !u!1 &5168548272069967143
 GameObject:
   m_ObjectHideFlags: 0
@@ -5190,7 +5191,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 417537101042264792}
   m_Direction: 2
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.99985486
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -6528,7 +6529,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.000022672031}
+  m_AnchoredPosition: {x: 0, y: 0.000035620113}
   m_SizeDelta: {x: 350, y: 500}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &5728086239518219755
@@ -7040,7 +7041,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.000022370283}
+  m_AnchoredPosition: {x: 0, y: 0.000035620113}
   m_SizeDelta: {x: 80, y: 500}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1678913603837827630
@@ -7508,11 +7509,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 69553502803771474, guid: 956273af0ba681673b6a32baaf3e1862, type: 3}
       propertyPath: m_Size
-      value: 1
+      value: 0.99985486
       objectReference: {fileID: 0}
     - target: {fileID: 1894568144303924818, guid: 956273af0ba681673b6a32baaf3e1862, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.000022672031
+      value: 0.000035620113
       objectReference: {fileID: 0}
     - target: {fileID: 3125051062121537081, guid: 956273af0ba681673b6a32baaf3e1862, type: 3}
       propertyPath: m_AnchorMax.x

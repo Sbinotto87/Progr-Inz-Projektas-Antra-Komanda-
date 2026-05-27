@@ -48,13 +48,13 @@ public class Player : MonoBehaviour
     [SerializeField] private float speedForMaxFov = 7f;
     [SerializeField] private float sneakEdgeTolerance = 0.22f;
 
-    public float health = 1000f;
+    public float health = 100f;
     public float hunger = 100f;
     public float thirst = 100f;
 
     [Header("Fall Damage")]
-    [SerializeField] private float minimumFallVelocity = -12f;
-    [SerializeField] private float fallDamageMultiplier = 4f;
+    [SerializeField] private float minimumFallVelocity = -20f;
+    [SerializeField] private float fallDamageMultiplier = 1.5f;
 
     private float highestYWhileGrounded;
 
@@ -479,7 +479,23 @@ public class Player : MonoBehaviour
         transform.Rotate(Vector3.up * mouseX);
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -89f, 89f);
-        playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        //playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+
+        // Calculate standard look rotation
+        Quaternion baseLookRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        Vector3 baseCameraPosition = new Vector3(0f, HalfHeight * 0.5f, 0f); // Default camera position
+
+        // Read the tilt and subtle jitter from PlayerEffects safely
+        if (TryGetComponent<PlayerEffects>(out var effects))
+        {
+            playerCamera.transform.localRotation = baseLookRotation * Quaternion.Euler(effects.CameraTilt);
+            playerCamera.transform.localPosition = baseCameraPosition + effects.CameraPositionOffset;
+        }
+        else
+        {
+            playerCamera.transform.localRotation = baseLookRotation;
+            playerCamera.transform.localPosition = baseCameraPosition;
+        }
     }
 
     /// <summary>
@@ -684,7 +700,7 @@ public class Player : MonoBehaviour
     
     public void AddHealth(float amount)
     {
-        health = Mathf.Min(health + amount, 1000f);
+        health = Mathf.Min(health + amount, 100f);
         Debug.Log($"Healed! Health is now: {health}");
     }
     
@@ -727,22 +743,30 @@ public class Player : MonoBehaviour
         if (!grounded && IsGrounded(transform.position))
         {
             float impactVelocity = verticalVelocity;
+
+            if (isInvincible) return;
             if (impactVelocity < minimumFallVelocity)
             {
-                GetComponent<StatusEffectManager>()?.AddEffect(
-                    duration: 10f,
-                    onApply: p =>
-                    {
-                        p.sprintLockCount++;
-                        p.jumpLockCount++;
-                    },
-                    onRemove: p =>
-                    {
-                        p.sprintLockCount--;
-                        p.jumpLockCount--;
-                    }
-                );
                 float damage = Mathf.Abs(impactVelocity - minimumFallVelocity) * fallDamageMultiplier;
+
+                // FIX 2: Only apply the 10-second crippling debuff if it was a genuinely heavy fall
+                // (e.g., taking more than 15 HP of damage). Small 0.8 HP scratches won't lock your jumping anymore.
+                if (damage > 15f)
+                {
+                    GetComponent<StatusEffectManager>()?.AddEffect(
+                        duration: 10f,
+                        onApply: p =>
+                        {
+                            p.sprintLockCount++;
+                            p.jumpLockCount++;
+                        },
+                        onRemove: p =>
+                        {
+                            p.sprintLockCount--;
+                            p.jumpLockCount--;
+                        }
+                    );
+                }
 
                 TakeDamage(damage);
             }
