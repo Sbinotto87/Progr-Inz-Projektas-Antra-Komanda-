@@ -73,8 +73,7 @@ public class Gun : MonoBehaviour
 
             nextAmmoTime = Time.time + ammoRegenTime;
         }
-
-        Debug.Log(fireRate);
+        
         if (shootAction.IsPressed() && Time.time >= nextFireTime)
         {
             nextFireTime = Time.time + fireRate;
