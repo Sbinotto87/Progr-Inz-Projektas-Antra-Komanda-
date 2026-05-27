@@ -342,6 +342,12 @@ MonoBehaviour:
   overlayTexture: {fileID: 0}
   sprintLockCount: 0
   jumpLockCount: 0
+  pickaxeMesh: {fileID: 5142668917745224233, guid: 74ca7d393bc0054c6811fff3ca842b60, type: 3}
+  axeMesh: {fileID: 1557531394788352144, guid: 74ca7d393bc0054c6811fff3ca842b60, type: 3}
+  shovelMesh: {fileID: -7486672976217756100, guid: 74ca7d393bc0054c6811fff3ca842b60, type: 3}
+  swordMesh: {fileID: 6444504572132926600, guid: 74ca7d393bc0054c6811fff3ca842b60, type: 3}
+  iron_material: {fileID: 2100000, guid: 0c0aa619f118a270aaf0b46063f537fa, type: 2}
+  stone_material: {fileID: 2100000, guid: e8d66df471594631aa92bc14e66135f6, type: 2}
 --- !u!114 &368639874964193589
 MonoBehaviour:
   m_ObjectHideFlags: 0
