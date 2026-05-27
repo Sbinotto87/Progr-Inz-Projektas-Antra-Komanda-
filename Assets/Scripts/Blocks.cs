@@ -40,7 +40,7 @@ public class Blocks : MonoBehaviour
 
     private void Awake()
     {
-        block = new BlockType[20];
+        block = new BlockType[21];
         GameObject createdItems = GameObject.Find("CreatedItems");
         if (createdItems == null)
             createdItems = new GameObject("CreatedItems", typeof(CreatedItems));
@@ -373,6 +373,20 @@ public class Blocks : MonoBehaviour
             dropItem = defaultItem,
             mesh = MeshType.Nf0125
         };
+        block[20] = new BlockType
+        {
+            name = "Door block",
+            isSolid = false,
+            isTransparent = false, // Must be true so we don't cull the blocks behind it
+            isBreakable = true,
+            isCutout = false,
+            isSwimable = false,
+            tool = ToolCategory.Axe,
+            hitCount = 3,
+            faces = new byte[] { 15, 15, 15, 15, 15, 15 }, // Just use glass texture ID or similar
+            dropItem = items[17], // Drops the door item we created earlier
+            mesh = MeshType.Full // Or a custom invisible MeshType if you want the GameObject to be the ONLY visual
+        };
     }
     
 }
@@ -414,7 +428,9 @@ public enum MeshType
     Nf05,
     Nf0375,
     Nf025,
-    Nf0125
+    Nf0125,
+    DoorZ, 
+    DoorX
 }
 
 public enum ToolCategory

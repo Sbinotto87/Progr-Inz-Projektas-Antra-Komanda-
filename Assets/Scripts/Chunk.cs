@@ -246,6 +246,18 @@ public class Chunk
                         vList.Add(pos + Voxel.Vertices0125[Voxel.Faces[i, 2]]);
                         vList.Add(pos + Voxel.Vertices0125[Voxel.Faces[i, 3]]);
                         break;
+                    case MeshType.DoorZ:
+                        vList.Add(pos + Voxel.DoorVerticesZ[Voxel.Faces[i, 0]]);
+                        vList.Add(pos + Voxel.DoorVerticesZ[Voxel.Faces[i, 1]]);
+                        vList.Add(pos + Voxel.DoorVerticesZ[Voxel.Faces[i, 2]]);
+                        vList.Add(pos + Voxel.DoorVerticesZ[Voxel.Faces[i, 3]]);
+                        break;
+                    case MeshType.DoorX:
+                        vList.Add(pos + Voxel.DoorVerticesX[Voxel.Faces[i, 0]]);
+                        vList.Add(pos + Voxel.DoorVerticesX[Voxel.Faces[i, 1]]);
+                        vList.Add(pos + Voxel.DoorVerticesX[Voxel.Faces[i, 2]]);
+                        vList.Add(pos + Voxel.DoorVerticesX[Voxel.Faces[i, 3]]);
+                        break;
                     default:
                         vList.Add(pos + Voxel.Vertices[Voxel.Faces[i, 0]]);
                         vList.Add(pos + Voxel.Vertices[Voxel.Faces[i, 1]]);
