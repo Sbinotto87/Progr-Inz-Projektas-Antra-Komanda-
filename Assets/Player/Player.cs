@@ -101,6 +101,16 @@ public class Player : MonoBehaviour
 
     public int sprintLockCount = 0;
     public int jumpLockCount = 0;
+    
+    [Header("Meshes & Materials")]
+    public Mesh pickaxeMesh;
+    public Mesh axeMesh;
+    public Mesh shovelMesh;
+    public Mesh swordMesh;
+    public Material iron_material;
+    public Material stone_material;
+    
+    private bool methodCalled = false;
 
     void Start()
     {
@@ -351,6 +361,11 @@ public class Player : MonoBehaviour
 
         if (move.x > 0)
         {
+            if (!methodCalled)
+            {
+                methodCalled = true;
+                World.addChestItems();
+            }
             if (!(CheckBlocks(newX + HalfWidth, pos.y - HalfHeight + SkinWidth, pos.z + HalfWidth) ||
                   CheckBlocks(newX + HalfWidth, pos.y - HalfHeight + SkinWidth, pos.z - HalfWidth) ||
                   CheckBlocks(newX + HalfWidth, pos.y + HalfHeight, pos.z + HalfWidth) ||

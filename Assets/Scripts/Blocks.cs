@@ -264,7 +264,7 @@ public class Blocks : MonoBehaviour
             isSwimable = false,
             tool = ToolCategory.Axe,
             hitCount = 5,
-            faces = new byte[] { 1, 1, 1, 1, 1, 1 },
+            faces = new byte[] { 10, 11, 11, 11, 11, 11 }, // with different sides
             dropItem = items[9],
             mesh = MeshType.Full
         };

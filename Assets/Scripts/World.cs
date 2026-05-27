@@ -1,48 +1,57 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Unity.VisualScripting;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace Assets.Scripts
 {
-    
-    public class World: MonoBehaviour
+
+    public class World : MonoBehaviour
     {
         /// <summary>
         /// Player gameObject prefab
         /// </summary>
-        [SerializeField]
-        private GameObject Player;
+        [SerializeField] private GameObject Player;
+
         /// <summary>
         /// world size
         /// </summary>
         public static readonly int WorldSize = 100;
+
         /// <summary>
         /// view distance from player
         /// </summary>
         public int viewDistance;
+
         /// <summary>
         /// world size in blocks, used for perlin noise bounds
         /// </summary>
         public readonly int WorldSizeInBlocks = WorldSize * Chunk.Width;
+
         /// <summary>
         /// chunk array
         /// </summary>
         public Chunk[,] chunks = new Chunk[WorldSize, WorldSize];
+
         /// <summary>
         /// List of chunks in the players vision
         /// </summary>
         public List<ChunkCoord> activeChunks = new List<ChunkCoord>();
+
         /// <summary>
         /// no clu, pavogiau koda
         /// </summary>
         public Material material;
+
         public Material transparentMaterial;
+
         /// <summary>
         /// world time
         /// </summary>
         public int DayTime; //1440 seconds (24 minutes, 1 irl second = 1 ingame minute
+
         public int CurrentDay; //event every 7 days?
         public int Tick;
 
@@ -53,28 +62,35 @@ namespace Assets.Scripts
         /// signed 32bit int for seed
         /// </summary>
         public int Seed;
+
         public float offsetX;
         public float offsetZ;
+
         /// <summary>
         /// current biome to generate 
         /// </summary>
         public BiomeData biome;
+
         /// <summary>
         /// the spawn position(gets overwritten)
         /// </summary>
-        Vector3 spawnPosition = new Vector3 (0, 100, 0);
+        Vector3 spawnPosition = new Vector3(0, 100, 0);
+
         /// <summary>
         /// the chunk that the player is in
         /// </summary>
         ChunkCoord playerChunkCoord;
+
         /// <summary>
         /// the chunk that the player was previously in
         /// </summary>
         ChunkCoord playerLastChunkCoord;
+
         /// <summary>
         /// player position cause for some reason i cant pull it from gameObject player
         /// </summary>
         private Transform playerTransform;
+
         Queue<ChunkCoord> chunksToRender;
         public bool IsInRadiation;
 
@@ -84,11 +100,13 @@ namespace Assets.Scripts
 
         private void Awake()
         {
-            spawnPosition = spawnPosition = new Vector3((WorldSize * Chunk.Width) / 2f, Chunk.Height - 5, (WorldSize * Chunk.Width) / 2f);
+            spawnPosition = spawnPosition = new Vector3((WorldSize * Chunk.Width) / 2f, Chunk.Height - 5,
+                (WorldSize * Chunk.Width) / 2f);
             var player = Instantiate(Player, spawnPosition, Quaternion.identity); //spawns player
 
             player.name = Player.name;
         }
+
         private void Start()
         {
             IsInRadiation = false;
@@ -103,7 +121,7 @@ namespace Assets.Scripts
             CurrentDay = 0;
             Tick = 0;
             viewDistance = 8;
-            chunksToRender = new Queue<ChunkCoord> ();
+            chunksToRender = new Queue<ChunkCoord>();
 
             UnityEngine.Debug.Log("generating");
             GenerateWorld();
@@ -125,7 +143,7 @@ namespace Assets.Scripts
                 playerLastChunkCoord = playerChunkCoord;
                 //UnityEngine.Debug.Log(sw.Elapsed);
             }
-            if(chunksToRender.Count>0)
+            if (chunksToRender.Count > 0)
             {
                 ChunkCoord coord = chunksToRender.Dequeue();
 
@@ -139,15 +157,17 @@ namespace Assets.Scripts
                 }
             }
         }
+
         /// <summary>
         /// tickrate, 20 ticks per second, used for ingame time
         /// </summary>
         private void FixedUpdate()
         {
             TickDayTime();
-            if(Tick %5 == 0)
+            if (Tick % 5 == 0)
                 ProcessFluids();
         }
+
         /// <summary>
         /// updates the ingame time (in seconds) every 20 tics
         /// </summary>
@@ -165,6 +185,7 @@ namespace Assets.Scripts
                     break;
             }
         }
+
         /// <summary>
         /// increments day counter and resets day time, called at midnight
         /// </summary>
@@ -173,6 +194,7 @@ namespace Assets.Scripts
             DayTime = 0;
             CurrentDay++;
         }
+
         /// <summary>
         /// generates chunk coordinates for world and the chunks themselves
         /// </summary>
@@ -186,10 +208,11 @@ namespace Assets.Scripts
                     chunks[x, z] = new Chunk(new ChunkCoord(x, z), this, MyBlocks);
                 }
             }
-            
-            Structures.GenerateMall(this, spawnPosition, (viewDistance - 2) * Chunk.Width, (viewDistance - 2) * Chunk.Width);
-            Structures.GenerateBuildings(this, spawnPosition, (viewDistance - 2) * Chunk.Width, (viewDistance - 2) * Chunk.Width);
-            
+
+            Structures.GenerateMall(this, spawnPosition, viewDistance * Chunk.Width, viewDistance * Chunk.Width);
+            Structures.GenerateBuildings(this, spawnPosition, (viewDistance - 2) * Chunk.Width,
+                (viewDistance - 2) * Chunk.Width);
+
             for (int x = (WorldSize / 2) - viewDistance; x < (WorldSize / 2) + viewDistance; x++)
             {
                 for (int z = (WorldSize / 2) - viewDistance; z < (WorldSize / 2) + viewDistance; z++)
@@ -197,16 +220,53 @@ namespace Assets.Scripts
                     Structures.GenerateGrass(chunks[x, z]);
                     Structures.GenerateTrees(chunks[x, z]);
                     Structures.GenerateOres(chunks[x, z], 10);
-                    
+
                     chunks[x, z].CreateMeshData();
                     chunks[x, z].CreateChunkMesh();
-        
+
                     activeChunks.Add(new ChunkCoord(x, z));
                 }
             }
-            
+
             Player.transform.position = spawnPosition;
         }
+
+        public static void addChestItems()
+        {
+            GameObject createdItems = GameObject.Find("CreatedItems");
+            if (createdItems == null)
+                createdItems = new GameObject("CreatedItems", typeof(CreatedItems));
+            CreatedItems createdItems1 = createdItems.GetComponent<CreatedItems>();
+            Item[] items = createdItems1.items;
+        
+            KeyValuePair<Item, double>[] chestItems =
+            {
+                new KeyValuePair<Item, double>(items[11], 0.7f),
+                new KeyValuePair<Item, double>(items[8], 0.5f),
+                new KeyValuePair<Item, double>(items[10], 0.8f),
+                new KeyValuePair<Item, double>(items[7], 0.2f),
+                new KeyValuePair<Item, double>(items[13], 0.2f),
+                new KeyValuePair<Item, double>(items[15], 0.2f),
+                new KeyValuePair<Item, double>(items[6], 0.05f)
+            };
+            
+            GameObject[] chestBlocks = GameObject.FindGameObjectsWithTag("Chest block");
+            foreach (GameObject chestBlock in chestBlocks)
+            {
+                //add the items
+                for (int i = 0; i < chestItems.Length; i++)
+                {
+                    float num = UnityEngine.Random.value;
+                    if (num <= chestItems[i].Value)
+                    {
+                        int amount = 1;
+                        if (i < 3) amount = UnityEngine.Random.Range(2, 7);
+                        chestBlock.GetComponent<ChestBlock>().chestItemsList.Add(new InventorySlot(chestItems[i].Key, amount));
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// creates chunk game object
         /// </summary>
@@ -214,7 +274,7 @@ namespace Assets.Scripts
         private void CreateChunk(ChunkCoord coord)
         {
             chunks[coord.x, coord.z] = new Chunk(new ChunkCoord(coord.x, coord.z), this, MyBlocks);
-            
+
             //Generate structures
             Structures.GenerateGrass(chunks[coord.x, coord.z]);
             Structures.GenerateTrees(chunks[coord.x, coord.z]);
@@ -305,6 +365,7 @@ namespace Assets.Scripts
             // fallback: terrain generation (ONLY for ungenerated areas)           
             return GenerateTerrainVoxel(x, y, z);
         }
+
         private int GenerateTerrainVoxel(int x, int y, int z)
         {
             if (y == 0)
@@ -321,13 +382,14 @@ namespace Assets.Scripts
             if (y > calculatedHeight)
                 if (y < 56)
                     return 13;
-                else 
-                return -1; // Air
+                else
+                    return -1; // Air
             else if (y == calculatedHeight || (y < calculatedHeight && y > calculatedHeight - 4))
                 return 1; // dirt
             else
                 return 0; // Stone
         }
+
         /// <summary>
         /// gets chunk coord from world coord
         /// </summary>
@@ -340,6 +402,7 @@ namespace Assets.Scripts
 
             return new ChunkCoord(x, z);
         }
+
         /// <summary>
         /// recalculates whuch chunks should be active
         /// </summary>
@@ -390,6 +453,7 @@ namespace Assets.Scripts
                 }
             }
         }
+
         /// <summary>
         /// used for checking view distance
         /// </summary>
@@ -402,6 +466,7 @@ namespace Assets.Scripts
             else
                 return false;
         }
+
         /// <summary>
         /// used for limiting block creation (based on perlin noise)
         /// </summary>
@@ -409,11 +474,13 @@ namespace Assets.Scripts
         /// <returns>true if within world limits</returns>
         bool IsVoxelInWorld(Vector3 pos)
         {
-            if (pos.x >= 0 && pos.x < WorldSizeInBlocks && pos.y >= 0 && pos.y < Chunk.Height && pos.z >= 0 && pos.z < WorldSizeInBlocks)
+            if (pos.x >= 0 && pos.x < WorldSizeInBlocks && pos.y >= 0 && pos.y < Chunk.Height && pos.z >= 0 &&
+                pos.z < WorldSizeInBlocks)
                 return true;
             else
                 return false;
         }
+
         /// <summary>
         /// adds fluid update to queue
         /// </summary>
@@ -426,6 +493,7 @@ namespace Assets.Scripts
                 fluidUpdateSet.Add(pos);
             }
         }
+
         public int GetFluidLevel(int blockID)
         {
             // Treat falling oil (11) as a max-level source block for flow calculations
@@ -435,13 +503,16 @@ namespace Assets.Scripts
             {
                 if (OilLevels[i] == blockID) return i;
             }
+
             return 0; // Not a fluid
         }
+
         public bool CanFlowInto(int blockID)
         {
             // -1 is air, 4 is grass
             return blockID == -1 || blockID == 4;
         }
+
         public void SetVoxel(Vector3 pos, int blockID)
         {
             if (!IsVoxelInWorld(pos)) return;
@@ -464,13 +535,15 @@ namespace Assets.Scripts
                 TriggerNeighborFluids(pos);
             }
         }
+
         public void TriggerNeighborFluids(Vector3 pos)
         {
-        Vector3[] neighbors = {
-        Vector3.up, Vector3.down,
-        Vector3.forward, Vector3.back,
-        Vector3.left, Vector3.right
-        };
+            Vector3[] neighbors =
+            {
+                Vector3.up, Vector3.down,
+                Vector3.forward, Vector3.back,
+                Vector3.left, Vector3.right
+            };
 
             foreach (Vector3 dir in neighbors)
             {
@@ -481,6 +554,7 @@ namespace Assets.Scripts
                 }
             }
         }
+
         private void ProcessFluids()
         {
             int updatesThisTick = Mathf.Min(fluidUpdateQueue.Count, 200);

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -21,12 +22,29 @@ public class ToolBarUI : MonoBehaviour
     private int selectedSlotIndex = 0;
     private Inventory playerInventory;
 
+    private Transform toolCamera;
+    public Transform weaponCamera;
+    private MeshRenderer toolRenderer;
+    private MeshFilter toolMeshFilter;
+    private MeshRenderer weaponRenderer;
+    private MeshFilter weaponMeshFilter;
+
     // ─────────────────────────────────────────────
     // Lifecycle
     // ─────────────────────────────────────────────
     private void Start()
     {
         FindAndBindInventory();
+        toolCamera = GameObject.Find("Camera").transform;
+        toolCamera.gameObject.SetActive(false);
+        toolRenderer = toolCamera.GetComponentInChildren<MeshRenderer>();
+        toolMeshFilter = toolCamera.GetComponentInChildren<MeshFilter>();
+
+        if(weaponCamera == null )
+        weaponCamera = GameObject.Find("WeaponCamera").transform;
+        weaponCamera.gameObject.SetActive(false);
+        weaponRenderer = weaponCamera.GetComponentInChildren<MeshRenderer>();
+        weaponMeshFilter = weaponCamera.GetComponentInChildren<MeshFilter>();
     }
 
     private void OnDestroy()
@@ -175,21 +193,39 @@ public class ToolBarUI : MonoBehaviour
     {
         if (playerInventory == null) return;
         Player player = playerInventory.GetComponent<Player>();
-        Transform tool = GameObject.Find("UI elements").transform.Find("tool");
-        Image toolImage = tool != null ? tool.GetComponent<Image>() : null;
 
         Item item = GetSelectedItem();
         bool holdable = item != null &&
                         (item.category == ItemCategory.Tool || item.category == ItemCategory.Weapon);
-
+        bool isGun = item != null && item.category == ItemCategory.Gun;
         if (holdable)
         {
-            if (toolImage != null) { toolImage.sprite = item.icon; tool.gameObject.SetActive(true); }
+            if (toolCamera != null)
+            {
+                if (weaponCamera != null) weaponCamera.gameObject.SetActive(false);
+                string[] itemName = item.itemName.Split(' ');
+                AssignMaterial(itemName[0], player);
+                AssignMesh(itemName.Length == 1 ? itemName[0] : itemName[1], player);
+                toolCamera.gameObject.SetActive(true);
+            }
+            if (player != null) { player.currentEquippedTool = item; player.HasEquippedTool = true; }
+        }
+        else if(isGun)
+        {
+            if (weaponCamera != null)
+            {
+                if (toolCamera != null) toolCamera.gameObject.SetActive(false);
+                //string[] itemName = item.itemName.Split(' ');
+                //AssignMaterial(itemName[0], player);
+                //AssignMesh(itemName.Length == 1 ? itemName[0] : itemName[1], player);
+                weaponCamera.gameObject.SetActive(true);
+            }
             if (player != null) { player.currentEquippedTool = item; player.HasEquippedTool = true; }
         }
         else
         {
-            if (tool != null) tool.gameObject.SetActive(false);
+            if (toolCamera != null) toolCamera.gameObject.SetActive(false);
+            if (weaponCamera != null) weaponCamera.gameObject.SetActive(false);
             if (player != null) { player.currentEquippedTool = null; player.HasEquippedTool = false; }
         }
     }
@@ -217,5 +253,27 @@ public class ToolBarUI : MonoBehaviour
                 // int idx = item.blockIndex;  → hand to whatever places blocks.
                 break;
         }
+    }
+
+    private void AssignMaterial(string itemName, Player player)
+    {
+        if (itemName.Equals("Iron", StringComparison.CurrentCultureIgnoreCase))
+            toolRenderer.material = player.iron_material;
+        else if (itemName.Equals("Stone", StringComparison.CurrentCultureIgnoreCase))
+            toolRenderer.material = player.stone_material;
+        else if (itemName.Equals("Sword", StringComparison.CurrentCultureIgnoreCase))
+            toolRenderer.material = player.iron_material;
+    }
+
+    private void AssignMesh(string itemName, Player player)
+    {
+        if (itemName.Equals("axe", StringComparison.CurrentCultureIgnoreCase))
+            toolMeshFilter.mesh = player.axeMesh;
+        else if (itemName.Equals("pickaxe", StringComparison.CurrentCultureIgnoreCase))
+            toolMeshFilter.mesh = player.pickaxeMesh;
+        else if (itemName.Equals("shovel", StringComparison.CurrentCultureIgnoreCase))
+            toolMeshFilter.mesh = player.shovelMesh;
+        else if (itemName.Equals("sword", StringComparison.CurrentCultureIgnoreCase))
+            toolMeshFilter.mesh = player.swordMesh;
     }
 }

@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Assets.Scripts;
 using UnityEngine;
+using UnityEngine.LowLevelPhysics2D;
 using Random = UnityEngine.Random;
 
 public class Structures
@@ -60,8 +62,13 @@ public class Structures
         }
         if (stopsignal) return;
         
-        PlaceStructure(mall, world, new Vector3(x, y, z));
+        int chestcount = 6;
+        for (int i = 0; i < chestcount; i++)
+        {
+            PlaceChest(mall, new Vector3(x, y, z));
+        }
         
+        PlaceStructure(mall, world, new Vector3(x, y, z));
         PlaceStructure(eiffel, world, new Vector3(x, y + 1, z) + new Vector3(13 - mallOffset, 0, -20 + mallOffset));
     }
 
@@ -112,11 +119,29 @@ public class Structures
                 
                 y = GetYcoord(world, new Vector3(x, 0, z), buildingLength + 10, buildingWidth + 10, world.biome.solidGroundHeight + 15);
             }
-
             if (stopsignal) continue;
+            
+            int chestcount = 2;
+            for (int j = 0; j < chestcount; j++)
+            {
+                PlaceChest(building, new Vector3(x, y, z));
+            }
             
             PlaceStructure(building, world, new Vector3(x, y, z));
         }
+    }
+    
+    private static void PlaceChest(int[,,] building, Vector3 position)
+    {
+        int x, z;
+        while (true)
+        {
+            x = Random.Range(3, building.GetLength(0) - 3);
+            z = Random.Range(building.GetLength(2) / 2, building.GetLength(2) - 3);
+            if (building[x, 1, z] != 12) break;
+        }
+        building[x, 1, z] = 12;
+        GameObject chest = UnityEngine.Object.Instantiate(GameObject.Find("Chest block"), position + new Vector3(x, 1, z), Quaternion.identity);
     }
     
     public static void GenerateGrass(Chunk chunk)
@@ -324,7 +349,7 @@ public class Structures
     private static int GetYcoord(World world, Vector3 position, int X, int Z, int from = 224)
     {
         int currentChunkX, currentChunkZ, chunkX, chunkZ;
-        bool dirtfound, airfound;
+        bool dirtfound, airfound, tolerance = false;
 
         for (int y = from; y >= world.biome.solidGroundHeight + 6; y--)
         {
@@ -343,11 +368,20 @@ public class Structures
                     
                     if (world.chunks[currentChunkX, currentChunkZ].blocks[chunkX, y, chunkZ] == -1) airfound = true;
                     if (world.chunks[currentChunkX, currentChunkZ].blocks[chunkX, y, chunkZ] == 1) dirtfound = true;
-                    
-                    if (airfound && dirtfound) return -1;
+
+                    if (airfound && dirtfound)
+                    {
+                        if (tolerance) return -1;
+                        else
+                        {
+                            tolerance = true;
+                            break;
+                        }
+                    }
                 }
+                if (dirtfound && airfound) break;
             }
-            if (dirtfound) return y;
+            if (dirtfound && !airfound) return y;
         }
 
         return -1;
