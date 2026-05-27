@@ -4,6 +4,7 @@ using System.Diagnostics;
 using Unity.VisualScripting;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Assets.Scripts
 {
@@ -156,6 +157,13 @@ namespace Assets.Scripts
                     }
                 }
             }
+
+            // Place this right where your day increments from 6 to 7:
+            if (CurrentDay >= 7)
+            {
+                SceneManager.LoadScene(2);
+            }
+
         }
 
         /// <summary>
